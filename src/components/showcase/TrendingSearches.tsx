@@ -1,13 +1,12 @@
 import React, { useRef } from 'react';
-import { ChevronLeft, ChevronRight, Utensils, Music, Coffee, Wine, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 
 interface TrendingItem {
   id: string;
   name: string;
   category: string;
   badge?: string;
-  icon: React.ReactNode;
-  bgGradient: string;
+  imageUrl: string;
   subtitle: string;
 }
 
@@ -17,8 +16,7 @@ const TRENDING_ITEMS: TrendingItem[] = [
     name: 'Chef Christian & Braises de Kin',
     category: 'GASTRONOMIE & GRILLADES',
     badge: 'Tendance #1',
-    icon: <Utensils className="w-8 h-8 text-[#FFC21A]" />,
-    bgGradient: 'from-[#FF6A2B] to-[#14110F]',
+    imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Maboké de capitaine & brochettes géantes',
   },
   {
@@ -26,8 +24,7 @@ const TRENDING_ITEMS: TrendingItem[] = [
     name: 'Grillades Malewa Chic',
     category: 'STREET-FOOD KINSHASA',
     badge: 'Coup de Cœur',
-    icon: <Utensils className="w-8 h-8 text-[#FF6A2B]" />,
-    bgGradient: 'from-[#14110F] to-[#2A2420]',
+    imageUrl: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Poulet bicyclette braisé & bananes pesées',
   },
   {
@@ -35,16 +32,14 @@ const TRENDING_ITEMS: TrendingItem[] = [
     name: 'Fally Ipupa & Invités d’Honneur',
     category: 'CONCERT LIVE SAMEDI 26',
     badge: 'Tête d’Affiche',
-    icon: <Music className="w-8 h-8 text-[#FFC21A]" />,
-    bgGradient: 'from-[#0E5A8A] to-[#14110F]',
+    imageUrl: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Grand show exclusif sous les étoiles',
   },
   {
     id: 'mama-kin',
     name: 'Mama Kinshasa Authentic Buffet',
     category: 'TRADITIONNEL & TERROIR',
-    icon: <Utensils className="w-8 h-8 text-[#FFC21A]" />,
-    bgGradient: 'from-[#FF6A2B] to-[#E24E10]',
+    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Pondu royal, fumbwa & mikate chauds',
   },
   {
@@ -52,16 +47,14 @@ const TRENDING_ITEMS: TrendingItem[] = [
     name: 'Cocktails Mikili & Juice Bar',
     category: 'MIXOLOGIE & DRINKS',
     badge: 'Bar Central',
-    icon: <Wine className="w-8 h-8 text-[#0E5A8A]" />,
-    bgGradient: 'from-[#0E5A8A] to-[#1E1A17]',
+    imageUrl: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Tangawisi bio, bissap givré & mojitos',
   },
   {
     id: 'tacos-kongo',
     name: 'Tacos Kongo & Fusion Gourmande',
     category: 'CUISINE DU MONDE',
-    icon: <Coffee className="w-8 h-8 text-[#FF6A2B]" />,
-    bgGradient: 'from-[#2A2420] to-[#14110F]',
+    imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80',
     subtitle: 'Tacos chèvre braisée & sauces piment doux',
   },
 ];
@@ -126,14 +119,20 @@ export const TrendingSearches: React.FC<TrendingSearchesProps> = ({ onSelectItem
             onClick={() => onSelectItem && onSelectItem(item)}
             className="min-w-[260px] sm:min-w-[280px] max-w-[280px] bg-white rounded-[16px] border border-[#D9D0C6] shadow-level1 hover:shadow-md hover:border-[#FF6A2B] transition-all cursor-pointer group flex flex-col justify-between overflow-hidden"
           >
-            {/* Visual Header */}
-            <div className={`h-28 bg-gradient-to-r ${item.bgGradient} p-4 relative flex items-center justify-center text-white`}>
-              <div className="transform group-hover:scale-110 transition-transform duration-300">
-                {item.icon}
-              </div>
+            {/* Visual Header avec image représentative */}
+            <div className="h-32 relative overflow-hidden bg-[#14110F]">
+              <img 
+                src={item.imageUrl} 
+                alt={item.name}
+                width="280"
+                height="128"
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
               {item.badge && (
-                <span className="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FFC21A] text-[#14110F]">
+                <span className="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FFC21A] text-[#14110F] shadow-xs">
                   {item.badge}
                 </span>
               )}

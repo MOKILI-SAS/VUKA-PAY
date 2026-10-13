@@ -129,7 +129,8 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     revenueUSD: 18450,
     scannedEntries: 840,
     organizerName: 'Fondation Congolicious',
-    isFeatured: true
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 'kin-jazz',
@@ -145,7 +146,8 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     totalCapacity: 2500,
     revenueUSD: 6300,
     scannedEntries: 0,
-    organizerName: 'Kinshasa Jazz Club'
+    organizerName: 'Kinshasa Jazz Club',
+    imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 'afrotech-kin',
@@ -161,7 +163,8 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     totalCapacity: 800,
     revenueUSD: 10850,
     scannedEntries: 0,
-    organizerName: 'AfroTech Network'
+    organizerName: 'AfroTech Network',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'
   },
   {
     id: 'nuit-rumba',
@@ -177,7 +180,8 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     totalCapacity: 15000,
     revenueUSD: 0,
     scannedEntries: 0,
-    organizerName: 'Production Rumba Royale'
+    organizerName: 'Production Rumba Royale',
+    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'
   }
 ];
 

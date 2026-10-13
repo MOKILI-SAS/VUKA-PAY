@@ -194,4 +194,5 @@ export interface VukaPublishedEvent {
   scannedEntries: number;
   organizerName?: string;
   isFeatured?: boolean;
+  imageUrl?: string;
 }

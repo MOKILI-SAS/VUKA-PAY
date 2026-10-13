@@ -47,14 +47,14 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
         {/* Card 1: Large Featured Event — Fond Nuit #14110F avec accents Braise et Soleil */}
-        <div className="lg:col-span-7 relative overflow-hidden rounded-[24px] bg-[#14110F] text-[#FBF6EE] p-7 sm:p-10 flex flex-col justify-between shadow-level2 group">
+        <div className="lg:col-span-7 relative overflow-hidden rounded-[24px] bg-[#14110F] text-[#FBF6EE] p-5 sm:p-10 flex flex-col justify-between shadow-level2 group">
           {/* Subtle warm glow in corner */}
           <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#FF6A2B]/10 blur-3xl pointer-events-none" />
           <div className="absolute right-10 bottom-10 w-64 h-64 rounded-full bg-[#FFC21A]/10 blur-2xl pointer-events-none" />
 
           {/* Top Bar on Card 1 */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-bold">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-[#FFC21A] animate-pulse" />
               <span className="text-[#FBF6EE] uppercase tracking-wider text-[11px] font-bold">Festival Phare du Moment</span>
             </div>
@@ -66,34 +66,34 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
           </div>
 
           {/* Main Content Area with Poppins & Inter Typography */}
-          <div className="relative z-10 my-8 sm:my-10 space-y-4">
+          <div className="relative z-10 my-4 sm:my-8 space-y-3 sm:space-y-4">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#FFC21A] uppercase tracking-wider font-mono">
               <Calendar className="w-3.5 h-3.5 text-[#FFC21A]" />
               <span>Kinshasa • 22 au 27 Septembre 2026 • Beaux-Arts</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-bold text-[#FBF6EE] leading-[1.08] tracking-tight font-heading">
+            <h1 className="text-2xl sm:text-5xl font-bold text-[#FBF6EE] leading-[1.1] tracking-tight font-heading">
               Congo Food Week 6.
-              <span className="block text-[#FF6A2B] mt-1">
+              <span className="block text-[#FF6A2B] mt-0.5 sm:mt-1">
                 La Grande Célébration Culinaire.
               </span>
             </h1>
 
-            <p className="text-sm sm:text-base text-[#D9D0C6] max-w-xl font-normal leading-relaxed">
+            <p className="text-xs sm:text-base text-[#D9D0C6] max-w-xl font-normal leading-relaxed">
               Le rendez-vous incontournable de Kinshasa vend ses pass officiels sur <strong>VUKA Pay</strong>. 23 stands d'exception, maîtres des braises, concerts live et paiement 100% cashless sans contact.
             </p>
 
             {/* Quick Metrics Pills */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2">
-              <div className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2 pt-1 sm:pt-2">
+              <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
                 <Utensils className="w-3.5 h-3.5 text-[#FFC21A]" />
                 <span>23 Stands Exposants</span>
               </div>
-              <div className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
+              <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
                 <Music className="w-3.5 h-3.5 text-[#FFC21A]" />
                 <span>6 Soirées Live</span>
               </div>
-              <div className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
+              <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs text-[#FBF6EE] font-semibold flex items-center gap-1.5">
                 <Heart className="w-3.5 h-3.5 text-[#C62828]" />
                 <span>10% Fdt Congolicious</span>
               </div>
@@ -104,7 +104,7 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
           <div className="relative z-10 flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={onExploreTickets}
-              className="h-12 px-7 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center gap-2.5 active:scale-95"
+              className="min-h-[48px] h-12 px-6 sm:px-7 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 active:scale-95"
             >
               <Ticket className="w-4 h-4 text-[#14110F]" />
               <span>Acheter un Pass (Dès 5$)</span>
@@ -113,7 +113,7 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
 
             <button
               onClick={onExploreStands}
-              className="h-12 px-6 rounded-full bg-white/10 hover:bg-white/20 text-[#FBF6EE] font-semibold text-xs sm:text-sm border border-white/20 transition-all flex items-center gap-2 active:scale-95"
+              className="min-h-[48px] h-12 px-5 sm:px-6 rounded-full bg-white/10 hover:bg-white/20 text-[#FBF6EE] font-semibold text-xs sm:text-sm border border-white/20 transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               <Utensils className="w-4 h-4 text-[#FFC21A]" />
               <span>Explorer les 23 Stands</span>

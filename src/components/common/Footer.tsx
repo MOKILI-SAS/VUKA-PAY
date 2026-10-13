@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ShieldCheck, Heart, ExternalLink, Lock } from 'lucide-react';
 import { VukaLogo } from './VukaLogo';
+import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 export const Footer: React.FC = () => {
   const { setAppViewMode, setActiveBackofficeModule } = useApp();
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('PRIVACY');
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setIsLegalModalOpen(true);
+  };
 
   return (
     <footer className="border-t border-[#D9D0C6] bg-white text-[#4A433D] py-16 px-4 sm:px-6 lg:px-8 mt-20">
@@ -110,33 +118,59 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Bar — Mention OBLIGATOIRE "Propulsé par MOKILI" */}
-        <div className="pt-8 border-t border-[#D9D0C6] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7068]">
-          <p>© 2026 VUKA Pay.</p>
-          
-          {/* MENTION OFFICIELLE MOKILI */}
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#FBF6EE] border border-[#D9D0C6] text-[#14110F] shadow-sm">
+        {/* Bottom Bar Épurée */}
+        <div className="pt-8 border-t border-[#D9D0C6] flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#7A7068]">
+          <p>© 2026 VUKA Pay. Tous droits réservés.</p>
+
+          {/* Liens Légaux & Conformité */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 font-medium">
+            <button
+              type="button"
+              onClick={() => openLegal('PRIVACY')}
+              className="hover:text-[#14110F] hover:underline transition cursor-pointer"
+            >
+              Politique de Confidentialité
+            </button>
+            <span className="text-[#D9D0C6] hidden sm:inline">•</span>
+            <button
+              type="button"
+              onClick={() => openLegal('TERMS')}
+              className="hover:text-[#14110F] hover:underline transition cursor-pointer"
+            >
+              Conditions Générales (CGU / CGV)
+            </button>
+            <span className="text-[#D9D0C6] hidden sm:inline">•</span>
+            <button
+              type="button"
+              onClick={() => openLegal('LEGAL_NOTICE')}
+              className="hover:text-[#14110F] hover:underline transition cursor-pointer"
+            >
+              Mentions Légales
+            </button>
+          </div>
+
+          {/* Attribution MOKILI */}
+          <div className="flex items-center gap-1.5 font-medium">
             <span>Propulsé par</span>
             <a 
               href="https://mokili.io" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="font-bold text-[#FF6A2B] hover:text-[#E24E10] transition flex items-center gap-1 group"
+              className="font-bold text-[#14110F] hover:text-[#FF6A2B] transition flex items-center gap-1"
             >
               <span>MOKILI</span>
-              <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ExternalLink className="w-3 h-3 text-[#7A7068]" />
             </a>
-            <span className="text-[#D9D0C6]">|</span>
-            <span className="text-[#7A7068]">mokili.io</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[#7A7068] font-medium">
-            <span>Propulsé par MOKILI</span>
-            <span>•</span>
-            <span>Mode Offline-First</span>
           </div>
         </div>
       </div>
+
+      {/* Modal Légale & Conformité */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        initialTab={legalTab}
+        onClose={() => setIsLegalModalOpen(false)}
+      />
     </footer>
   );
 };

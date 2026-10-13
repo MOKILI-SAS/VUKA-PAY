@@ -1,27 +1,9 @@
 import React from 'react';
-import { Calendar, MapPin, Ticket, ArrowRight, Utensils, Laptop, Users, Music, PlusCircle } from 'lucide-react';
+import { Calendar, MapPin, Ticket, ArrowRight, PlusCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void }> = ({ onSelectEventTickets }) => {
   const { publishedEvents, openOrganizerLogin } = useApp();
-
-  const getEventIcon = (category: string) => {
-    if (category.includes('GASTRONOMIE')) return <Utensils className="w-5 h-5 text-[#FFC21A]" />;
-    if (category.includes('INNOVATION')) return <Laptop className="w-5 h-5 text-amber-400" />;
-    if (category.includes('CONCERT') || category.includes('FESTIVAL')) return <Music className="w-5 h-5 text-cyan-400" />;
-    return <Users className="w-5 h-5 text-[#FFC21A]" />;
-  };
-
-  const getEventGradient = (idx: number, isFeatured?: boolean) => {
-    if (isFeatured) return 'from-[#FF6A2B] via-orange-950 to-[#14110F]';
-    const gradients = [
-      'from-purple-900 to-slate-900',
-      'from-amber-900 to-slate-900',
-      'from-slate-800 to-slate-950',
-      'from-[#0E5A8A] to-[#14110F]'
-    ];
-    return gradients[idx % gradients.length];
-  };
 
   return (
     <section id="evenements" className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -57,26 +39,34 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
                 : 'bg-white border-[#D9D0C6] hover:border-[#FF6A2B]/50 shadow-level1 hover:shadow-md'
             }`}
           >
-            {/* Top Color Banner */}
-            <div className={`p-5 bg-gradient-to-br ${getEventGradient(idx, event.isFeatured)} text-white relative`}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20">
+            {/* Image représentative de l'événement */}
+            <div className="relative h-44 w-full overflow-hidden bg-[#14110F]">
+              <img 
+                src={event.imageUrl || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'} 
+                alt={event.title}
+                width="400"
+                height="176"
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
+              
+              <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[#FBF6EE] border border-white/15">
                   {event.category}
                 </span>
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  {getEventIcon(event.category)}
-                </div>
+                {event.isFeatured && (
+                  <span className="px-2.5 py-1 rounded-full bg-[#FFC21A] text-[#14110F] text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                    Vedette CFW6
+                  </span>
+                )}
               </div>
 
-              <h3 className="text-lg font-bold text-white leading-snug tracking-tight font-heading">
-                {event.title}
-              </h3>
-
-              {event.isFeatured && (
-                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFC21A] text-[#14110F] text-[10px] font-bold uppercase tracking-wider">
-                  <span>Partenaire Officiel CFW6</span>
-                </div>
-              )}
+              <div className="absolute bottom-3 left-3 right-3">
+                <h3 className="text-base sm:text-lg font-bold text-white leading-tight tracking-tight font-heading drop-shadow-sm line-clamp-2">
+                  {event.title}
+                </h3>
+              </div>
             </div>
 
             {/* Event Details */}
