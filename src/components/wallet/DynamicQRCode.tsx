@@ -27,7 +27,7 @@ export const DynamicQRCode: React.FC = () => {
         width: 240,
         margin: 1,
         color: {
-          dark: '#0A0D17',
+          dark: '#14110F',
           light: '#FFFFFF'
         }
       }).then(setQrDataUrl).catch(console.error);
@@ -43,33 +43,33 @@ export const DynamicQRCode: React.FC = () => {
   const isUrgent = secondsRemaining <= 5;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-3xl max-w-sm mx-auto shadow-xl">
+    <div className="flex flex-col items-center justify-center p-6 bg-white border border-[#E5E0D8] rounded-[32px] max-w-sm mx-auto shadow-sm">
       
       {/* Header Badge */}
-      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF5722]/10 border border-[#FF5722]/20 text-[#FF5722] text-xs font-bold uppercase tracking-wider mb-4">
-        <Lock className="w-3.5 h-3.5" />
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE3D3] border border-[#FF6A2B]/20 text-[#FF6A2B] text-xs font-bold uppercase tracking-wider mb-4">
+        <Lock className="w-3.5 h-3.5 text-[#FF6A2B]" />
         <span>Paiement Sans Contact Sécurisé</span>
       </div>
 
-      <h3 className="text-lg font-bold text-white text-center mb-1">
+      <h3 className="text-lg font-black text-[#14110F] text-center mb-1 font-poppins">
         Scannez pour payer au stand
       </h3>
-      <p className="text-xs text-slate-400 text-center mb-6">
+      <p className="text-xs text-[#9C9488] text-center mb-6 font-normal">
         Ce QR Code tourne automatiquement toutes les 30 secondes pour bloquer les fraudes par capture d'écran.
       </p>
 
       {/* QR Code Container with Animated Ring */}
-      <div className="relative p-5 rounded-3xl bg-white shadow-2xl flex flex-col items-center justify-center">
+      <div className="relative p-5 rounded-3xl bg-[#FBF6EE] border border-[#E5E0D8] shadow-inner flex flex-col items-center justify-center">
         {qrDataUrl ? (
           <img src={qrDataUrl} alt="QR Code Dynamique VUKA" className="w-52 h-52 object-contain" />
         ) : (
           <div className="w-52 h-52 flex items-center justify-center">
-            <RefreshCw className="w-8 h-8 text-slate-400 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-[#9C9488] animate-spin" />
           </div>
         )}
 
         {/* Floating Rotating Signature */}
-        <div className="mt-2 text-[10px] font-mono text-slate-700 font-bold tracking-widest uppercase">
+        <div className="mt-2 text-[10px] font-mono text-[#14110F] font-bold tracking-widest uppercase">
           ID: {wallet.id.slice(0, 10)} • KEY: {signature}
         </div>
       </div>
@@ -77,19 +77,19 @@ export const DynamicQRCode: React.FC = () => {
       {/* Countdown Progress Bar */}
       <div className="w-full mt-6 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400 flex items-center gap-1">
-            <RefreshCw className={`w-3.5 h-3.5 ${isUrgent ? 'animate-spin text-red-400' : 'text-[#FF5722]'}`} />
+          <span className="text-[#9C9488] flex items-center gap-1 font-medium">
+            <RefreshCw className={`w-3.5 h-3.5 ${isUrgent ? 'animate-spin text-[#C62828]' : 'text-[#FF6A2B]'}`} />
             <span>Renouvellement automatique :</span>
           </span>
-          <span className={`font-mono font-bold ${isUrgent ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+          <span className={`font-mono font-bold ${isUrgent ? 'text-[#C62828] animate-pulse' : 'text-[#14110F]'}`}>
             {secondsRemaining}s
           </span>
         </div>
 
-        <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+        <div className="w-full h-2 rounded-full bg-[#F5F3EF] overflow-hidden">
           <div 
             className={`h-full transition-all duration-1000 ${
-              isUrgent ? 'bg-red-500' : 'bg-gradient-to-r from-[#FF5722] to-[#FFB300]'
+              isUrgent ? 'bg-[#C62828]' : 'bg-[#FF6A2B]'
             }`}
             style={{ width: `${progressPercent}%` }}
           />
@@ -97,10 +97,10 @@ export const DynamicQRCode: React.FC = () => {
       </div>
 
       {/* Anti-Fraud Notice */}
-      <div className="mt-6 p-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
-        <ShieldAlert className="w-4 h-4 text-[#FFB300] shrink-0 mt-0.5" />
+      <div className="mt-6 p-3 rounded-2xl bg-[#E3EEF6] border border-[#0E5A8A]/20 text-[11px] text-[#0E5A8A] flex items-start gap-2.5 font-medium">
+        <ShieldAlert className="w-4 h-4 text-[#0E5A8A] shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-slate-200">Protection Anti-Fraude :</span> Les captures d'écran et photos de ce QR code sont automatiquement rejetées par les caisses Sunmi V2S.
+          <span className="font-bold text-[#14110F]">Protection Anti-Fraude :</span> Les captures d'écran et photos de ce QR code sont automatiquement rejetées par les caisses Sunmi V2S.
         </div>
       </div>
 

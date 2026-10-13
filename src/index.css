@@ -2,10 +2,175 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* VUKA Charte Graphique v1.0 — Variables officielles */
+  --color-braise: #FF6A2B;
+  --color-braise-pressed: #E24E10;
+  --color-braise-tint: #FFE3D3;
+  --color-nuit: #14110F;
+  --color-soleil: #FFC21A;
+  --color-fleuve: #0E5A8A;
+  --color-sable: #FBF6EE;
+  --color-white: #FFFFFF;
+  --color-gray-100: #F3ECE2;
+  --color-gray-300: #D9D0C6;
+  --color-gray-500: #7A7068;
+  --color-gray-700: #4A433D;
+  --color-success: #167A42;
+  --color-success-tint: #E2F3E9;
+  --color-error: #C62828;
+  --color-error-tint: #FBE5E5;
+  --color-warning-tint: #FFF3CC;
+  --color-info-tint: #E3EEF6;
+
+  --font-heading: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px; --space-16: 64px;
+
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+  --radius-xl: 24px; --radius-pill: 999px;
+
+  --motion-fast: 120ms; --motion-base: 200ms; --motion-sheet: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
 @layer base {
   body {
-    @apply bg-[#0A0D17] text-slate-100 antialiased font-sans;
+    background-color: var(--color-sable);
+    color: var(--color-nuit);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.01em;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-nuit);
+    letter-spacing: -0.025em;
+  }
+
+  /* Règle absolue de la Charte : sur Braise et Soleil, texte toujours Nuit */
+  ::selection {
+    background-color: var(--color-braise-tint);
+    color: var(--color-nuit);
+  }
+}
+
+/* Chiffres tabulaires pour les listes de montants */
+.tnum, .font-tnum {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Échelle typographique officielle */
+.font-montant-xl {
+  font-family: var(--font-heading);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+}
+
+.font-montant-marchand {
+  font-family: var(--font-heading);
+  font-size: 56px;
+  line-height: 64px;
+  font-weight: 700;
+}
+
+.font-display {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+}
+
+.font-h1 {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 600;
+}
+
+.font-h2 {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+}
+
+.font-h3 {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+.font-corps {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.font-corps-petit {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.font-legende {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+/* Élévations officielles */
+.elevation-0 {
+  box-shadow: none;
+}
+.elevation-1 {
+  box-shadow: 0 1px 3px rgba(20, 17, 15, 0.08);
+}
+.elevation-2 {
+  box-shadow: 0 8px 24px rgba(20, 17, 15, 0.16);
+}
+
+/* Boutons officiels VUKA */
+/* Règle stricte : texte NUIT sur Braise et Soleil */
+.btn-braise {
+  @apply inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#FF6A2B] text-[#14110F] font-semibold px-6 py-3 text-sm md:text-base hover:bg-[#E24E10] active:scale-[0.98] transition-all;
+}
+
+.btn-soleil {
+  @apply inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#FFC21A] text-[#14110F] font-semibold px-6 py-3 text-sm md:text-base hover:brightness-95 active:scale-[0.98] transition-all;
+}
+
+.btn-nuit {
+  @apply inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#14110F] text-[#FBF6EE] font-semibold px-6 py-3 text-sm md:text-base hover:bg-[#2A2420] active:scale-[0.98] transition-all;
+}
+
+.btn-fleuve {
+  @apply inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#0E5A8A] text-white font-semibold px-6 py-3 text-sm md:text-base hover:bg-[#0b486e] active:scale-[0.98] transition-all;
+}
+
+/* Compatibilité des anciens sélecteurs avec la nouvelle charte */
+.btn-brand-primary, .btn-weez-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#FF6A2B] text-[#14110F] font-bold px-7 py-3 text-sm md:text-base shadow-sm hover:bg-[#E24E10] transition-all active:scale-[0.98];
+}
+
+.btn-brand-lime {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#FFC21A] text-[#14110F] font-bold px-7 py-3 text-sm md:text-base shadow-sm hover:brightness-95 transition-all active:scale-[0.98];
+}
+
+.btn-brand-outline, .btn-weez-outline {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-[#D9D0C6] bg-white text-[#14110F] font-semibold px-6 py-2.5 text-sm hover:bg-[#F3ECE2] transition-all active:scale-[0.98];
+}
+
+.badge-weez-pill {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE3D3] border border-[#FF6A2B]/20 text-[#14110F] text-xs font-semibold tracking-wide;
 }
 
 /* Custom Scrollbar */
@@ -15,39 +180,41 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A0D17;
+  background: #F3ECE2;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #D9D0C6;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF5722;
+  background: #7A7068;
 }
 
-/* Animations et effets d'onde */
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 14px rgba(255, 87, 34, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
-  }
+/* Ticket Perforé Officiel VUKA (Fond Nuit #14110F avec découpes et accents Braise & Soleil) */
+.ticket-perforated {
+  position: relative;
+  background-color: #14110F;
+  border-radius: 24px;
+  overflow: hidden;
+  color: #FBF6EE;
 }
 
-.animate-pulse-ring {
-  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.ticket-stamp-left {
+  background-image: radial-gradient(circle at 0% 50%, #FBF6EE 12px, transparent 13px);
+  background-size: 100% 36px;
 }
 
-/* Badges Weezevent-Style */
-.badge-solution {
-  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase;
+.ticket-stamp-right {
+  background-image: radial-gradient(circle at 100% 50%, #FBF6EE 12px, transparent 13px);
+  background-size: 100% 36px;
 }
+
+.ticket-dashed-line {
+  background-image: linear-gradient(to bottom, #7A7068 50%, rgba(122, 112, 104, 0) 0%);
+  background-position: left;
+  background-size: 2px 14px;
+  background-repeat: repeat-y;
+}
+

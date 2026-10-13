@@ -14,11 +14,12 @@ import {
   RefreshCw,
   Trophy,
   ArrowRight,
-  Sparkles
+  Calendar
 } from 'lucide-react';
 import { StockRequestsView } from './StockRequestsView';
 import { StandPerformance } from './StandPerformance';
 import { DayClosingPayoutModal } from './DayClosingPayoutModal';
+import { OrganizerEventsManager } from './OrganizerEventsManager';
 import { DailyClosingReport } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
@@ -33,7 +34,7 @@ export const AdminDashboard: React.FC = () => {
     executeDailyClosingAndPayout
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'STOCKS' | 'STANDS' | 'AUDIT'>('STOCKS');
+  const [activeTab, setActiveTab] = useState<'EVENTS' | 'STOCKS' | 'STANDS' | 'AUDIT'>('EVENTS');
   const [closingModalOpen, setClosingModalOpen] = useState(false);
   const [closingReport, setClosingReport] = useState<DailyClosingReport | null>(null);
 
@@ -51,19 +52,19 @@ export const AdminDashboard: React.FC = () => {
     <div className="py-8 px-4 sm:px-6 max-w-7xl mx-auto space-y-8">
       
       {/* Top Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-[28px] bg-white border border-[#E5E0D8] shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center font-black text-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-[#FFE3D3] border border-[#FF6A2B]/20 text-[#FF6A2B] flex items-center justify-center font-black text-2xl">
             <Building2 className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-white">Super Admin & Trésorerie Centrale</h2>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-bold">
+              <h2 className="text-xl font-black text-[#14110F] font-poppins">Super Admin & Trésorerie Centrale</h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FFE3D3] text-[#FF6A2B] border border-[#FF6A2B]/20 text-[10px] font-bold">
                 Congo Food Week 6
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">
+            <p className="text-xs text-[#9C9488] font-mono mt-0.5">
               Supervision financière, validation des stocks et reversements quotidiens M-Pesa B2C
             </p>
           </div>
@@ -72,9 +73,9 @@ export const AdminDashboard: React.FC = () => {
         {/* Global Action Trigger: Clôture */}
         <button
           onClick={handleOpenClosing}
-          className="py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-2"
+          className="py-3.5 px-6 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2 active:scale-95"
         >
-          <Smartphone className="w-4 h-4" />
+          <Smartphone className="w-4 h-4 text-[#14110F]" />
           <span>Clôture Journalière & Payouts B2C</span>
         </button>
       </div>
@@ -83,59 +84,59 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Metric 1: Volume Brut Cashless */}
-        <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-lg">
+        <div className="p-5 rounded-[24px] bg-white border border-[#E5E0D8] shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Volume Cashless Brut</span>
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-[#9C9488] uppercase tracking-wider">Volume Cashless Brut</span>
+            <TrendingUp className="w-4 h-4 text-[#0E5A8A]" />
           </div>
-          <div className="text-3xl font-black text-white font-mono">
+          <div className="text-3xl font-black text-[#14110F] font-mono">
             {formatUSD(totalVolumeUSD)}
           </div>
-          <div className="text-xs text-[#FFB300] font-mono mt-1">
+          <div className="text-xs text-[#FF6A2B] font-mono font-bold mt-1">
             ≈ {formatCDF(totalVolumeUSD)}
           </div>
         </div>
 
         {/* Metric 2: Fondation Congolicious 10% */}
-        <div className="p-5 rounded-3xl bg-slate-900 border border-[#FF5722]/30 shadow-lg">
+        <div className="p-5 rounded-[24px] bg-white border border-[#E5E0D8] shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-[#FF5722] uppercase tracking-wider flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 fill-[#FF5722]" />
+            <span className="text-xs font-bold text-[#FF6A2B] uppercase tracking-wider flex items-center gap-1.5">
+              <Heart className="w-3.5 h-3.5 text-[#FF6A2B]" />
               <span>10% Fdt Congolicious</span>
             </span>
           </div>
-          <div className="text-3xl font-black text-[#FF5722] font-mono">
+          <div className="text-3xl font-black text-[#FF6A2B] font-mono">
             {formatUSD(totalFoundationCommissionUSD)}
           </div>
-          <div className="text-xs text-slate-400 font-mono mt-1">
+          <div className="text-xs text-[#9C9488] font-medium mt-1">
             Reversé pour les œuvres sociales
           </div>
         </div>
 
         {/* Metric 3: Net Dû Standiers 90% */}
-        <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-lg">
+        <div className="p-5 rounded-[24px] bg-white border border-[#E5E0D8] shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Net Dû aux 23 Stands (90%)</span>
-            <Building2 className="w-4 h-4 text-[#00D2FF]" />
+            <span className="text-xs font-bold text-[#9C9488] uppercase tracking-wider">Net Dû aux 23 Stands (90%)</span>
+            <Building2 className="w-4 h-4 text-[#167A42]" />
           </div>
-          <div className="text-3xl font-black text-emerald-400 font-mono">
+          <div className="text-3xl font-black text-[#167A42] font-mono">
             {formatUSD(netDueToStandsUSD)}
           </div>
-          <div className="text-xs text-slate-400 font-mono mt-1">
+          <div className="text-xs text-[#9C9488] font-medium mt-1">
             Reversement par M-Pesa B2C
           </div>
         </div>
 
         {/* Metric 4: Festivaliers Présents */}
-        <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-lg">
+        <div className="p-5 rounded-[24px] bg-white border border-[#E5E0D8] shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Affluence en Direct</span>
-            <Users className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-bold text-[#9C9488] uppercase tracking-wider">Affluence en Direct</span>
+            <Users className="w-4 h-4 text-[#14110F]" />
           </div>
-          <div className="text-3xl font-black text-white font-mono">
+          <div className="text-3xl font-black text-[#14110F] font-mono">
             {totalAttendeesEntered}
           </div>
-          <div className="text-xs text-slate-400 mt-1">
+          <div className="text-xs text-[#9C9488] font-medium mt-1">
             Sur {purchasedTickets.length} billets émis
           </div>
         </div>
@@ -143,19 +144,31 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center gap-2 border-b border-[#E5E0D8] pb-3 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab('EVENTS')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition shrink-0 ${
+            activeTab === 'EVENTS'
+              ? 'bg-[#FF6A2B] text-[#14110F] shadow-sm font-black'
+              : 'text-[#4A443D] hover:text-[#14110F] bg-white border border-[#E5E0D8]'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Mes Événements & Déroulement</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('STOCKS')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition shrink-0 ${
             activeTab === 'STOCKS'
-              ? 'bg-[#FF5722] text-white shadow-vuka'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-[#FF6A2B] text-[#14110F] shadow-sm font-black'
+              : 'text-[#4A443D] hover:text-[#14110F] bg-white border border-[#E5E0D8]'
           }`}
         >
           <Package className="w-4 h-4" />
           <span>Validation Réassorts</span>
           {pendingRequestsCount > 0 && (
-            <span className="px-2 py-0.5 rounded-full bg-white text-slate-950 text-[10px] font-black">
+            <span className="px-2 py-0.5 rounded-full bg-[#14110F] text-[#FFC21A] text-[10px] font-black">
               {pendingRequestsCount}
             </span>
           )}
@@ -163,10 +176,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('STANDS')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition shrink-0 ${
             activeTab === 'STANDS'
-              ? 'bg-[#FFB300] text-slate-950 shadow-md'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-[#FFC21A] text-[#14110F] shadow-sm font-black'
+              : 'text-[#4A443D] hover:text-[#14110F] bg-white border border-[#E5E0D8]'
           }`}
         >
           <Trophy className="w-4 h-4" />
@@ -175,10 +188,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('AUDIT')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition shrink-0 ${
             activeTab === 'AUDIT'
-              ? 'bg-purple-600 text-white'
-              : 'text-slate-400 hover:text-white bg-slate-900/60'
+              ? 'bg-[#14110F] text-white font-bold'
+              : 'text-[#4A443D] hover:text-[#14110F] bg-white border border-[#E5E0D8]'
           }`}
         >
           <Receipt className="w-4 h-4" />
@@ -188,35 +201,36 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Tab Panels */}
       <div>
+        {activeTab === 'EVENTS' && <OrganizerEventsManager />}
         {activeTab === 'STOCKS' && <StockRequestsView />}
         {activeTab === 'STANDS' && <StandPerformance />}
         {activeTab === 'AUDIT' && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-white">Journal Cryptographique de Toutes les Transactions</h3>
-            <div className="divide-y divide-slate-800 max-h-[500px] overflow-y-auto">
+          <div className="bg-white border border-[#E5E0D8] rounded-[28px] p-6 shadow-sm space-y-4">
+            <h3 className="text-base font-black text-[#14110F] font-poppins">Journal Cryptographique de Toutes les Transactions</h3>
+            <div className="divide-y divide-[#E5E0D8] max-h-[500px] overflow-y-auto">
               {transactions.map(tx => (
                 <div key={tx.id} className="py-3 flex items-center justify-between text-xs">
                   <div>
-                    <div className="font-bold text-white flex items-center gap-2">
+                    <div className="font-bold text-[#14110F] flex items-center gap-2">
                       <span className="font-mono">{tx.id}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3EF] text-[#4A443D]">
                         {tx.type} • {tx.paymentMethod}
                       </span>
                       {tx.offlineGenerated && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-bold">
                           Sync Offline
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
+                    <div className="text-[11px] text-[#9C9488] mt-0.5 font-mono">
                       {formatDateTime(tx.timestamp)} • Stand: {tx.standName || 'N/A'} • Festivalier: {tx.festivalierPhone}
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-mono font-bold text-white text-sm">{formatUSD(tx.amountUSD)}</div>
+                    <div className="font-mono font-black text-[#14110F] text-sm">{formatUSD(tx.amountUSD)}</div>
                     {tx.commissionAmountUSD > 0 && (
-                      <div className="text-[10px] text-[#FF5722] font-mono">
+                      <div className="text-[10px] text-[#FF6A2B] font-mono font-bold">
                         10% Fdt: {formatUSD(tx.commissionAmountUSD)}
                       </div>
                     )}

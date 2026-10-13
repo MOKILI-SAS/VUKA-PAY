@@ -4,7 +4,39 @@ export type UserRole =
   | 'FESTIVALIER'     // Client porteur de billet & portefeuille cashless
   | 'STAND_MANAGER'   // Exposant / Vendeur sur caisse POS (Sunmi V2S ou Mobile)
   | 'STAFF_ACCESS'    // Agent de contrôle d'accès aux portes du festival
-  | 'SUPER_ADMIN';    // Administrateur général / Fondation Congolicious / LAB3
+  | 'SUPER_ADMIN';    // Administrateur général / Espace Organisateurs
+
+// Modes de vue principaux de la plateforme
+export type AppViewMode = 
+  | 'PUBLIC_LANDING'    // Landing page Weezevent/Ticketmaster publique
+  | 'CLIENT_PORTAL'     // Espace client & Dashboard festivalier
+  | 'BACKOFFICE_STAFF'; // Espace pro sécurisé (Caisse POS, Contrôle Accès, Admin)
+
+// Modules du Backoffice Staff
+export type BackofficeModule = 
+  | 'POS_TERMINAL'     // Terminal de vente caisse 23 stands
+  | 'ACCESS_CONTROL'   // Scanners portes & contrôle anti-passback
+  | 'SUPER_ADMIN';     // Console Trésorerie, Payouts & Stocks
+
+// Onglets du Dashboard Client Festivalier
+export type ClientPortalTab = 
+  | 'OVERVIEW'   // Suivi du parcours festivalier
+  | 'TICKETS'    // Mes Billets & QR dynamique
+  | 'WALLET'     // Mon Portefeuille & Recharges M-Pesa
+  | 'HISTORY'    // Mes Commandes & Reçus
+  | 'PROFILE';   // Mes Informations & Sécurité
+
+// Compte utilisateur client festivalier
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatarUrl?: string;
+  walletId: string;
+  createdAt: string;
+  isVerified: boolean;
+}
 
 // Type de pass et billet
 export type TicketCategory = '6_DAYS_PREMIUM' | 'DAY_PASS' | 'VIP_PASS';
@@ -143,4 +175,23 @@ export interface DailyClosingReport {
   }[];
   isClosed: boolean;
   closedAt?: string;
+}
+
+// Événement publié sur la plateforme VUKA Pay
+export interface VukaPublishedEvent {
+  id: string;
+  title: string;
+  category: string;
+  badge: string;
+  dateStr: string;
+  location: string;
+  city: string;
+  priceFrom: string;
+  status: 'OPEN' | 'COMING_SOON';
+  ticketsSold: number;
+  totalCapacity: number;
+  revenueUSD: number;
+  scannedEntries: number;
+  organizerName?: string;
+  isFeatured?: boolean;
 }

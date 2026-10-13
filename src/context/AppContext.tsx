@@ -8,7 +8,12 @@ import {
   FestivalierWallet, 
   CashlessTransaction, 
   StockRequest,
-  DailyClosingReport
+  DailyClosingReport,
+  AppViewMode,
+  BackofficeModule,
+  ClientPortalTab,
+  UserAccount,
+  VukaPublishedEvent
 } from '../types';
 import { 
   MOCK_TICKETS, 
@@ -20,17 +25,44 @@ import {
 } from '../data/mockData';
 
 interface AppContextType {
+  // Navigation globale VUKA
+  appViewMode: AppViewMode;
+  setAppViewMode: (mode: AppViewMode) => void;
+  activeBackofficeModule: BackofficeModule;
+  setActiveBackofficeModule: (module: BackofficeModule) => void;
+  activeClientTab: ClientPortalTab;
+  setActiveClientTab: (tab: ClientPortalTab) => void;
+
+  // Authentification & Compte Client
+  currentUser: UserAccount | null;
+  setCurrentUser: (user: UserAccount | null) => void;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  authModalMode: 'LOGIN' | 'REGISTER';
+  setAuthModalMode: (mode: 'LOGIN' | 'REGISTER') => void;
+  isOrganizerAuthMode: boolean;
+  setIsOrganizerAuthMode: (val: boolean) => void;
+  openOrganizerLogin: () => void;
+  registerUser: (name: string, email: string, phone: string, password?: string) => Promise<UserAccount>;
+  loginUser: (identifier: string, password?: string) => Promise<UserAccount>;
+  logoutUser: () => void;
+
+  // Rôle historique / rétrocompatibilité
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   
-  // Billetterie
+  // Billetterie & Événements
   tickets: TicketDefinition[];
   purchasedTickets: PurchasedTicket[];
   buyTicket: (ticketDefId: string, buyerName: string, buyerPhone: string, buyerEmail: string) => Promise<PurchasedTicket>;
+  publishedEvents: VukaPublishedEvent[];
+  addOrganizerEvent: (newEvent: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => void;
   
   // Festivalier & Wallet
   wallet: FestivalierWallet;
   topUpWallet: (amountUSD: number, phoneMpesa: string) => Promise<boolean>;
+  refundWalletBalance: (phoneMpesa: string) => Promise<{ success: boolean; amountRefundedUSD: number }>;
+  linkRFIDToWallet: (rfidTagId: string) => void;
   
   // Stands & Produits
   stands: Stand[];
@@ -81,8 +113,121 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
+  {
+    id: 'cfw-6',
+    title: 'Congo Food Week — Saison 6',
+    category: 'GASTRONOMIE & MUSIQUE',
+    badge: 'FESTIVAL MAJEUR • BILLETTERIE OUVERTE',
+    dateStr: '22 – 27 Septembre 2026 (6 Jours)',
+    location: 'Académie des Beaux-Arts',
+    city: 'Kinshasa, Gombe',
+    priceFrom: 'Dès 5 $ (13 750 CDF)',
+    status: 'OPEN',
+    ticketsSold: 1420,
+    totalCapacity: 5000,
+    revenueUSD: 18450,
+    scannedEntries: 840,
+    organizerName: 'Fondation Congolicious',
+    isFeatured: true
+  },
+  {
+    id: 'kin-jazz',
+    title: 'Kinshasa Jazz & Rumba Festival',
+    category: 'FESTIVAL LIVE & CONCERTS',
+    badge: 'BILLETTERIE OUVERTE',
+    dateStr: '10 – 12 Octobre 2026',
+    location: 'Théâtre de Verdure • Mont Ngaliema',
+    city: 'Kinshasa',
+    priceFrom: 'Dès 15 $ (41 250 CDF)',
+    status: 'OPEN',
+    ticketsSold: 420,
+    totalCapacity: 2500,
+    revenueUSD: 6300,
+    scannedEntries: 0,
+    organizerName: 'Kinshasa Jazz Club'
+  },
+  {
+    id: 'afrotech-kin',
+    title: 'AfroTech Summit Kinshasa 2026',
+    category: 'INNOVATION & STARTUPS',
+    badge: 'BADGES PRO & VIP',
+    dateStr: '05 – 06 Novembre 2026',
+    location: 'Pullman Grand Hôtel Kinshasa',
+    city: 'Kinshasa, Gombe',
+    priceFrom: 'Dès 35 $ (96 250 CDF)',
+    status: 'OPEN',
+    ticketsSold: 310,
+    totalCapacity: 800,
+    revenueUSD: 10850,
+    scannedEntries: 0,
+    organizerName: 'AfroTech Network'
+  },
+  {
+    id: 'nuit-rumba',
+    title: 'Les Nuits Royales de la Rumba',
+    category: 'CONCERT GÉANT LIVE',
+    badge: 'BIENTÔT EN VENTE',
+    dateStr: '28 Novembre 2026',
+    location: 'Stade des Martyrs',
+    city: 'Kinshasa',
+    priceFrom: 'Dès 10 $ (27 500 CDF)',
+    status: 'COMING_SOON',
+    ticketsSold: 0,
+    totalCapacity: 15000,
+    revenueUSD: 0,
+    scannedEntries: 0,
+    organizerName: 'Production Rumba Royale'
+  }
+];
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Navigation par rôle
+  // Navigation globale VUKA
+  const [appViewMode, setAppViewMode] = useState<AppViewMode>('PUBLIC_LANDING');
+  const [activeBackofficeModule, setActiveBackofficeModule] = useState<BackofficeModule>('POS_TERMINAL');
+  const [activeClientTab, setActiveClientTab] = useState<ClientPortalTab>('OVERVIEW');
+
+  // Authentification & Compte Client (null par défaut : visiteur déconnecté)
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
+    const saved = localStorage.getItem('vuka_current_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return null; }
+    }
+    return null;
+  });
+
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authModalMode, setAuthModalMode] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
+  const [isOrganizerAuthMode, setIsOrganizerAuthMode] = useState<boolean>(false);
+
+  const openOrganizerLogin = () => {
+    setIsOrganizerAuthMode(true);
+    setAuthModalMode('LOGIN');
+    setIsAuthModalOpen(true);
+  };
+
+  // Catalogue des événements (support de la publication par les organisateurs)
+  const [publishedEvents, setPublishedEvents] = useState<VukaPublishedEvent[]>(() => {
+    const saved = localStorage.getItem('vuka_published_events');
+    return saved ? JSON.parse(saved) : INITIAL_PUBLISHED_EVENTS;
+  });
+
+  const addOrganizerEvent = (newEventData: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => {
+    const newEvent: VukaPublishedEvent = {
+      ...newEventData,
+      id: `evt-${Date.now().toString().slice(-6)}`,
+      ticketsSold: 0,
+      revenueUSD: 0,
+      scannedEntries: 0
+    };
+    setPublishedEvents(prev => {
+      const updated = [newEvent, ...prev];
+      localStorage.setItem('vuka_published_events', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Navigation par rôle (rétrocompatibilité)
   const [currentRole, setCurrentRole] = useState<UserRole>('PUBLIC');
   
   // Billetterie
@@ -202,20 +347,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return t;
     }));
 
-    // Tracer la transaction de billetterie
-    const newTx: CashlessTransaction = {
-      id: `TXN-TCK-${Date.now().toString().slice(-6)}`,
-      timestamp: new Date().toISOString(),
-      type: 'PAYMENT',
-      amountUSD: ticketDef.priceUSD,
-      festivalierPhone: buyerPhone,
-      paymentMethod: 'MPESA_C2B',
-      commissionAmountUSD: 0, // Les billets vont directement au compte organisateur
-      merchantNetUSD: ticketDef.priceUSD,
-      isSynced: true,
-      notes: `Achat billetterie : ${ticketDef.name}`
-    };
-    setTransactions(prev => [newTx, ...prev]);
+    // Mettre à jour les statistiques de l'événement vedette
+    setPublishedEvents(prev => prev.map(evt => {
+      if (evt.id === 'cfw-6') {
+        return {
+          ...evt,
+          ticketsSold: evt.ticketsSold + 1,
+          revenueUSD: evt.revenueUSD + ticketDef.priceUSD
+        };
+      }
+      return evt;
+    }));
+
+    // Si le festivalier n'était pas connecté, créer sa session automatiquement pour qu'il voie son billet
+    if (!currentUser) {
+      const createdUser: UserAccount = {
+        id: `usr-${Date.now().toString().slice(-6)}`,
+        name: buyerName,
+        email: buyerEmail,
+        phone: buyerPhone,
+        walletId: `wal-${Date.now().toString().slice(-4)}`,
+        createdAt: new Date().toISOString(),
+        isVerified: true
+      };
+      setCurrentUser(createdUser);
+      localStorage.setItem('vuka_current_user', JSON.stringify(createdUser));
+    }
 
     return newPurchasedTicket;
   };
@@ -249,6 +406,97 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setTransactions(prev => [newTx, ...prev]);
     return true;
+  };
+
+  // Authentification Festivalier / Création de compte
+  const registerUser = async (name: string, email: string, phone: string, _password?: string): Promise<UserAccount> => {
+    const newUser: UserAccount = {
+      id: `usr-${Date.now().toString().slice(-6)}`,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      walletId: `wal-${Date.now().toString().slice(-4)}`,
+      createdAt: new Date().toISOString(),
+      isVerified: true
+    };
+    setCurrentUser(newUser);
+    localStorage.setItem('vuka_current_user', JSON.stringify(newUser));
+
+    setWallet(prev => ({
+      ...prev,
+      id: newUser.walletId,
+      festivalierName: newUser.name,
+      phone: newUser.phone
+    }));
+
+    setIsAuthModalOpen(false);
+    setAppViewMode('CLIENT_PORTAL');
+    setActiveClientTab('OVERVIEW');
+    return newUser;
+  };
+
+  const loginUser = async (identifier: string, _password?: string): Promise<UserAccount> => {
+    const isEmail = identifier.includes('@');
+    const existingUser: UserAccount = {
+      id: currentUser ? currentUser.id : `usr-${Date.now().toString().slice(-6)}`,
+      name: currentUser ? currentUser.name : (isEmail ? identifier.split('@')[0] : 'Festivalier VUKA'),
+      email: isEmail ? identifier : (currentUser?.email || 'festivalier@vuka.cd'),
+      phone: !isEmail ? identifier : (currentUser?.phone || '+243 81 234 5678'),
+      walletId: wallet.id,
+      createdAt: currentUser?.createdAt || new Date().toISOString(),
+      isVerified: true
+    };
+    setCurrentUser(existingUser);
+    localStorage.setItem('vuka_current_user', JSON.stringify(existingUser));
+    setIsAuthModalOpen(false);
+    setAppViewMode('CLIENT_PORTAL');
+    return existingUser;
+  };
+
+  const logoutUser = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('vuka_current_user');
+    setAppViewMode('PUBLIC_LANDING');
+  };
+
+  // Demande de remboursement de solde restant (Cashless refund CDC)
+  const refundWalletBalance = async (phoneMpesa: string): Promise<{ success: boolean; amountRefundedUSD: number }> => {
+    if (wallet.balanceUSD <= 0) return { success: false, amountRefundedUSD: 0 };
+    const refundAmount = wallet.balanceUSD;
+
+    // Simulation virement M-Pesa B2C
+    await new Promise(r => setTimeout(r, 900));
+
+    setWallet(prev => ({
+      ...prev,
+      balanceUSD: 0
+    }));
+
+    const refundTx: CashlessTransaction = {
+      id: `TXN-REF-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      type: 'REFUND',
+      amountUSD: refundAmount,
+      festivalierId: wallet.id,
+      festivalierPhone: phoneMpesa,
+      paymentMethod: 'MPESA_B2C_PAYOUT',
+      commissionAmountUSD: 0,
+      merchantNetUSD: refundAmount,
+      isSynced: true,
+      notes: `Remboursement solde festivalier sur M-Pesa (${phoneMpesa})`
+    };
+
+    setTransactions(prev => [refundTx, ...prev]);
+    return { success: true, amountRefundedUSD: refundAmount };
+  };
+
+  // Liaison de bracelet RFID physique MIFARE
+  const linkRFIDToWallet = (rfidTagId: string) => {
+    setWallet(prev => {
+      const updated = { ...prev, rfidTagId: rfidTagId.trim() };
+      localStorage.setItem('vuka_festivalier_wallet', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   // Récupérer les items du stand actif
@@ -536,13 +784,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
+      appViewMode,
+      setAppViewMode,
+      activeBackofficeModule,
+      setActiveBackofficeModule,
+      activeClientTab,
+      setActiveClientTab,
+      currentUser,
+      setCurrentUser,
+      isAuthModalOpen,
+      setIsAuthModalOpen,
+      authModalMode,
+      setAuthModalMode,
+      isOrganizerAuthMode,
+      setIsOrganizerAuthMode,
+      openOrganizerLogin,
+      registerUser,
+      loginUser,
+      logoutUser,
       currentRole,
       setCurrentRole,
       tickets,
       purchasedTickets,
       buyTicket,
+      publishedEvents,
+      addOrganizerEvent,
       wallet,
       topUpWallet,
+      refundWalletBalance,
+      linkRFIDToWallet,
       stands,
       activeStandId,
       setActiveStandId,

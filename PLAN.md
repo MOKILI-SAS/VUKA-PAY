@@ -18,6 +18,7 @@
 | **LOT 4** | Module Contrôle d'Accès (Scan Billets & RFID) | **TERMINÉ ✅** | LOT 1 |
 | **LOT 5** | Back-Office Super Admin & Trésorerie Maître (Commission 10% & Payouts) | **TERMINÉ ✅** | LOT 2, LOT 3 |
 | **LOT 6** | Tests, Audit de Sécurité, Documentation & Préparation Déploiement | **TERMINÉ ✅** | LOT 5 |
+| **LOT UX**| Refonte UX & Charte Graphique VUKA v1.0 (Braise, Nuit, Soleil, Fleuve, Sable) | **TERMINÉ ✅** | Charte v1.0 |
 
 ---
 

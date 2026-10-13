@@ -76,6 +76,56 @@
    - Compilation Vite & TypeScript réussie sans aucune erreur (`npm.cmd run build`).
    - Suite de tests unitaires automatisés validée à 100% (`npm.cmd test`).
 
+### Session 3 — 09 octobre 2026
+
+#### Actions Réalisées :
+1. **Intégration de la Charte Graphique Officielle VUKA (`VUKA_Charte_graphique_v1.0.pdf`) :**
+   - Remplacement de la palette verte temporaire par les tokens officiels de la marque :
+     - **Braise (`#FF6A2B`)** : Énergie vitale, action, couleur primaire.
+     - **Nuit (`#14110F`)** : Socle de contraste, typographie, arrière-plans denses.
+     - **Soleil (`#FFC21A`)** : Richesse, fête, statut VIP & accents.
+     - **Fleuve (`#0E5A8A`)** : Majesté du fleuve Congo, infrastructure & staff.
+     - **Sable (`#FBF6EE`)** : Terre d'accueil, fond d'interface principal.
+     - **Blanc (`#FFFFFF`)** : Cartes et surfaces surélevées.
+     - **Succès (`#167A42`)** & **Erreur (`#C62828`)**.
+2. **Règle de contraste stricte WCAG AA (Page 4 de la Charte) :**
+   - Texte sur Braise et Soleil systématiquement forcé en Nuit (`#14110F`). Zéro texte blanc sur fond orange.
+3. **Typographies de la Marque :**
+   - Google Fonts intégrées dans `index.html` : **Poppins** (titres, boutons d'action, chiffres clés) et **Inter** (corps de texte, tables de données).
+4. **Composants & Identité Visuelle :**
+   - Nouveau logo vectoriel `VukaLogo.tsx` basé sur la géométrie officielle (Page 3).
+   - Bracelet RFID physique : Déclinaisons exactes des 4 coloris (Festivalier `#FF6A2B`, VIP `#14110F`, Staff `#0E5A8A`, Marchand `#FFC21A`).
+   - Mise à jour de tous les modules (Vitrine Bento, Billetterie, Espace Festivalier ClientDashboard, Wallet, Caisses POS, Contrôle d'accès, Back-office Admin).
+5. **Validation & Serveur Preview :**
+   - Compilation TypeScript & Vite `npm run build` : 0 erreur, 1942 modules transformés.
+   - Tests unitaires MOKILI `npm test` : 4/4 réussis.
+   - Serveur de preview opérationnel sur `http://localhost:5173/`.
+
+### Session 4 — 13 octobre 2026
+
+#### Actions Réalisées :
+1. **Épuration et Refonte Sobre du Header :**
+   - Équilibrage 3-zones : Logo VUKA vectoriel officiel à gauche, navigation centrale aérée (Événements, Comment ça marche, Tarifs, Solutions), groupe d'actions à droite.
+   - Suppression du bouton encombrant "Billetterie" et de la mention "À la une".
+   - Intégration du lien direct « Espace Organisateurs » déclenchant l'authentification et l'accès au tableau de bord.
+   - Micro-interactions douces sur les onglets et dropdowns avec fermeture automatique au clic extérieur (`useRef`).
+   - Suppression de l'utilisateur "Dieudonné" codé en dur : le visiteur arrive déconnecté par défaut (`currentUser = null`), avec statut invité propre.
+2. **Épuration Visuelle & Règle Anti-Emoji :**
+   - Suppression de tous les emojis dans le code et les données (0 emoji dans `src/`).
+   - Remplacement de "Kinshasa, RDC" par "Propulsé par MOKILI" avec lien vers mokili.io.
+   - Suppression des mentions de démo " & LAB3. Déployé pour le Congo Food Week 6." et des badges parasites.
+3. **Barre de Recherche et Filtres :**
+   - Barre de recherche sobre à contour Braise (`#FF6A2B`) et fond blanc (`#FFFFFF`), avec filtre de catégories intégré (`SlidersHorizontal`).
+   - Suppression des métadonnées statiques encombrantes.
+4. **Flux Billetterie & Espace Organisateurs :**
+   - Champs obligatoires Email et WhatsApp dans le formulaire de commande pour réception et consultation du billet.
+   - Création de l'interface `OrganizerEventsManager.tsx` permettant aux organisateurs de publier des événements et de suivre les statistiques (ventes, revenus, entrées scannées).
+5. **Validation & Déploiement :**
+   - Compilation TypeScript réussie (`tsc -b` : 0 erreur).
+   - Suite de tests unitaires (4/4) validée avec succès.
+   - Serveur de prévisualisation Vite actif sur `http://localhost:5173/` (HTTP 200).
+   - Dépôt distant configuré et synchronisé sur `https://github.com/MOKILI-SAS/VUKA-PAY`.
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -89,6 +139,8 @@
 | **DEC-005** | 08/09/2026 | Automatisation de la commission 10% Fondation Congolicious | Exigence stricte du modèle solidaire CFW6 sur chaque vente exposant. | VALIDÉE |
 | **DEC-006** | 08/09/2026 | Mention obligatoire « Propulsé par MOKILI » avec lien mokili.io | Respect des consignes de branding et d'attribution MOKILI SAS. | VALIDÉE |
 | **DEC-007** | 08/09/2026 | Gouvernance stricte des réassorts standiers | Interdiction de saisie libre des stocks côté standier, soumission soumise à l'Admin. | VALIDÉE |
+| **DEC-008** | 09/10/2026 | Refonte UX & Charte Graphique VUKA v1.0 | Remplacement de la palette temporaire par Braise (#FF6A2B), Nuit (#14110F), Soleil (#FFC21A), Fleuve (#0E5A8A), Sable (#FBF6EE). Règle de contraste stricte text Nuit sur Braise/Soleil. | VALIDÉE |
+| **DEC-009** | 13/10/2026 | Header épuré, sobre et proportionné | Ergonomie sans surcharge visuelle, navigation 3-zones, intégration de l'Espace Organisateurs et formulaire billetterie Email/WhatsApp obligatoire. | VALIDÉE |
 
 ---
 
@@ -103,3 +155,6 @@
 | **LOT 4** | Contrôle d'Accès Portes & RFID | ✅ Terminé | 6 postes, scan <500ms, anti-passback, appairage bracelet MIFARE |
 | **LOT 5** | Back-Office Super Admin & Trésorerie | ✅ Terminé | Trésorerie maître, 10% Fondation, validation réassorts, clôture B2C |
 | **LOT 6** | Tests, Build & Validation Finale | ✅ Terminé | Build Vite 0 erreur, 4/4 tests unitaires passés avec succès |
+| **UX & BRAND** | Refonte Charte Graphique Officielle v1.0 | ✅ Terminé | 100% tokens Braise, Nuit, Soleil, Fleuve, Sable, Poppins/Inter intégrés |
+| **HEADER & POLISH** | Header sobre & Flux organisateur | ✅ Terminé | Navigation épurée, 0 emoji, obligatoire email/whatsapp, push distant |
+
