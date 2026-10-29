@@ -2,8 +2,10 @@
 
 **Organisation :** MOKILI SAS  
 **Document :** Plan d'exécution par lots testables (LOTS)  
-**Version :** 1.1  
-**Statut :** 100% Réalisé et Validé (Lots 0 à 6)
+**Version :** 2.0  
+**Statut :** 100% Réalisé et Validé (Lots 0 à 7)  
+**Date de révision :** 29 octobre 2026  
+**Framework de référence :** MOKILI TECH CORE V2.0 / MOKILI MASTER PROMPT V2.0  
 
 ---
 
@@ -11,14 +13,15 @@
 
 | Lot | Désignation | Statut | Dépendance |
 |---|---|---|---|
-| **LOT 0** | Constitution MOKILI, Socle technique & Design System VUKA | **TERMINÉ ✅** | Validation cadrage |
-| **LOT 1** | Vitrine Publique Weezevent-Style & Billetterie en ligne | **TERMINÉ ✅** | LOT 0 |
-| **LOT 2** | Espace Festivalier & VUKA Wallet (Cashless & QR Dynamique) | **TERMINÉ ✅** | LOT 1 |
-| **LOT 3** | Terminal Marchand / POS Caisse (Sunmi V2S, Mobile & Offline-First) | **TERMINÉ ✅** | LOT 2 |
-| **LOT 4** | Module Contrôle d'Accès (Scan Billets & RFID) | **TERMINÉ ✅** | LOT 1 |
-| **LOT 5** | Back-Office Super Admin & Trésorerie Maître (Commission 10% & Payouts) | **TERMINÉ ✅** | LOT 2, LOT 3 |
-| **LOT 6** | Tests, Audit de Sécurité, Documentation & Préparation Déploiement | **TERMINÉ ✅** | LOT 5 |
-| **LOT UX**| Refonte UX & Charte Graphique VUKA v1.0 (Braise, Nuit, Soleil, Fleuve, Sable) | **TERMINÉ ✅** | Charte v1.0 |
+| **LOT 0** | Constitution MOKILI, Socle technique & Design System VUKA | **TERMINÉ [x]** | Validation cadrage |
+| **LOT 1** | Vitrine Publique Weezevent-Style & Billetterie en ligne | **TERMINÉ [x]** | LOT 0 |
+| **LOT 2** | Espace Festivalier & VUKA Wallet (Cashless & QR Dynamique) | **TERMINÉ [x]** | LOT 1 |
+| **LOT 3** | Terminal Marchand / POS Caisse (Sunmi V2S, Mobile & Offline-First) | **TERMINÉ [x]** | LOT 2 |
+| **LOT 4** | Module Contrôle d'Accès (Scan Billets & RFID) | **TERMINÉ [x]** | LOT 1 |
+| **LOT 5** | Back-Office Super Admin & Trésorerie Maître (Commission 10% & Payouts) | **TERMINÉ [x]** | LOT 2, LOT 3 |
+| **LOT 6** | Tests, Audit de Sécurité, Documentation & Préparation Déploiement | **TERMINÉ [x]** | LOT 5 |
+| **LOT UX** | Refonte UX & Charte Graphique VUKA v1.0 (Braise, Nuit, Soleil, Fleuve, Sable) | **TERMINÉ [x]** | Charte v1.0 |
+| **LOT 7** | Réalignement Framework MOKILI V2.0 & Gouvernance Multi-Agents | **TERMINÉ [x]** | V2.0 Core |
 
 ---
 
@@ -26,22 +29,22 @@
 
 ### LOT 0 : Constitution MOKILI, Socle technique & Design System VUKA
 - [x] Initialisation Git du projet.
-- [x] Création des 5 documents de gouvernance : `CLAUDE.md`, `PLAN.md`, `SUIVI.md`, `MOKILI-PROJECT-SPEC.md`, `README.md`.
+- [x] Création des documents de gouvernance : `AGENTS.md`, `CLAUDE.md`, `PLAN.md`, `SUIVI.md`, `MOKILI-PROJECT-SPEC.md`, `README.md`.
 - [x] Initialisation du projet Vite + React 19 + TypeScript.
-- [x] Configuration de Tailwind CSS et des tokens de couleur VUKA (`#FF5722`, `#FFB300`, `#0A0D17`, `#00D2FF`, `#10B981`).
-- [x] Création du socle de composants UI partagés (Header, Footer avec *« Propulsé par MOKILI »*, Boutons, Badges, Modales, Cartes).
+- [x] Configuration de Tailwind CSS et des tokens de couleur officiels VUKA (Braise `#FF6A2B`, Nuit `#14110F`, Soleil `#FFC21A`, Fleuve `#0E5A8A`, Sable `#FBF6EE`).
+- [x] Création du socle de composants UI partagés (Header épuré, Footer avec *« Propulsé par MOKILI »*, Boutons, Badges, Modales, Cartes).
 - [x] Mise en place du switcher de rôles / simulateur multi-vues (Public, Festivalier, Standier POS, Contrôleur d'accès, Super Admin).
-- **Validation :** L'application compile sans erreur TypeScript (`npm.cmd run build`), le design system s'affiche parfaitement et les 5 rôles sont commutables.
+- **Validation :** L'application compile sans erreur TypeScript (`npx tsc -b`), le design system s'affiche parfaitement et les 5 rôles sont commutables.
 
 ### LOT 1 : Vitrine Publique Weezevent-Style & Billetterie en Ligne
 - [x] Page d'accueil publique inspirée de Weezevent :
-  - [x] Barre de navigation moderne avec logo VUKA et présentation des solutions (VUKA Ticket, Access, Pay, POS).
-  - [x] Hero chaleureux et énergique avec typographie vibrante et accroche forte.
-  - [x] Section 4 piliers technologiques avec badges colorés d'inspiration Weezevent.
+  - [x] Barre de navigation moderne avec logo vectoriel VUKA et présentation des solutions.
+  - [x] Hero bento sobre et équilibré avec bouton d'action principal au-dessus de la ligne de flottaison.
+  - [x] Section 4 piliers technologiques avec badges d'inspiration Weezevent.
   - [x] Présentation de l'événement pilote : **Congo Food Week 6 (CFW6)**.
 - [x] Module Billetterie :
-  - [x] Grille des billets (Pass 6 Jours Tissu Premium à 25$, Pass Journaliers Jour 1 à 6 de 10$ à 15$, Pass VIP).
-  - [x] Tunnel d'achat fluide (Sélection, Coordonnées participant, Paiement M-Pesa).
+  - [x] Grille des billets (Pass 6 Jours Tissu Premium à 25$, Pass Journaliers de 10$ à 15$, Pass VIP Lounge 50$).
+  - [x] Tunnel d'achat fluide avec saisie obligatoire Email et WhatsApp pour la réception du billet.
   - [x] Reçu de confirmation et génération de billet avec QR Code unique sécurisé et téléchargeable.
 - [x] Footer officiel avec mention *« Propulsé par MOKILI »* pointant vers `https://mokili.io`.
 - **Validation :** Parcours d'achat complet sans accroc, ticket généré avec QR code valide et données conformes aux spécifications CFW6.
@@ -101,7 +104,7 @@
 
 ### LOT 6 : Tests, Audit de Sécurité, Documentation & Préparation Déploiement
 - [x] Validation de compilation TypeScript et packaging Vite sans erreurs (`dist/` généré).
-- [x] Suite de tests unitaires automatisés (`scripts/test-engine.js` exécuté via `npm.cmd test`) couvrant :
+- [x] Suite de tests unitaires automatisés (`scripts/test-engine.js` exécuté via `npm test`) couvrant :
   - Split financier 90/10 et conversion bidevise USD/CDF (2850 CDF).
   - Algorithme HMAC TOTP et rejet des captures d'écran après 30s-60s.
   - Protection Anti-Passback au contrôle d'accès.
@@ -109,3 +112,13 @@
 - [x] Vérification de conformité des 5 fichiers de gouvernance MOKILI.
 - [x] Vérification de la présence obligatoire de la mention *« Propulsé par MOKILI »* pointant vers `https://mokili.io`.
 - **Validation :** 4/4 tests unitaires réussis avec code de sortie 0, documentation synchronisée.
+
+### LOT 7 : Réalignement Framework MOKILI V2.0 & Gouvernance Multi-Agents
+- [x] Découverte et chargement du framework central MOKILI V2.0 via `.mokili/config`.
+- [x] Création de `AGENTS.md` (instructions universelles multi-agents MOKILI).
+- [x] Harmonisation de `CLAUDE.md`, `MOKILI-PROJECT-SPEC.md`, `PLAN.md`, `SUIVI.md` et `README.md`.
+- [x] Mise à jour des profils MOKILI selon la Matrice V2.0 : `P06 SaaS` (Principal) + `P07 E-commerce` + `P05 Frontend` + `P08 API`.
+- [x] Vérification de la conformité SEO Quality Gate (`sitemap.xml`, `robots.txt`, métas Open Graph, Twitter Cards).
+- [x] Vérification de la modalité légale RGPD / Loi RDC n° 20/017 relative aux TIC (`LegalModal.tsx`).
+- [x] Suppression de tous les emojis dans les logs de test et documents pour une sobriété rigoureuse.
+- **Validation :** Compilation TypeScript 100% propre, 4/4 tests passés, synchronisation Git réussie.

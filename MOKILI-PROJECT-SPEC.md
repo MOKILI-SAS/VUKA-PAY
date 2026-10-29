@@ -2,10 +2,10 @@
 
 **Organisation :** MOKILI SAS  
 **Document :** Spécification Technique Complète du Projet  
-**Version :** 1.0  
-**Statut :** Validé  
-**Date :** 08 septembre 2026  
-**Auteur :** Ingénieur Full-Stack Senior & World-Class Product Designer  
+**Version :** 2.0  
+**Statut :** Validé & Aligné sur MOKILI Framework V2.0  
+**Date de révision :** 29 octobre 2026  
+**Framework de référence :** MOKILI TECH CORE V2.0 / MOKILI MASTER PROMPT V2.0  
 
 ---
 
@@ -26,19 +26,20 @@
 
 ---
 
-## 3. PROFILES MOKILI
-- **PRIMARY :** `P08 SaaS` + `P07 Web App` (Plateforme multi-tenant de gestion des commandes, billets et paiements).
-- **SECONDARY :**
-  - `P10 Mobile` (PWA installable et interface mobile responsive pour Festivaliers et Standiers).
-  - `P14 Dashboard / Back-Office` (Supervision globale temps réel, trésorerie maître, gestion des stocks et reversements journaliers).
-  - `P15 Portail / Marketplace` (Vitrine publique inspirée de Weezevent pour la découverte et la vente de billets).
-- **SPECIALIZED :** `P09 API / Passerelle Mobile Money` (Intégration M-Pesa C2B et B2C, cryptographie des QR codes dynamiques anti-fraude, résilience offline-first).
+## 3. PROFILS MOKILI (MATRICE V2.0)
+- **PRIMARY PROFILE :** `P06 — Application web complexe / SaaS`
+  - Plateforme multi-tenant de gestion des commandes, billets, accès et paiements.
+  - Tableaux de bord multi-rôles, supervision en direct de la trésorerie maître, gestion des approbations de réassort et clôture journalière groupée M-Pesa B2C.
+- **COMBINED / SECONDARY PROFILES :**
+  - `P07 — E-commerce / Billetterie & Marketplace multi-stands` : Vitrine de découverte inspirée de Weezevent, catalogue des 7 pass et des 23 stands exposants, menus interactifs et commandes sans contact.
+  - `P05 — Frontend web riche / SPA PWA` : Interface utilisateur ultra-réactive React 19 + TypeScript + Vite + Tailwind CSS, rotation dynamique QR 30s HMAC, résilience offline-first (IndexedDB) pour terminaux Sunmi V2S et smartphones.
+  - `P08 — API REST / Passerelle Mobile Money` : Intégration M-Pesa C2B et B2C, cryptographie des QR codes dynamiques anti-fraude, résilience Starlink.
 
 ---
 
 ## 4. AUDIENCE & USER ROLES
 1. **Festivalier (Client) :**
-   - Découverte des événements et achat de billets en ligne.
+   - Découverte des événements et achat de billets en ligne (Email & WhatsApp obligatoires pour délivrance).
    - Portefeuille numérique (VUKA Wallet) rechargeable via M-Pesa.
    - Génération d'un QR code dynamique sécurisé (renouvelé toutes les 30s) ou liaison d'un bracelet RFID pour le paiement sans contact.
    - Consultation des menus des stands et réception de reçus numériques instantanés.
@@ -53,8 +54,10 @@
    - *Contrainte stricte :* Modification de stock bloquée par défaut, soumission d'une requête de réassort soumise à validation de l'administrateur.
 3. **Contrôleur d'Accès (Staff Entrées) :**
    - 6 terminaux dédiés au contrôle aux portes.
-   - Scan des billets QR code, vérification d'unicité (anti-passback), association immédiate avec bracelet RFID MIFARE.
-4. **Super Administrateur & Organisateur (Trésorerie Maître) :**
+   - Scan des billets QR code (< 500 ms), vérification d'unicité (anti-passback), association immédiate avec bracelet RFID MIFARE.
+4. **Organisateur d'Événements :**
+   - Espace dédié avec connexion sécurisée, publication d'événements, suivi en direct de la billetterie, des revenus et des entrées scannées.
+5. **Super Administrateur & Direction (Trésorerie Maître) :**
    - Vue consolidée de la trésorerie en temps réel (fonds M-Pesa centralisés).
    - Validation ou refus en un clic des demandes de réassort de stock des stands.
    - Monitoring des volumes de vente par stand et global.
@@ -64,45 +67,49 @@
 ---
 
 ## 5. SCOPE & FONCTIONNALITÉS
-### In Scope (MVP & V1)
+### In Scope
 - Vitrine Weezevent-Style présentant les solutions VUKA (*Ticket*, *Access*, *Pay*, *POS*).
-- Billetterie en ligne multi-pass (Pass 6 Jours Tissu Premium 25$, Pass Journaliers 10$-15$, Pass VIP).
+- Header épuré et sobre avec navigation 3-zones et accès direct à l'Espace Organisateurs.
+- Billetterie en ligne multi-pass (Pass 6 Jours Tissu Premium 25$, Pass Journaliers 10$-15$, Pass VIP Lounge 50$).
 - Wallet numérique avec recharge M-Pesa C2B interactive.
-- QR Code dynamique de paiement à renouvellement temporel anti-fraude.
-- Caisse Marchande POS avec mode **Offline-First** (IndexedDB) pour pallier les coupures internet et synchronisation automatique.
+- QR Code dynamique de paiement à renouvellement temporel anti-fraude (HMAC TOTP 30s).
+- Caisse Marchande POS avec mode **Offline-First** (IndexedDB) pour pallier les coupures internet et synchronisation automatique Starlink.
 - Module de gestion stricte des stocks avec circuit d'approbation Super Admin.
 - Split automatique des revenus (10% commission Fondation Congolicious / 90% vendeur).
-- Module Contrôle d'Accès avec jauge en direct et prévention de la fraude.
+- Module Contrôle d'Accès avec jauge en direct et prévention anti-passback.
 - Dashboard Super Admin et Payouts journaliers M-Pesa B2C.
-- Mention « Propulsé par MOKILI » pointant vers `mokili.io`.
+- Espace Organisateurs avec publication d'événements et suivi des métriques.
+- Conformité SEO technique : `robots.txt`, `sitemap.xml`, métas Open Graph (1200x630), Twitter Cards.
+- Modalité légale et RGPD : Politique de Confidentialité (Loi RDC n° 20/017 relative aux TIC), CGU/CGV et Mentions Légales.
+- Mention « Propulsé par MOKILI » pointant vers `https://mokili.io`.
 
-### Out of Scope (V1)
-- Impression physique de bracelets en usine (géré par prestataire externe).
-- Déploiement matériel physique de Starlink sur site (fourni par l'équipe logistique terrain).
+### Out of Scope
+- Fabrication industrielle physique des bracelets tissu et cartes PVC (sous-traitance matériel).
+- Déploiement physique des antennes Starlink sur site (fourni par l'équipe logistique terrain).
 
 ---
 
 ## 6. ARCHITECTURE TECHNIQUE
 ```text
-                         [ FESTIVALIER / VISITEUR ]
-                                     │
-                     ┌───────────────┴───────────────┐
-                     ▼                               ▼
-       [ Vitrine & Billetterie Web ]       [ VUKA Wallet & QR Dynamique ]
-                     │                               │
-                     └───────────────┬───────────────┘
-                                     │
-                          [ VUKA UNIFIED CORE ]
-                                     │
-         ┌───────────────────────────┼───────────────────────────┐
-         ▼                           ▼                           ▼
-[ POS Caisse Standier ]    [ Contrôle d'Accès ]        [ Super Admin & Trésorerie ]
- (Offline-First IndexedDB)  (Scan & Association RFID)   (Commission 10% & Payouts)
-         │                           │                           │
-         └───────────────────────────┼───────────────────────────┘
-                                     ▼
-                      [ M-Pesa Gateway Adapter ]
-                         (C2B Top-Up / B2C Payout)
+                         [ FESTIVALIER / ACHETEUR ]
+                                      │
+                      ┌───────────────┴───────────────┐
+                      ▼                               ▼
+        [ Vitrine & Billetterie Web ]       [ VUKA Wallet & QR Dynamique ]
+                      │                               │
+                      └───────────────┬───────────────┘
+                                      │
+                           [ VUKA UNIFIED CORE ]
+                                      │
+          ┌───────────────────────────┼───────────────────────────┐
+          ▼                           ▼                           ▼
+ [ POS Caisse Standier ]    [ Contrôle d'Accès ]        [ Super Admin & Trésorerie ]
+  (Offline-First IndexedDB)  (Scan & Association RFID)   (Commission 10% & Payouts)
+          │                           │                           │
+          └───────────────────────────┼───────────────────────────┘
+                                      ▼
+                       [ M-Pesa Gateway Adapter ]
+                          (C2B Top-Up / B2C Payout)
 ```
 
 ---
@@ -117,16 +124,16 @@
 
 ---
 
-## 8. DESIGN SYSTEM & IDENTITÉ VISUELLE
-- **Inspiration :** [Weezevent](https://weezevent.com/fr/) + Chaleur africaine contemporaine et vibrante.
-- **Couleurs :**
-  - Primaire : Terracotta Sunset (`#FF5722` / `#F4511E`)
-  - Accent Chaud : Kinshasa Gold / Ochre (`#FFB300` / `#F59E0B`)
-  - Nuit Profonde : Deep Night Indigo (`#0A0D17` / `#111827`)
-  - Accent Tech : Electric Cyan NFC (`#00D2FF` / `#06B6D4`)
-  - Succès : Congo Emerald (`#10B981`)
-- **Typographie :** Display percutant et géométrique pour les titres, typographie claire pour les données et prix, monospace stylisé pour les tokens de sécurité et billets.
-- **Mention Footer :** « Propulsé par MOKILI » -> `https://mokili.io`.
+## 8. CHARTE GRAPHIQUE OFFICIELLE VUKA (v1.0)
+- **Palette officielle :**
+  - **Braise (`#FF6A2B`)** : Énergie vitale, action prioritaire, boutons principaux.
+  - **Nuit (`#14110F`)** : Socle de contraste, typographie, surfaces sombres.
+  - **Soleil (`#FFC21A`)** : Accents VIP, puces RFID, badges.
+  - **Fleuve (`#0E5A8A`)** : Infrastructure, sécurité, staff.
+  - **Sable (`#FBF6EE`)** & **Fumée (`#F3ECE2`)** : Fond principal et cartes secondaires.
+  - **Règle WCAG AA stricte :** Texte sur fond Braise et Soleil systématiquement en Nuit (`#14110F`). Zéro texte blanc sur fond orange.
+- **Typographie :** **Poppins** (titres, CTA, prix) et **Inter** (corps, données).
+- **Zéro emoji :** Discipline visuelle stricte, design épuré et contemporain.
 
 ---
 
@@ -146,4 +153,5 @@
 5. Fonctionnement vérifié du mode offline-first en simulant une coupure réseau.
 6. Validation administrative requise pour tout réassort de stock.
 7. Clôture financière quotidienne avec calcul du net vendeur et simulation du payout M-Pesa B2C.
-8. Présence impeccable de la mention « Propulsé par MOKILI » pointant vers `mokili.io`.
+8. Présence impeccable de la mention « Propulsé par MOKILI » pointant vers `https://mokili.io`.
+9. Conformité aux Quality Gates SEO, accessibilité et sécurité légale.

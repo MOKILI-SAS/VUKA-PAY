@@ -1,6 +1,6 @@
 # VUKA Pay — Super App de Billetterie & Paiement Cashless Événementiel
 
-[![Standard MOKILI](https://img.shields.io/badge/MOKILI-TECH%20CORE%20V1.0-orange.svg)](https://mokili.io)
+[![Standard MOKILI](https://img.shields.io/badge/MOKILI-TECH%20CORE%20V2.0-orange.svg)](https://mokili.io)
 [![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](https://mokili.io)
 [![Framework](https://img.shields.io/badge/Stack-React%2019%20%2F%20Vite%20%2F%20TypeScript-purple.svg)](https://react.dev)
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 🌟 Les 4 Piliers VUKA (Inspiration Weezevent)
+## 1. Les 4 Piliers VUKA (Inspiration Weezevent)
 
 1. **VUKA Ticket :** Billetterie en ligne multi-tarifs, pass festivaliers 6 jours et journaliers, paiement mobile money instantané (M-Pesa) et billets numériques infalsifiables.
 2. **VUKA Access :** Contrôle d'accès ultra-rapide (< 500 ms) aux portes, détection anti-passback et appairage avec bracelets RFID / puces MIFARE DESFire.
@@ -19,7 +19,7 @@
 
 ---
 
-## 🤝 Le Modèle Solidaire (Congo Food Week 6)
+## 2. Le Modèle Solidaire (Congo Food Week 6)
 
 - **10% de prélèvement automatique** sur chaque transaction validée par un stand, reversé directement au compte de la **Fondation Congolicious** pour financer des actions d'impact social.
 - **Trésorerie Maître :** Centralisation des flux sur le compte administrateur M-Pesa.
@@ -28,7 +28,7 @@
 
 ---
 
-## 🚀 Démarrage Rapide
+## 3. Démarrage Rapide
 
 ### Prérequis
 - Node.js version 18+ (testé avec v24.16.0)
@@ -51,27 +51,29 @@ npm run dev
 
 ---
 
-## 📱 Rôles & Comptes de Test Intégrés
+## 4. Rôles & Comptes de Test Intégrés
 
 L'application intègre un **sélecteur de rôles instantané** permettant de naviguer et tester en direct tous les flux :
 - **Visiteur / Acheteur :** Découverte de la vitrine Weezevent-Style, consultation du catalogue et achat de billets.
 - **Festivalier :** Consultation du solde du wallet, recharge M-Pesa, génération du QR Code dynamique de paiement.
 - **Standier / Vendeur (POS) :** Sélection de son stand parmi les 23 stands du CFW6, catalogue tactile, encaissement et demande de réassort.
 - **Contrôleur d'Accès :** Scan des billets aux entrées, appairage bracelet RFID, suivi de la jauge en direct.
+- **Organisateur :** Espace de publication d'événements et suivi des ventes.
 - **Super Admin :** Tableau de bord de trésorerie maître, validation/rejet des réassorts de stock, suivi de la commission 10% et déclenchement des payouts M-Pesa B2C.
 
 ---
 
-## 📚 Documentation de Gouvernance MOKILI
+## 5. Documentation de Gouvernance MOKILI V2.0
 
-- `CLAUDE.md` : Directives opérationnelles pour les agents de développement.
-- `PLAN.md` : Feuille de route par lots testables (LOTS 0 à 6).
+- `AGENTS.md` : Directives de gouvernance partagées pour les agents de développement IA.
+- `CLAUDE.md` : Directives opérationnelles spécifiques Claude Code / Antigravity.
+- `PLAN.md` : Feuille de route par lots testables (LOTS 0 à 7).
 - `SUIVI.md` : Journal des actions, décisions et validations.
-- `MOKILI-PROJECT-SPEC.md` : Spécification technique et fonctionnelle détaillée.
+- `MOKILI-PROJECT-SPEC.md` : Spécification technique et fonctionnelle détaillée V2.0.
 
 ---
 
-## 🏛️ Crédits & Attribution
+## 6. Crédits & Attribution
 
 Propulsé par [MOKILI SAS](https://mokili.io) — Excellence logicielle & ingénierie souveraine africaine.
 Conçu pour **LAB3** et la **Fondation Congolicious** dans le cadre du **Congo Food Week 6**.
