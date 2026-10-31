@@ -25,7 +25,6 @@ export const Header: React.FC = () => {
     logoutUser,
     setIsAuthModalOpen,
     setAuthModalMode,
-    openOrganizerLogin,
     wallet
   } = useApp();
 
@@ -138,7 +137,7 @@ export const Header: React.FC = () => {
                   <button 
                     type="button"
                     onClick={() => { 
-                      scrollToSection('billetterie'); 
+                      scrollToSection('evenements'); 
                       setSolutionsDropdownOpen(false); 
                     }}
                     className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left"
@@ -190,20 +189,8 @@ export const Header: React.FC = () => {
             </div>
           </nav>
 
-          {/* ZONE DROITE : Actions utilisateurs & Espace Organisateurs */}
+          {/* ZONE DROITE : Actions utilisateurs */}
           <div className="flex items-center gap-2 sm:gap-3">
-            
-            {/* Raccourci Espace Organisateurs */}
-            <button
-              type="button"
-              onClick={openOrganizerLogin}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#7A7068] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
-            >
-              <span>Espace Organisateurs</span>
-            </button>
-
-            {/* Séparateur subtil */}
-            <div className="hidden sm:block h-4 w-px bg-[#D9D0C6]" />
 
             {/* Profil Utilisateur / Bouton Connexion */}
             {currentUser ? (
@@ -356,7 +343,7 @@ export const Header: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
+            <div>
               <button
                 type="button"
                 onClick={() => {
@@ -364,19 +351,10 @@ export const Header: React.FC = () => {
                   setIsAuthModalOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="py-2.5 rounded-full bg-white border border-[#D9D0C6] text-xs font-bold text-[#14110F] text-center shadow-xs"
+                className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-xs font-bold text-[#14110F] text-center shadow-xs flex items-center justify-center gap-2 transition"
               >
-                Se connecter
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  openOrganizerLogin();
-                  setMobileMenuOpen(false);
-                }}
-                className="py-2.5 rounded-full bg-[#14110F] text-xs font-bold text-[#FBF6EE] text-center shadow-xs"
-              >
-                Organisateurs
+                <User className="w-4 h-4 text-[#14110F]" />
+                <span>Se connecter / Mon Compte</span>
               </button>
             </div>
           )}

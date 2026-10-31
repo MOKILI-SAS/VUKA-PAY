@@ -11,16 +11,29 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
+import { TicketDefinition } from '../../types';
+
 interface TicketmasterHeroBentoProps {
   onExploreTickets: () => void;
   onExploreStands: () => void;
+  onSelectTicket?: (ticket: TicketDefinition) => void;
 }
 
 export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
   onExploreTickets,
   onExploreStands,
+  onSelectTicket,
 }) => {
-  const { openOrganizerLogin } = useApp();
+  const { tickets } = useApp();
+
+  const handleSelectPass = (ticketId: string) => {
+    if (onSelectTicket) {
+      const found = tickets.find((t) => t.id === ticketId) || tickets[0];
+      if (found) onSelectTicket(found);
+    } else {
+      onExploreTickets();
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-8">
@@ -103,7 +116,7 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
           {/* Action CTAs Bottom — Règle : Texte Nuit sur Braise */}
           <div className="relative z-10 flex flex-wrap items-center gap-3 pt-2">
             <button
-              onClick={onExploreTickets}
+              onClick={() => handleSelectPass('pass-6-days')}
               className="min-h-[48px] h-12 px-6 sm:px-7 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 active:scale-95"
             >
               <Ticket className="w-4 h-4 text-[#14110F]" />
@@ -150,8 +163,8 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
                 <div className="text-[10px] text-[#7A7068] font-mono">≈ 13 750 CDF</div>
               </div>
               <button
-                onClick={onExploreTickets}
-                className="h-9 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
+                onClick={() => handleSelectPass('pass-j1')}
+                className="h-10 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
               >
                 Réserver
               </button>
@@ -184,8 +197,8 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
                 <div className="text-[10px] text-[#7A7068] font-mono">≈ 55 000 CDF</div>
               </div>
               <button
-                onClick={onExploreTickets}
-                className="h-9 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
+                onClick={() => handleSelectPass('pass-6-days')}
+                className="h-10 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
               >
                 Réserver
               </button>
@@ -218,44 +231,44 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
                 <div className="text-[10px] text-[#7A7068] font-mono">≈ 137 500 CDF</div>
               </div>
               <button
-                onClick={onExploreTickets}
-                className="h-9 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
+                onClick={() => handleSelectPass('pass-6-days')}
+                className="h-10 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95"
               >
                 Réserver
               </button>
             </div>
           </div>
 
-          {/* Card 5: VUKA Événements & Espace Organisateurs */}
+          {/* Card 5: VUKA Cashless & Portefeuille Digital */}
           <div className="p-6 rounded-[24px] bg-[#14110F] text-[#FBF6EE] shadow-level1 hover:shadow-md transition-all flex flex-col justify-between group">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FFC21A] text-[#14110F] uppercase tracking-wider">
-                  Espace Organisateurs
+                  Cashless & Sans Contact
                 </span>
-                <span className="text-[10px] font-bold text-[#FF6A2B] uppercase">Multi-Événements</span>
+                <span className="text-[10px] font-bold text-[#FF6A2B] uppercase font-mono">100% Sécurisé</span>
               </div>
 
               <div>
                 <h3 className="text-lg font-bold text-[#FBF6EE] group-hover:text-[#FFC21A] transition-colors tracking-tight font-heading">
-                  Vendez vos billets sur VUKA.
+                  Portefeuille VUKA Pay
                 </h3>
                 <p className="text-xs text-[#D9D0C6] mt-1 line-clamp-2 font-normal">
-                  Festivals, concerts, galas : lancez votre billetterie et déployez le cashless sans contact comme le Congo Food Week.
+                  Rechargez en direct par M-Pesa. Réglez vos consommations par bracelet RFID ou QR code dynamique aux 23 stands sans espèces.
                 </p>
               </div>
             </div>
 
             <div className="pt-4 mt-2 border-t border-white/10 flex items-center justify-between">
               <span className="text-[11px] font-medium text-[#D9D0C6]">
-                Mise en ligne en 5 min
+                Recharge instantanée
               </span>
               <button
-                onClick={openOrganizerLogin}
-                className="h-9 px-3.5 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs transition flex items-center gap-1.5 active:scale-95"
+                onClick={onExploreStands}
+                className="h-10 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider transition active:scale-95 inline-flex items-center gap-1.5"
               >
-                <span>Créer mon événement</span>
-                <ArrowRight className="w-3 h-3 text-[#14110F]" />
+                <span>Découvrir</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#14110F]" />
               </button>
             </div>
           </div>

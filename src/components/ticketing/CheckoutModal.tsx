@@ -15,18 +15,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ ticket, onClose })
   const { 
     currentUser, 
     buyTicket, 
+    tickets,
     setIsAuthModalOpen, 
     setAuthModalMode,
     setAppViewMode,
     setActiveClientTab
   } = useApp();
 
+  const [currentTicket, setCurrentTicket] = useState<TicketDefinition>(ticket || ({} as TicketDefinition));
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '+243 ');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [loading, setLoading] = useState(false);
   const [purchasedTicket, setPurchasedTicket] = useState<PurchasedTicket | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (ticket) {
+      setCurrentTicket(ticket);
+    }
+  }, [ticket]);
 
   useEffect(() => {
     if (currentUser) {
@@ -62,7 +70,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ ticket, onClose })
     try {
       setLoading(true);
       setError(null);
-      const bought = await buyTicket(ticket.id, name.trim(), cleanPhone, cleanEmail);
+      const bought = await buyTicket(currentTicket.id, name.trim(), cleanPhone, cleanEmail);
       
       try {
         confetti({
@@ -176,15 +184,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ ticket, onClose })
               </div>
             )}
 
-            {/* Ticket Summary Card */}
-            <div className="p-4 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] mb-5 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-bold text-[#14110F] font-heading">{ticket.name}</div>
-                <div className="text-xs text-[#7A7068]">{ticket.dayLabel || 'Accès 6 Jours'}</div>
+            {/* Ticket Selector / Summary Card */}
+            <div className="p-4 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] mb-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-bold text-[#14110F] font-heading">{currentTicket.name}</div>
+                  <div className="text-xs text-[#7A7068]">{currentTicket.dayLabel || 'Accès 6 Jours'}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-bold text-[#FF6A2B] font-mono tnum">{formatUSD(currentTicket.priceUSD)}</div>
+                  <div className="text-xs text-[#7A7068] font-mono">≈ {formatCDF(currentTicket.priceUSD)}</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-xl font-bold text-[#FF6A2B] font-mono tnum">{formatUSD(ticket.priceUSD)}</div>
-                <div className="text-xs text-[#7A7068] font-mono">≈ {formatCDF(ticket.priceUSD)}</div>
+
+              {/* Pass Switcher Dropdown */}
+              <div className="pt-2 border-t border-[#D9D0C6]/60">
+                <label htmlFor="modal-ticket-switcher" className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-1">
+                  Formule de Pass
+                </label>
+                <select
+                  id="modal-ticket-switcher"
+                  value={currentTicket.id}
+                  onChange={(e) => {
+                    const found = tickets.find(t => t.id === e.target.value);
+                    if (found) setCurrentTicket(found);
+                  }}
+                  className="w-full bg-white border border-[#D9D0C6] rounded-xl px-3 py-2 text-xs font-semibold text-[#14110F] focus:outline-none focus:border-[#FF6A2B] cursor-pointer"
+                >
+                  {tickets.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} — {formatUSD(t.priceUSD)} (≈ {formatCDF(t.priceUSD)})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

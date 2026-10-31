@@ -168,6 +168,29 @@
    - Validation stricte des types TypeScript (`npx tsc -b`) : 0 erreur.
    - Commit et push de la mise à niveau sur les branches `main` et `master` du dépôt GitHub `https://github.com/MOKILI-SAS/VUKA-PAY`.
 
+### Session 7 — 31 octobre 2026
+
+#### Actions Réalisées :
+1. **Suppression de toute mention « Espace Organisateurs » :**
+   - Retrait du lien « Espace Organisateurs » et du séparateur dans la zone droite du Header.
+   - Retrait du bouton « Organisateurs » dans le menu mobile du Header (remplacé par un bouton unique « Se connecter / Mon Compte » de 44px de hauteur).
+   - Remplacement de la carte 5 du Hero Bento (« Espace Organisateurs ») par « Portefeuille VUKA Pay — Cashless & Sans Contact » avec bouton d'exploration directe du cashless.
+   - Retrait du bouton « Organisateurs : Publier un événement » dans la section des événements.
+2. **Purge des Blocs Spécifiés par l'Utilisateur :**
+   - Suppression du bloc « Programmation des 6 Journées » (`FestivalSchedule.tsx`) et de sa barre latérale.
+   - Suppression du bloc « Les Zones du Festival » (`FestivalZones.tsx`).
+   - Retrait du widget de témoignage flottant de Benjamin C. dans la section `SolutionsGalaxy.tsx`.
+   - Suppression du bloc catalogue de billets redondant au bas de page (`TicketCatalog.tsx`).
+3. **Optimisation de la Responsivité & Ergonomie Mobile :**
+   - Contrôle du viewport et assurance du zéro débordement horizontal (`overflow-x-hidden`).
+   - Cibles tactiles calibrées à une hauteur minimale de 44px (`min-h-[44px]`) sur tous les boutons d'action.
+   - Intégration d'un sélecteur rapide de formule de pass dans le `CheckoutModal`, permettant de basculer instantanément entre tous les pass (Pass 6 Jours, Pass Jour 1 à 6) sans encombrer la page d'accueil.
+4. **Validation Technique & Serveur de Prévisualisation :**
+   - Compilation TypeScript réussie (`npx tsc -b`) sans aucune erreur.
+   - Suite de tests unitaires MOKILI validée à 100% (`npm test` : 4/4 PASS).
+   - Build de production Vite optimisé (`npm run build` en 27.97s).
+   - Serveur de prévisualisation opérationnel et testé avec succès (HTTP 200 sur `http://localhost:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -185,6 +208,7 @@
 | **DEC-009** | 13/10/2026 | Header épuré, sobre et proportionné | Ergonomie sans surcharge visuelle, navigation 3-zones, intégration de l'Espace Organisateurs et formulaire billetterie Email/WhatsApp obligatoire. | VALIDÉE |
 | **DEC-010** | 13/10/2026 | Conformité SEO, Open Graph & Modal Légale | Intégration sitemap/robots, métas Open Graph, images réalistes de catalogue et textes juridiques RGPD/RDC. | VALIDÉE |
 | **DEC-011** | 29/10/2026 | Réalignement complet sur le Framework MOKILI V2.0 | Mise à niveau des profils (P06 SaaS Principal, P07 Billetterie, P05 Frontend PWA, P08 API), adoption du standard AGENTS.md, synchronisation des 5 fichiers de gouvernance et conformité zero-emoji. | VALIDÉE |
+| **DEC-012** | 31/10/2026 | Épuration radicale de la vitrine & Responsivité mobile | Suppression des sections programmation/zones/témoignages/organisateurs, intégration du sélecteur de pass dans le modal de commande et boutons tactiles 44px. | VALIDÉE |
 
 ---
 
@@ -203,3 +227,4 @@
 | **UX & BRAND** | Refonte Charte Graphique Officielle v1.0 | [PASS] Terminé | 100% tokens Braise, Nuit, Soleil, Fleuve, Sable, Poppins/Inter intégrés |
 | **HEADER & POLISH** | Header sobre & Flux organisateur | [PASS] Terminé | Navigation épurée, 0 emoji, obligatoire email/whatsapp, push distant |
 | **SEO & LEGAL** | Audit SEO, Open Graph, Sitemap & Légal | [PASS] Terminé | Sitemap.xml, robots.txt, Open Graph, LegalModal RGPD/RDC, images catalogue |
+| **PURGE & RESPONSIVE** | Épuration vitrine, 0 organisateur & mobile | [PASS] Terminé | Retrait organisateurs, programmation, zones, pass switcher modal, preview 200 OK |

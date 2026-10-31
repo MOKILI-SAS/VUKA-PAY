@@ -1,31 +1,22 @@
 import React from 'react';
-import { Calendar, MapPin, Ticket, ArrowRight, PlusCircle } from 'lucide-react';
+import { Calendar, MapPin, Ticket, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void }> = ({ onSelectEventTickets }) => {
-  const { publishedEvents, openOrganizerLogin } = useApp();
+  const { publishedEvents } = useApp();
 
   return (
     <section id="evenements" className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10">
       
-      {/* Header Section (Sans le badge Catalogue Multi-Événements) */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div>
-          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#14110F] font-heading">
-            Les grands événements équipés par VUKA Pay.
-          </h2>
-          <p className="text-sm text-[#7A7068] mt-1 max-w-2xl font-normal">
-            Festivals culturels, concerts géants ou sommets professionnels : achetez vos billets sécurisés et profitez de l'expérience cashless sans contact.
-          </p>
-        </div>
-
-        <button
-          onClick={openOrganizerLogin}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-[#FF6A2B] text-[#FF6A2B] hover:bg-[#FFE3D3] font-bold text-xs sm:text-sm transition active:scale-95 shrink-0"
-        >
-          <PlusCircle className="w-4 h-4 text-[#FF6A2B]" />
-          <span>Organisateurs : Publier un événement</span>
-        </button>
+      {/* Header Section */}
+      <div className="mb-8">
+        <div className="w-8 h-1 bg-[#FF6A2B] rounded-full mb-3" />
+        <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#14110F] font-heading">
+          Les grands événements équipés par VUKA Pay.
+        </h2>
+        <p className="text-sm text-[#7A7068] mt-1.5 max-w-2xl font-normal">
+          Festivals culturels, concerts géants ou sommets professionnels : achetez vos billets sécurisés et profitez de l'expérience cashless sans contact.
+        </p>
       </div>
 
       {/* Events Grid */}
@@ -93,7 +84,7 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
                 {event.id === 'cfw-6' ? (
                   <button
                     onClick={onSelectEventTickets}
-                    className="w-full h-10 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
+                    className="w-full min-h-[44px] h-11 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
                   >
                     <Ticket className="w-3.5 h-3.5 text-[#14110F]" />
                     <span>Acheter des Billets</span>
@@ -107,7 +98,7 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
                         alert(`La billetterie pour ${event.title} sera ouverte prochainement sur VUKA Pay.`);
                       }
                     }}
-                    className="w-full h-10 rounded-full bg-[#F3ECE2] hover:bg-[#D9D0C6] text-[#14110F] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95"
+                    className="w-full min-h-[44px] h-11 rounded-full bg-[#F3ECE2] hover:bg-[#D9D0C6] text-[#14110F] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95"
                   >
                     <span>{event.status === 'OPEN' ? 'Voir l’événement' : 'Recevoir une alerte'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />

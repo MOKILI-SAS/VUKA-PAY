@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Star, ShieldCheck, Heart, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Heart, Sparkles, Check, ArrowRight } from 'lucide-react';
 
 export const SolutionsGalaxy: React.FC<{ onSelectTicket: () => void }> = ({ onSelectTicket }) => {
   const { setCurrentRole } = useApp();
@@ -76,9 +76,9 @@ export const SolutionsGalaxy: React.FC<{ onSelectTicket: () => void }> = ({ onSe
               <div className="pt-2">
                 <button
                   onClick={onSelectTicket}
-                  className="w-full inline-flex items-center justify-center rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold py-3 text-xs uppercase tracking-wider transition shadow-sm active:scale-95"
+                  className="w-full min-h-[44px] inline-flex items-center justify-center rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold py-3 text-xs uppercase tracking-wider transition shadow-sm active:scale-95"
                 >
-                  Créer une billetterie
+                  Réserver un Pass
                 </button>
               </div>
             </div>
@@ -220,26 +220,6 @@ export const SolutionsGalaxy: React.FC<{ onSelectTicket: () => void }> = ({ onSe
 
           </div>
 
-        </div>
-
-        {/* Floating Testimonial Widget */}
-        <div className="mt-12 max-w-sm rounded-2xl bg-white border border-slate-200 p-4 shadow-sm flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#FF6A2B] text-[#14110F] flex items-center justify-center font-display font-black text-xs flex-shrink-0">
-            CFW
-          </div>
-          <div>
-            <div className="flex items-center gap-1 text-[#FFB300] mb-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-[#FFB300]" />
-              ))}
-            </div>
-            <p className="text-[12px] text-slate-700 leading-snug font-medium mb-1.5">
-              "Nous apprécions l'autonomie qu'offre VUKA Pay. Le fait de maîtriser les encaissements sur les 23 stands nous permet d'être réactifs en temps réel."
-            </p>
-            <div className="text-[10px] text-slate-500 font-semibold">
-              Benjamin C. / Billetterie & Développement — Kinshasa
-            </div>
-          </div>
         </div>
 
       </div>

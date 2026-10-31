@@ -6,11 +6,8 @@ import { TicketmasterSearchHeader } from './components/showcase/TicketmasterSear
 import { TicketmasterHeroBento } from './components/showcase/TicketmasterHeroBento';
 import { UpcomingEventsSection } from './components/showcase/UpcomingEventsSection';
 import { TrendingSearches } from './components/showcase/TrendingSearches';
-import { FestivalSchedule } from './components/showcase/FestivalSchedule';
-import { FestivalZones } from './components/showcase/FestivalZones';
 import { PerforatedTicketSection } from './components/showcase/PerforatedTicketSection';
 import { SolutionsGalaxy } from './components/showcase/SolutionsGalaxy';
-import { TicketCatalog } from './components/ticketing/TicketCatalog';
 import { CheckoutModal } from './components/ticketing/CheckoutModal';
 import { ClientDashboard } from './components/client/ClientDashboard';
 import { BackofficeHub } from './components/backoffice/BackofficeHub';
@@ -18,19 +15,14 @@ import { AuthModal } from './components/auth/AuthModal';
 import { TicketDefinition } from './types';
 
 const MainContent: React.FC = () => {
-  const { appViewMode, setAppViewMode, setActiveClientTab } = useApp();
+  const { appViewMode, setAppViewMode, setActiveClientTab, tickets } = useApp();
   const [selectedTicketForCheckout, setSelectedTicketForCheckout] = useState<TicketDefinition | null>(null);
 
-  const scrollToTickets = () => {
-    if (appViewMode !== 'PUBLIC_LANDING') {
-      setAppViewMode('PUBLIC_LANDING');
+  const handleOpenPassCheckout = (ticket?: TicketDefinition) => {
+    const chosenTicket = ticket || tickets.find((t) => t.id === 'pass-6-days') || tickets[0];
+    if (chosenTicket) {
+      setSelectedTicketForCheckout(chosenTicket);
     }
-    setTimeout(() => {
-      const el = document.getElementById('billetterie');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
   };
 
   const handleExploreStands = () => {
@@ -46,44 +38,36 @@ const MainContent: React.FC = () => {
   // 2. SITE PUBLIC ET PORTAIL CLIENT FESTIVALIER
   return (
     <div className="min-h-screen flex flex-col bg-[#FBF6EE] text-[#14110F] selection:bg-[#FFE3D3] selection:text-[#14110F]">
-      {/* Top Navbar publique avec profil festivalier et accès billetterie */}
+      {/* Top Navbar publique avec profil festivalier et navigation fluide */}
       <Header />
 
       {/* Main Views */}
       <main className="flex-1 pb-16">
         
-        {/* VUE 1 : LANDING PAGE GRAND PUBLIC (100% épurée, aucun outil staff/caisse visible) */}
+        {/* VUE 1 : LANDING PAGE GRAND PUBLIC (100% sobre, épurée et sans encombrement) */}
         {appViewMode === 'PUBLIC_LANDING' && (
           <div className="space-y-6">
-            {/* 1. Ticketmaster Global Search Header Bar (Emplacement | Dates | Recherche | Bouton) */}
-            <TicketmasterSearchHeader onSearchClick={scrollToTickets} />
+            {/* 1. Ticketmaster Global Search Header Bar avec filtre de catégories */}
+            <TicketmasterSearchHeader onSearchClick={() => handleOpenPassCheckout()} />
 
-            {/* 2. Ticketmaster Hero Bento Grid (5 Cartes : Grand événement CFW6 à gauche + 4 cartes à droite) */}
+            {/* 2. Ticketmaster Hero Bento Grid (Grand événement CFW6 + Pass & Cashless) */}
             <TicketmasterHeroBento 
-              onExploreTickets={scrollToTickets} 
+              onExploreTickets={() => handleOpenPassCheckout()} 
               onExploreStands={handleExploreStands}
+              onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket)}
             />
 
             {/* 3. Catalogue Multi-Événements VUKA Pay (CFW6, Kinshasa Jazz, AfroTech, Nuits de la Rumba) */}
-            <UpcomingEventsSection onSelectEventTickets={scrollToTickets} />
+            <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
 
-            {/* 4. Section "RECHERCHES POPULAIRES" avec carrousel horizontal et flèches de défilement */}
-            <TrendingSearches onSelectItem={() => scrollToTickets()} />
+            {/* 4. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
+            <TrendingSearches onSelectItem={() => handleOpenPassCheckout()} />
 
-            {/* 5. Section "ÉVÉNEMENTS DE LA SEMAINE / PROGRAMMATION DES 6 JOURS" + Sidebar "EN VEDETTE" */}
-            <FestivalSchedule onSelectDayTicket={scrollToTickets} />
+            {/* 5. Grand Ticket Perforé Braise (#FF6A2B) & Nuit (#14110F) avec QR Code Scannable */}
+            <PerforatedTicketSection onExploreTickets={() => handleOpenPassCheckout()} />
 
-            {/* 6. Section "LES ZONES DU FESTIVAL" (Inspirée de la grille Villes Populaires de Ticketmaster) */}
-            <FestivalZones />
-
-            {/* 7. Grand Ticket Perforé Braise (#FF6A2B) & Nuit (#14110F) avec QR Code Scannable */}
-            <PerforatedTicketSection />
-
-            {/* 8. Les 3 Piliers d'Expertise VUKA Pay (Billetterie, Cashless, Accès) */}
-            <SolutionsGalaxy onSelectTicket={scrollToTickets} />
-
-            {/* 9. Catalogue des Billets Officiels CFW6 avec Paiement M-Pesa */}
-            <TicketCatalog onBuyClick={(ticket) => setSelectedTicketForCheckout(ticket)} />
+            {/* 6. Les 3 Piliers d'Expertise VUKA Pay (Fluide, Chaleureux 10% Solidaire, Fiable) */}
+            <SolutionsGalaxy onSelectTicket={() => handleOpenPassCheckout()} />
           </div>
         )}
 
@@ -105,7 +89,7 @@ const MainContent: React.FC = () => {
         />
       )}
 
-      {/* Persistent Footer with required "Propulsé par MOKILI" et lien discret staff */}
+      {/* Persistent Footer avec mentions légales obligatoires et attribution "Propulsé par MOKILI" */}
       <Footer />
     </div>
   );

@@ -3,7 +3,11 @@ import QRCode from 'qrcode';
 import { useApp } from '../../context/AppContext';
 import { ArrowRight, Smartphone, CheckCircle2 } from 'lucide-react';
 
-export const PerforatedTicketSection: React.FC = () => {
+interface PerforatedTicketSectionProps {
+  onExploreTickets?: () => void;
+}
+
+export const PerforatedTicketSection: React.FC<PerforatedTicketSectionProps> = ({ onExploreTickets }) => {
   const { setCurrentRole } = useApp();
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
 
@@ -118,12 +122,20 @@ export const PerforatedTicketSection: React.FC = () => {
                     <ArrowRight className="w-4 h-4 text-[#14110F]" />
                   </button>
 
-                  <a
-                    href="#billetterie"
-                    className="inline-flex items-center justify-center px-5 py-3.5 rounded-full border border-white/30 text-[#FBF6EE] font-semibold text-sm hover:bg-white/10 transition"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onExploreTickets) {
+                        onExploreTickets();
+                      } else {
+                        const el = document.getElementById('evenements');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="inline-flex items-center justify-center px-5 py-3.5 rounded-full border border-white/30 text-[#FBF6EE] font-semibold text-sm hover:bg-white/10 transition active:scale-95"
                   >
                     Voir les pass CFW6
-                  </a>
+                  </button>
                 </div>
 
                 <div className="pt-2 flex items-center gap-3 text-xs text-[#D9D0C6] font-medium">
