@@ -98,6 +98,19 @@ const ACTIVITY_TYPE_CONFIGS: TypeConfig[] = [
       'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80'
     ]
+  },
+  {
+    type: 'É-vote',
+    label: 'É-vote',
+    tagline: 'Élection, concours, vote de jury et sondage sécurisé',
+    badge: 'É-VOTE SÉCURISÉ',
+    icon: CheckCircle2,
+    defaultPrice: 'Gratuit',
+    defaultCategory: 'VOTE & COMPÉTITION',
+    defaultImages: [
+      'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80'
+    ]
   }
 ];
 

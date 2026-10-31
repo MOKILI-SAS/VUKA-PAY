@@ -86,6 +86,12 @@ interface AppContextType {
     ticket?: PurchasedTicket;
     details?: string;
   };
+
+  // Interactions sociales & Engagement subtil (Like & Suivi d'organisateur)
+  likedEventIds: string[];
+  toggleLikeEvent: (eventId: string) => void;
+  followedOrganizers: string[];
+  toggleFollowOrganizer: (organizer: string) => void;
   
   // Festivalier & Wallet
   wallet: FestivalierWallet;
@@ -357,7 +363,38 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
       { label: 'Son & Lumière', value: 'Stade 360°' },
       { label: 'Paiement Boissons', value: 'VUKA Cashless' }
     ],
-    ctaText: 'Me Notifier à l\'Ouverture'
+    ctaText: 'Me Notifier à l\'Ouverture',
+    likesCount: 890,
+    organizerFollowers: 7600
+  },
+  {
+    id: 'evote-awards',
+    title: 'Trophées Congolicious Food Awards 2026',
+    subtitle: 'Vote Officiel du Meilleur Chef & Stand de Kinshasa.',
+    category: 'VOTE DIGITAL & COMPÉTITION',
+    activityType: 'É-vote',
+    badge: 'É-VOTE EN DIRECT',
+    dateStr: 'Clôture le 27 Septembre 2026',
+    location: 'Plateforme Digitale VUKA',
+    city: 'Kinshasa',
+    priceFrom: 'Vote Gratuit & Sécurisé',
+    status: 'OPEN',
+    ticketsSold: 3420,
+    totalCapacity: 10000,
+    revenueUSD: 0,
+    scannedEntries: 0,
+    organizerName: 'Fondation Congolicious',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80',
+    description: 'Votez en direct et en toute transparence pour votre stand gastronomique préféré et le chef de l\'année au Congo Food Week 6.',
+    metrics: [
+      { label: 'Votes Enregistrés', value: '3 420 Votes' },
+      { label: 'Chefs en Compétition', value: '23 Candidats' },
+      { label: 'Audit Sécurisé', value: 'SHA-256' }
+    ],
+    ctaText: 'Participer au Vote',
+    likesCount: 512,
+    organizerFollowers: 14200
   }
 ];
 
@@ -486,6 +523,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ticket: found,
       details: 'Billet 100% authentique et valide. Prêt pour l’accès sécurisé.'
     };
+  };
+
+  // Likes et abonnements organisateurs
+  const [likedEventIds, setLikedEventIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem('vuka_liked_events');
+    return saved ? JSON.parse(saved) : ['cfw-6', 'kin-jazz'];
+  });
+
+  const toggleLikeEvent = (eventId: string) => {
+    setLikedEventIds(prev => {
+      const next = prev.includes(eventId) ? prev.filter(id => id !== eventId) : [...prev, eventId];
+      localStorage.setItem('vuka_liked_events', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const [followedOrganizers, setFollowedOrganizers] = useState<string[]>(() => {
+    const saved = localStorage.getItem('vuka_followed_organizers');
+    return saved ? JSON.parse(saved) : ['Fondation Congolicious'];
+  });
+
+  const toggleFollowOrganizer = (organizer: string) => {
+    setFollowedOrganizers(prev => {
+      const next = prev.includes(organizer) ? prev.filter(o => o !== organizer) : [...prev, organizer];
+      localStorage.setItem('vuka_followed_organizers', JSON.stringify(next));
+      return next;
+    });
   };
 
   const openPublishModal = (preselectedType?: ActivityType) => {
@@ -1104,6 +1168,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isTicketVerificationOpen,
       setIsTicketVerificationOpen,
       verifyTicketByCode,
+      likedEventIds,
+      toggleLikeEvent,
+      followedOrganizers,
+      toggleFollowOrganizer,
       wallet,
       topUpWallet,
       refundWalletBalance,

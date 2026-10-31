@@ -122,17 +122,6 @@ export const Header: React.FC = () => {
               Tarifs
             </button>
 
-            {/* Outil Vérifier un ticket */}
-            <button 
-              type="button"
-              onClick={() => setIsTicketVerificationOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
-              title="Vérifier l'authenticité d'un ticket VUKA"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#166534]" />
-              <span>Vérifier un ticket</span>
-            </button>
-
             {/* Dropdown Solutions */}
             <div className="relative" ref={solutionsRef}>
               <button 
@@ -206,26 +195,8 @@ export const Header: React.FC = () => {
             </div>
           </nav>
 
-          {/* ZONE DROITE : Actions utilisateurs & Bouton Publier */}
+          {/* ZONE DROITE : Actions utilisateurs (Connexion / Profil) */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Bouton Publier une Activité (Événement, Donation, Concert, Festival, Conférence) */}
-            <button
-              type="button"
-              onClick={() => {
-                if (!currentUser) {
-                  setAuthModalMode('LOGIN');
-                  setIsAuthModalOpen(true);
-                } else {
-                  openPublishModal();
-                }
-              }}
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] text-xs font-bold transition shadow-xs active:scale-95"
-              title="Publier un Événement, une Donation, un Concert, un Festival ou une Conférence"
-            >
-              <PlusCircle className="w-3.5 h-3.5 text-[#FF6A2B]" />
-              <span>Publier</span>
-            </button>
-
             {/* Profil Utilisateur / Bouton Connexion */}
             {currentUser ? (
               /* Utilisateur connecté : Pilule sobre */
@@ -368,26 +339,6 @@ export const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-[#E5E0D8] bg-[#FBF6EE] px-4 py-4 space-y-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
           
-          {/* Action Publier Mobile */}
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (!currentUser) {
-                  setAuthModalMode('LOGIN');
-                  setIsAuthModalOpen(true);
-                } else {
-                  openPublishModal();
-                }
-              }}
-              className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] text-[#FBF6EE] text-xs font-bold text-center shadow-xs flex items-center justify-center gap-2 transition active:scale-95"
-            >
-              <PlusCircle className="w-4 h-4 text-[#FF6A2B]" />
-              <span>Publier une Activité</span>
-            </button>
-          </div>
-
           {/* Section Compte Mobile */}
           {currentUser ? (
             <div className="p-4 rounded-2xl bg-white border border-[#E5E0D8] space-y-3">
@@ -438,28 +389,13 @@ export const Header: React.FC = () => {
                   setIsAuthModalOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-xs font-bold text-[#14110F] text-center shadow-xs flex items-center justify-center gap-2 transition"
+                className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-xs font-bold text-[#FBF6EE] text-center shadow-xs flex items-center justify-center gap-2 transition"
               >
-                <User className="w-4 h-4 text-[#14110F]" />
+                <User className="w-4 h-4 text-[#FF6A2B]" />
                 <span>Se connecter / Mon Compte</span>
               </button>
             </div>
           )}
-
-          {/* Outil Vérifier un ticket Mobile */}
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setIsTicketVerificationOpen(true);
-              }}
-              className="w-full py-2.5 px-4 rounded-xl border border-[#D9D0C6] bg-white text-xs font-semibold text-[#14110F] flex items-center justify-center gap-2"
-            >
-              <ShieldCheck className="w-4 h-4 text-[#166534]" />
-              <span>Vérifier la validité d'un ticket</span>
-            </button>
-          </div>
 
           {/* Liens de navigation mobile */}
           <div className="space-y-1">

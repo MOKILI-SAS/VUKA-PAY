@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Search, 
-  SlidersHorizontal, 
-  Check, 
-  PlusCircle, 
   MapPin, 
-  Filter,
-  ShieldCheck 
+  ShieldCheck,
+  Check
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ActivityType } from '../../types';
@@ -23,7 +20,8 @@ export const FILTER_CATEGORIES = [
   'Donation',
   'Concert',
   'Festival',
-  'Conférence'
+  'Conférence',
+  'É-vote'
 ] as const;
 
 export const CONGO_CITIES = [
@@ -43,16 +41,12 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
   onSearchClick,
 }) => {
   const { 
-    openPublishModal, 
     selectedActivityTypeFilter, 
     setSelectedActivityTypeFilter,
     selectedRegionFilter,
     setSelectedRegionFilter,
     publishedEvents,
-    setIsTicketVerificationOpen,
-    currentUser,
-    setIsAuthModalOpen,
-    setAuthModalMode
+    setIsTicketVerificationOpen
   } = useApp();
 
   const [query, setQuery] = useState('');
@@ -76,17 +70,8 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
   const handleCitySelect = (city: string) => {
     setSelectedRegionFilter(city);
     const cityInfo = city !== 'Toutes les villes' ? ` à ${city}` : ' dans toute la RDC';
-    setGuidanceMessage(`Filtrage activé${cityInfo}.`);
+    setGuidanceMessage(`Filtrage actif${cityInfo}.`);
     setTimeout(() => setGuidanceMessage(null), 3000);
-  };
-
-  const handlePublishClick = () => {
-    if (!currentUser) {
-      setAuthModalMode('LOGIN');
-      setIsAuthModalOpen(true);
-    } else {
-      openPublishModal();
-    }
   };
 
   const executeSearch = (searchQuery?: string) => {
@@ -94,7 +79,7 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
     const catInfo = selectedActivityTypeFilter !== 'Tous les types' ? ` • ${selectedActivityTypeFilter}` : '';
     const cityInfo = selectedRegionFilter !== 'Toutes les villes' ? ` • ${selectedRegionFilter}` : '';
     const msg = activeQ.trim() 
-      ? `Recherche : « ${activeQ} »${catInfo}${cityInfo}...` 
+      ? `Recherche pour « ${activeQ} »${catInfo}${cityInfo}...` 
       : `Filtres actifs : ${selectedActivityTypeFilter}${cityInfo}`;
     
     setGuidanceMessage(msg);
@@ -105,7 +90,7 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
         el.scrollIntoView({ behavior: 'smooth' });
       }
       setTimeout(() => setGuidanceMessage(null), 3000);
-    }, 200);
+    }, 150);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -114,124 +99,49 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-2 space-y-3">
+    <div id="recherche-evenements" className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-2 space-y-3">
       
-      {/* Barre Principale de Recherche — Style épuré et sobre inspiré de Tickera & Weezevent */}
-      <div className="bg-white rounded-2xl md:rounded-full border border-[#D9D0C6] hover:border-[#14110F]/40 shadow-xs hover:shadow-sm transition-all p-1.5 sm:p-2">
+      {/* 1. BARRE DE RECHERCHE SIMPLE & ÉPURÉE (Style Eventbrite) */}
+      <div className="bg-white rounded-full border border-[#D9D0C6] hover:border-[#14110F]/40 shadow-xs hover:shadow-sm transition-all p-1.5 sm:p-2">
         <form
           onSubmit={handleSearchSubmit}
-          className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-[#ECE7DE]"
+          className="flex items-center gap-3 px-4 py-1.5"
         >
-          {/* Champ 1 : Recherche Texte */}
-          <div className="flex-1 flex items-center gap-3 px-4 py-2 bg-white rounded-xl md:rounded-l-full">
-            <div className="w-7 h-7 rounded-full bg-[#FAF8F5] flex items-center justify-center shrink-0">
-              <Search className="w-3.5 h-3.5 text-[#7A7068]" />
-            </div>
-            <div className="flex-1 text-left min-w-0 bg-white">
-              <label htmlFor="search-input" className="block text-[10px] font-semibold uppercase tracking-wider text-[#7A7068]">
-                Rechercher une activité
-              </label>
-              <input
-                id="search-input"
-                type="text"
-                value={query}
-                onChange={handleInputChange}
-                placeholder="Ex : Congo Food Week, Rumba Live, Cantines, Sommet..."
-                className="w-full bg-white text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none"
-              />
-            </div>
-            {query && (
-              <button
-                type="button"
-                onClick={() => { setQuery(''); if (onSearchChange) onSearchChange(''); }}
-                className="text-[#7A7068] hover:text-[#14110F] text-xs px-2 font-medium"
-              >
-                Effacer
-              </button>
-            )}
-          </div>
+          <Search className="w-4 h-4 text-[#7A7068] shrink-0" />
+          
+          <input
+            id="search-input"
+            type="text"
+            value={query}
+            onChange={handleInputChange}
+            placeholder="Rechercher des événements, concerts, festivals, artistes ou villes..."
+            className="w-full bg-white text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none"
+          />
 
-          {/* Champ 2 : Sélecteur de Région / Ville (Kinshasa, Lubumbashi, Kisangani, Goma, Matadi...) */}
-          <div className="flex items-center gap-3 px-4 py-2 bg-white hover:bg-[#FAF8F5] transition md:w-56 shrink-0">
-            <div className="w-7 h-7 rounded-full bg-[#FAF8F5] flex items-center justify-center shrink-0">
-              <MapPin className="w-3.5 h-3.5 text-[#FF6A2B]" />
-            </div>
-            <div className="flex-1 text-left">
-              <label htmlFor="region-filter" className="block text-[10px] font-semibold uppercase tracking-wider text-[#7A7068]">
-                Région / Ville
-              </label>
-              <select
-                id="region-filter"
-                value={selectedRegionFilter}
-                onChange={(e) => handleCitySelect(e.target.value)}
-                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#14110F] focus:outline-none cursor-pointer pr-2 truncate"
-              >
-                {CONGO_CITIES.map((city, idx) => (
-                  <option key={idx} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Champ 3 : Filtre par Type d'Activité (Événement, Donation, Concert, Festival, Conférence) */}
-          <div className="flex items-center gap-3 px-4 py-2 bg-white hover:bg-[#FAF8F5] transition md:w-56 shrink-0">
-            <div className="w-7 h-7 rounded-full bg-[#FAF8F5] flex items-center justify-center shrink-0">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#14110F]" />
-            </div>
-            <div className="flex-1 text-left">
-              <label htmlFor="category-filter" className="block text-[10px] font-semibold uppercase tracking-wider text-[#7A7068]">
-                Type d'activité
-              </label>
-              <select
-                id="category-filter"
-                value={selectedActivityTypeFilter}
-                onChange={(e) => handleCategorySelect(e.target.value)}
-                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#14110F] focus:outline-none cursor-pointer pr-2 truncate"
-              >
-                {FILTER_CATEGORIES.map((cat, idx) => (
-                  <option key={idx} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Champ 4 : Actions (Rechercher + Publier + Vérifier Ticket) */}
-          <div className="px-2 pt-1 md:pt-0 shrink-0 flex items-center gap-2">
-            <button
-              type="submit"
-              className="flex-1 md:flex-initial h-10 px-5 rounded-xl md:rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <Search className="w-3.5 h-3.5 text-[#FBF6EE]" />
-              <span>Rechercher</span>
-            </button>
-
+          {query && (
             <button
               type="button"
-              onClick={handlePublishClick}
-              className="flex-1 md:flex-initial h-10 px-4 rounded-xl md:rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-95 shrink-0"
-              title="Publier un Événement, une Donation, un Concert, un Festival ou une Conférence"
+              onClick={() => { setQuery(''); if (onSearchChange) onSearchChange(''); }}
+              className="text-[#7A7068] hover:text-[#14110F] text-xs px-2 font-medium shrink-0"
             >
-              <PlusCircle className="w-3.5 h-3.5 text-[#14110F]" />
-              <span>Publier</span>
+              Effacer
             </button>
-          </div>
+          )}
+
+          <button
+            type="submit"
+            className="h-9 px-5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider transition active:scale-95 shrink-0"
+          >
+            Rechercher
+          </button>
         </form>
       </div>
 
-      {/* Barre Secondaire : Filtres Rapides (Pills) & Outil Vérification de Billet */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+      {/* 2. LIGNE UNIFIÉE : FILTRES DE CATÉGORIES + SÉLECTEUR DE VILLE + VÉRIFIER TICKET */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1">
         
-        {/* Pills de Catégories */}
+        {/* Catégories (Tous, Événement, Donation, Concert, Festival, Conférence, É-vote) */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#7A7068] flex items-center gap-1 shrink-0 mr-1">
-            <Filter className="w-3 h-3 text-[#7A7068]" />
-            <span>Filtres :</span>
-          </span>
-
           {FILTER_CATEGORIES.map((cat) => {
             const isSelected = selectedActivityTypeFilter === cat;
             const count = cat === 'Tous les types' 
@@ -249,7 +159,7 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
                 key={cat}
                 type="button"
                 onClick={() => handleCategorySelect(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 active:scale-95 ${
                   isSelected
                     ? 'bg-[#14110F] text-[#FBF6EE] shadow-xs'
                     : 'bg-white hover:bg-[#FAF8F5] text-[#4A433D] border border-[#D9D0C6]'
@@ -266,12 +176,29 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
           })}
         </div>
 
-        {/* Outil Rapide : Vérifier un Ticket */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Côté Droit : Sélecteur de Région/Ville + Bouton Vérifier Ticket sur la même ligne */}
+        <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-auto">
+          {/* Sélecteur de Région / Ville */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#D9D0C6] text-xs font-semibold text-[#14110F] shadow-xs">
+            <MapPin className="w-3.5 h-3.5 text-[#FF6A2B] shrink-0" />
+            <select
+              value={selectedRegionFilter}
+              onChange={(e) => handleCitySelect(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-[#14110F] focus:outline-none cursor-pointer pr-1"
+            >
+              {CONGO_CITIES.map((city, idx) => (
+                <option key={idx} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Bouton Vérifier Ticket */}
           <button
             type="button"
             onClick={() => setIsTicketVerificationOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] text-xs font-semibold text-[#14110F] shadow-xs transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] text-xs font-semibold text-[#14110F] shadow-xs transition active:scale-95"
             title="Vérifier la validité et l'authenticité d'un ticket VUKA Pay"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-[#166534]" />
@@ -281,10 +208,10 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
 
       </div>
 
-      {/* Message de confirmation ou filtrage actif */}
+      {/* Message de confirmation discret */}
       {guidanceMessage && (
-        <div className="px-4 py-2 rounded-xl bg-[#E2F3E9] border border-[#167A42]/20 text-xs text-[#167A42] font-semibold flex items-center gap-2 animate-in fade-in duration-200">
-          <Check className="w-3.5 h-3.5 text-[#167A42] shrink-0" />
+        <div className="px-3.5 py-1.5 rounded-xl bg-[#E2F3E9] border border-[#167A42]/20 text-xs text-[#167A42] font-semibold flex items-center gap-2 animate-in fade-in duration-150">
+          <Check className="w-3.5 h-3.5 text-[#166534] shrink-0" />
           <span>{guidanceMessage}</span>
         </div>
       )}

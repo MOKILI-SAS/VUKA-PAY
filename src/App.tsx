@@ -50,20 +50,20 @@ const MainContent: React.FC = () => {
         {/* VUE 1 : LANDING PAGE GRAND PUBLIC (100% sobre, épurée et sans encombrement) */}
         {appViewMode === 'PUBLIC_LANDING' && (
           <div className="space-y-6">
-            {/* 1. Ticketmaster Global Search Header Bar avec filtre de catégories */}
-            <TicketmasterSearchHeader onSearchClick={() => handleOpenPassCheckout()} />
-
-            {/* 2. Ticketmaster Hero Bento Grid (Grand événement CFW6 + Pass & Cashless) */}
+            {/* 1. Hero Section mettant en avant les activités populaires (Style Eventbrite) */}
             <TicketmasterHeroBento 
               onExploreTickets={() => handleOpenPassCheckout()} 
               onExploreStands={handleExploreStands}
               onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket)}
             />
 
-            {/* 3. Catalogue Multi-Événements VUKA Pay (CFW6, Kinshasa Jazz, AfroTech, Nuits de la Rumba) */}
-            <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
+            {/* 2. Section Événements : Barre de recherche simple, Filtres (dont É-vote), Régions & Grille */}
+            <div id="evenements" className="space-y-2">
+              <TicketmasterSearchHeader onSearchClick={() => handleOpenPassCheckout()} />
+              <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
+            </div>
 
-            {/* 4. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
+            {/* 3. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
             <TrendingSearches onSelectItem={() => handleOpenPassCheckout()} />
 
             {/* 5. Grand Ticket Perforé Braise (#FF6A2B) & Nuit (#14110F) avec QR Code Scannable */}

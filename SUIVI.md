@@ -238,6 +238,31 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation actif (HTTP 200 sur `http://localhost:5173/`).
 
+### Session 10 — 31 octobre 2026 (Après-midi)
+
+#### Actions Réalisées :
+1. **Hero Banner Style Eventbrite (Capture 1) :**
+   - Transformation complète du hero en une grande bannière cinématographique épurée à bords arrondis (`rounded-[24px]` à `rounded-[32px]`).
+   - Image de fond grand angle immersive avec dégradé subtil, typographie Poppins percutante et un CTA unique arrondi en pilule (« Découvrir l'événement » / « Prendre mon Pass »).
+   - Suppression du bruit visuel et respect strict de l'accessibilité WCAG AA.
+2. **Apaisement de la Grille des Événements & Élimination de la Fatigue Visuelle (Capture 2) :**
+   - Remplacement des 8 boutons néon orange pleine largeur par des boutons pilules foncés discrets, élégants avec transition douce au survol.
+   - Ajout d'un bouton « Like » (icône cœur) subtil sur l'angle supérieur droit des affiches avec compteur et état actif persistant.
+   - Ajout d'une action d'abonnement discret « + Suivre » / « Abonné » à côté du nom de l'organisateur.
+3. **Barre de Recherche Épurée & Ligne de Filtres Unifiée :**
+   - Décongestion de la barre de recherche : suppression des sélecteurs internes (type d'activité et ville) pour un champ de saisie unique, lisible et rapide.
+   - Déplacement du sélecteur de région/ville sur la ligne des filtres de catégories.
+   - Ajout de la catégorie « É-vote » aux côtés des catégories Événement, Donation, Concert, Festival, Conférence.
+   - Intégration du bouton « Vérifier un ticket » sur cette même ligne d'outils.
+4. **Header Allégé & Sobre :**
+   - Retrait des boutons « Publier » et « Vérifier ticket » de l'en-tête (desktop et mobile).
+   - En-tête recentré sur le logo VUKA Pay, les ancres de navigation directes et le bouton de compte/connexion utilisateur avec menu profil contextuel (Dashboard, Standier, Portefeuille, Tickets).
+5. **Validation Technique & Déploiement :**
+   - Tests unitaires MOKILI validés (`npm test` : 4/4 PASS).
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://localhost:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -258,6 +283,7 @@
 | **DEC-012** | 31/10/2026 | Épuration radicale de la vitrine & Responsivité mobile | Suppression des sections programmation/zones/témoignages/organisateurs, intégration du sélecteur de pass dans le modal de commande et boutons tactiles 44px. | VALIDÉE |
 | **DEC-013** | 31/10/2026 | Mini-Hero rotatif en boucle, Filtres normalisés & Publication | Slider en boucle des activités phares, filtres Événement/Donation/Concert/Festival/Conférence et workflow de publication multi-formats. | VALIDÉE |
 | **DEC-014** | 31/10/2026 | Mini-Hero Pleine Largeur, Vérification Billet, Espace Standier & Villes RDC | Suppression du bloc de 4 cartes, intégration du vérificateur de ticket HMAC, dashboard standier, sélecteur multi-régions et apaisement colorimétrique Tickera/Weezevent. | VALIDÉE |
+| **DEC-015** | 31/10/2026 | Hero Eventbrite, É-vote, Likes/Follows & Apaisement Cartes | Hero bannière épurée 1 CTA, atténuation du mur de boutons orange vers boutons sobres, likes/abonnements discrets, filtres unifiés avec É-vote et villes RDC, header ultra-sobre. | VALIDÉE |
 
 ---
 
@@ -278,3 +304,4 @@
 | **SEO & LEGAL** | Audit SEO, Open Graph, Sitemap & Légal | [PASS] Terminé | Sitemap.xml, robots.txt, Open Graph, LegalModal RGPD/RDC, images catalogue |
 | **PURGE & RESPONSIVE** | Épuration vitrine, 0 organisateur & mobile | [PASS] Terminé | Retrait organisateurs, programmation, zones, pass switcher modal, preview 200 OK |
 | **MINI-HERO & PUBLISH** | Mini-hero rotatif, filtres 5 types & bouton publier | [PASS] Terminé | Mini-hero 5.5s, filtres 5 types, PublishActivityModal, test & preview 200 OK |
+| **EVENTBRITE & É-VOTE** | Hero Eventbrite, É-vote, Likes/Follow & Grille apaisée | [PASS] Terminé | Hero 1 CTA, cartes sobres sans fatigue visuelle, é-vote, build 0 erreur, preview 200 OK |

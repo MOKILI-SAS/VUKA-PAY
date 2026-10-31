@@ -193,7 +193,7 @@ export interface StandApplication {
 }
 
 // Types d'activités publiables sur VUKA Pay
-export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence';
+export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence' | 'É-vote';
 
 // Événement ou activité publiée sur la plateforme VUKA Pay
 export interface VukaPublishedEvent {
@@ -218,4 +218,6 @@ export interface VukaPublishedEvent {
   description?: string;
   metrics?: { label: string; value: string }[];
   ctaText?: string;
+  likesCount?: number;
+  organizerFollowers?: number;
 }

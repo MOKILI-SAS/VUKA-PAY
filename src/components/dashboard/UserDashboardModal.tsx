@@ -212,6 +212,12 @@ export const UserDashboardModal: React.FC = () => {
                     title: 'Événement & Gala',
                     desc: 'Banquets diplomatiques, avant-premières et soirées privées.',
                     color: '#14110F'
+                  },
+                  {
+                    type: 'É-vote' as ActivityType,
+                    title: 'É-vote & Sondage',
+                    desc: 'Votes de jurys, concours, trophées et élections avec contrôle anti-fraude.',
+                    color: '#0E5A8A'
                   }
                 ].map((item) => (
                   <button
