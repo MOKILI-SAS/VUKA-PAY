@@ -191,6 +191,28 @@
    - Build de production Vite optimisé (`npm run build` en 27.97s).
    - Serveur de prévisualisation opérationnel et testé avec succès (HTTP 200 sur `http://localhost:5173/`).
 
+### Session 8 — 31 octobre 2026 (Matin)
+
+#### Actions Réalisées :
+1. **Transformation en Mini-Hero Slider en Boucle :**
+   - Remplacement de la carte statique de gauche du Bento par un composant Mini-Hero rotatif automatique (intervalle de 5.5s avec pause au survol de la souris).
+   - Contrôles manuels interactifs : flèches précédent / suivant et barre de pagination avec indicateurs de progression.
+   - Rotation fluide des activités mises en avant (CFW6, Kinshasa Jazz & Rumba, AfroTech Summit, Campagne Cantines Scolaires, Gala des Ambassadeurs, etc.).
+   - Affichage dynamique du badge, date, lieu, titre, sous-titre, description, métriques clés et bouton CTA contextuel.
+2. **Harmonisation des Filtres d'Activités :**
+   - Mise à niveau du filtre de recherche avec les 5 types demandés : `Événement, Donation, Concert, Festival, Conférence`.
+   - Ajout d'une barre de filtres rapides (pills avec compteurs dynamiques) sous le champ de recherche pour un filtrage instantané de la grille d'activités.
+3. **Bouton & Modal « Publier » avec Sélection du Type d'Activité :**
+   - Intégration d'un bouton d'action `Publier` dans le Header (desktop et tiroir mobile) et dans la barre de recherche.
+   - Création du composant `PublishActivityModal.tsx` avec sélection visuelle parmi les 5 catégories d'activités : Événement, Donation, Concert, Festival, Conférence.
+   - Formulaire complet de publication (titre, dates, lieu, tarif/don USD/CDF, organisateur, WhatsApp, description, choix d'images).
+   - Mise en ligne instantanée dans le catalogue et intégration immédiate dans la boucle de rotation du mini-hero.
+4. **Validation Technique & Déploiement :**
+   - Tests unitaires MOKILI validés (`npm test` : 4/4 PASS).
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation opérationnel (HTTP 200 sur `http://localhost:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -209,6 +231,7 @@
 | **DEC-010** | 13/10/2026 | Conformité SEO, Open Graph & Modal Légale | Intégration sitemap/robots, métas Open Graph, images réalistes de catalogue et textes juridiques RGPD/RDC. | VALIDÉE |
 | **DEC-011** | 29/10/2026 | Réalignement complet sur le Framework MOKILI V2.0 | Mise à niveau des profils (P06 SaaS Principal, P07 Billetterie, P05 Frontend PWA, P08 API), adoption du standard AGENTS.md, synchronisation des 5 fichiers de gouvernance et conformité zero-emoji. | VALIDÉE |
 | **DEC-012** | 31/10/2026 | Épuration radicale de la vitrine & Responsivité mobile | Suppression des sections programmation/zones/témoignages/organisateurs, intégration du sélecteur de pass dans le modal de commande et boutons tactiles 44px. | VALIDÉE |
+| **DEC-013** | 31/10/2026 | Mini-Hero rotatif en boucle, Filtres normalisés & Publication | Slider en boucle des activités phares, filtres Événement/Donation/Concert/Festival/Conférence et workflow de publication multi-formats. | VALIDÉE |
 
 ---
 
@@ -228,3 +251,4 @@
 | **HEADER & POLISH** | Header sobre & Flux organisateur | [PASS] Terminé | Navigation épurée, 0 emoji, obligatoire email/whatsapp, push distant |
 | **SEO & LEGAL** | Audit SEO, Open Graph, Sitemap & Légal | [PASS] Terminé | Sitemap.xml, robots.txt, Open Graph, LegalModal RGPD/RDC, images catalogue |
 | **PURGE & RESPONSIVE** | Épuration vitrine, 0 organisateur & mobile | [PASS] Terminé | Retrait organisateurs, programmation, zones, pass switcher modal, preview 200 OK |
+| **MINI-HERO & PUBLISH** | Mini-hero rotatif, filtres 5 types & bouton publier | [PASS] Terminé | Mini-hero 5.5s, filtres 5 types, PublishActivityModal, test & preview 200 OK |

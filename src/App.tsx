@@ -12,6 +12,7 @@ import { CheckoutModal } from './components/ticketing/CheckoutModal';
 import { ClientDashboard } from './components/client/ClientDashboard';
 import { BackofficeHub } from './components/backoffice/BackofficeHub';
 import { AuthModal } from './components/auth/AuthModal';
+import { PublishActivityModal } from './components/showcase/PublishActivityModal';
 import { TicketDefinition } from './types';
 
 const MainContent: React.FC = () => {
@@ -80,6 +81,9 @@ const MainContent: React.FC = () => {
 
       {/* Modal d'Authentification / Création de Compte */}
       <AuthModal />
+
+      {/* Modal de Publication d'Activités (Événement, Donation, Concert, Festival, Conférence) */}
+      <PublishActivityModal />
 
       {/* Checkout Modal when buying a ticket */}
       {selectedTicketForCheckout && (

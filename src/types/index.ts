@@ -177,11 +177,16 @@ export interface DailyClosingReport {
   closedAt?: string;
 }
 
-// Événement publié sur la plateforme VUKA Pay
+// Types d'activités publiables sur VUKA Pay
+export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence';
+
+// Événement ou activité publiée sur la plateforme VUKA Pay
 export interface VukaPublishedEvent {
   id: string;
   title: string;
+  subtitle?: string;
   category: string;
+  activityType: ActivityType;
   badge: string;
   dateStr: string;
   location: string;
@@ -195,4 +200,7 @@ export interface VukaPublishedEvent {
   organizerName?: string;
   isFeatured?: boolean;
   imageUrl?: string;
+  description?: string;
+  metrics?: { label: string; value: string }[];
+  ctaText?: string;
 }

@@ -42,6 +42,7 @@ export const OrganizerEventsManager: React.FC = () => {
     addOrganizerEvent({
       title: title.trim(),
       category: category.toUpperCase(),
+      activityType: 'Événement',
       badge: 'BILLETTERIE OUVERTE',
       dateStr: dateStr.trim(),
       location: location.trim(),

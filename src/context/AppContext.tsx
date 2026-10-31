@@ -13,7 +13,8 @@ import {
   BackofficeModule,
   ClientPortalTab,
   UserAccount,
-  VukaPublishedEvent
+  VukaPublishedEvent,
+  ActivityType
 } from '../types';
 import { 
   MOCK_TICKETS, 
@@ -51,12 +52,20 @@ interface AppContextType {
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   
-  // Billetterie & Événements
+  // Billetterie & Activités
   tickets: TicketDefinition[];
   purchasedTickets: PurchasedTicket[];
   buyTicket: (ticketDefId: string, buyerName: string, buyerPhone: string, buyerEmail: string) => Promise<PurchasedTicket>;
   publishedEvents: VukaPublishedEvent[];
   addOrganizerEvent: (newEvent: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => void;
+  
+  // Publication d'Activités & Filtres
+  isPublishModalOpen: boolean;
+  setIsPublishModalOpen: (open: boolean) => void;
+  publishPreselectedType: ActivityType | null;
+  openPublishModal: (preselectedType?: ActivityType) => void;
+  selectedActivityTypeFilter: string;
+  setSelectedActivityTypeFilter: (filter: string) => void;
   
   // Festivalier & Wallet
   wallet: FestivalierWallet;
@@ -117,9 +126,11 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
   {
     id: 'cfw-6',
     title: 'Congo Food Week — Saison 6',
-    category: 'GASTRONOMIE & MUSIQUE',
-    badge: 'FESTIVAL MAJEUR • BILLETTERIE OUVERTE',
-    dateStr: '22 – 27 Septembre 2026 (6 Jours)',
+    subtitle: 'La Grande Célébration Culinaire.',
+    category: 'GASTRONOMIE & BRAISES',
+    activityType: 'Festival',
+    badge: 'FESTIVAL PHARE DU MOMENT',
+    dateStr: '22 au 27 Septembre 2026',
     location: 'Académie des Beaux-Arts',
     city: 'Kinshasa, Gombe',
     priceFrom: 'Dès 5 $ (13 750 CDF)',
@@ -130,14 +141,23 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     scannedEntries: 840,
     organizerName: 'Fondation Congolicious',
     isFeatured: true,
-    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'
+    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+    description: 'Le grand rendez-vous culinaire de Kinshasa avec 23 stands gastronomiques, maîtres des braises, concerts live sous les étoiles et paiement 100% cashless sans contact.',
+    metrics: [
+      { label: 'Stands Gastronomiques', value: '23 Stands' },
+      { label: 'Soirées Live', value: '6 Soirées' },
+      { label: 'Don Solidaire', value: '10% Fondation' }
+    ],
+    ctaText: 'Acheter un Pass (Dès 5$)'
   },
   {
     id: 'kin-jazz',
     title: 'Kinshasa Jazz & Rumba Festival',
-    category: 'FESTIVAL LIVE & CONCERTS',
-    badge: 'BILLETTERIE OUVERTE',
-    dateStr: '10 – 12 Octobre 2026',
+    subtitle: 'Légendes de la Rumba & Sessions Jazz.',
+    category: 'MUSIQUE LIVE & RUMBA',
+    activityType: 'Concert',
+    badge: 'CONCERT GÉANT LIVE',
+    dateStr: '10 au 12 Octobre 2026',
     location: 'Théâtre de Verdure • Mont Ngaliema',
     city: 'Kinshasa',
     priceFrom: 'Dès 15 $ (41 250 CDF)',
@@ -147,14 +167,24 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     revenueUSD: 6300,
     scannedEntries: 0,
     organizerName: 'Kinshasa Jazz Club',
-    imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80'
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80',
+    description: 'Trois soirées d’exception au Théâtre de Verdure célébrant l’âge d’or et la modernité de la rumba congolaise et du jazz africain en plein air.',
+    metrics: [
+      { label: 'Artistes & Orchestres', value: '18 Groupes' },
+      { label: 'Scène de Plein Air', value: 'Verdure' },
+      { label: 'Contrôle Express', value: 'NFC 500ms' }
+    ],
+    ctaText: 'Réserver mon Billet'
   },
   {
     id: 'afrotech-kin',
     title: 'AfroTech Summit Kinshasa 2026',
-    category: 'INNOVATION & STARTUPS',
-    badge: 'BADGES PRO & VIP',
-    dateStr: '05 – 06 Novembre 2026',
+    subtitle: 'Le Carrefour Panafricain de l\'Innovation.',
+    category: 'TECH, FINTECH & STARTUPS',
+    activityType: 'Conférence',
+    badge: 'CONFÉRENCE INTERNATIONALE',
+    dateStr: '05 au 06 Novembre 2026',
     location: 'Pullman Grand Hôtel Kinshasa',
     city: 'Kinshasa, Gombe',
     priceFrom: 'Dès 35 $ (96 250 CDF)',
@@ -164,12 +194,76 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     revenueUSD: 10850,
     scannedEntries: 0,
     organizerName: 'AfroTech Network',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
+    description: 'Le sommet technologique majeur réunissant fondateurs de licornes, investisseurs capital-risque et décideurs institutionnels pour l\'accélération de l\'économie numérique en RDC.',
+    metrics: [
+      { label: 'Keynotes & Panels', value: '45 Speakers' },
+      { label: 'Délégations', value: '14 Pays' },
+      { label: 'Badges Digitaux', value: 'RFID MIFARE' }
+    ],
+    ctaText: 'Obtenir mon Badge Pro'
+  },
+  {
+    id: 'cantines-fondation',
+    title: 'Campagne Cantines Scolaires en Milieu Rural',
+    subtitle: 'Nourrir un Enfant, Bâtir le Congo.',
+    category: 'SOLIDARITÉ & IMPACT SOCIAL',
+    activityType: 'Donation',
+    badge: 'COLLECTE NATIONALE SOLIDAIRE',
+    dateStr: 'Campagne Permanente 2026',
+    location: 'Écoles Partenaires • Milieu Rural',
+    city: 'RDC',
+    priceFrom: 'Dès 2 $ (5 500 CDF)',
+    status: 'OPEN',
+    ticketsSold: 980,
+    totalCapacity: 5000,
+    revenueUSD: 7850,
+    scannedEntries: 0,
+    organizerName: 'Fondation Congolicious',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
+    description: '100% des fonds Mobile Money collectés financent directement des déjeuners nutritifs quotidiens pour les écoliers des zones défavorisées de la RDC.',
+    metrics: [
+      { label: 'Repas Scolaires Financés', value: '1 200 / jour' },
+      { label: 'Écoles Soutenues', value: '12 Centres' },
+      { label: 'Reversement Mobile Money', value: '100% Direct' }
+    ],
+    ctaText: 'Faire un Don M-Pesa'
+  },
+  {
+    id: 'salon-resto-kin',
+    title: 'Gala & Banquet des Ambassadeurs',
+    subtitle: 'L\'Excellence Hôtelière & Diplomatique.',
+    category: 'PRESTIGE, DÎNER & RÉSEAU',
+    activityType: 'Événement',
+    badge: 'ÉVÉNEMENT DE GALA',
+    dateStr: '19 Septembre 2026 • 19h30',
+    location: 'Hôtel Memling Kinshasa',
+    city: 'Kinshasa, Gombe',
+    priceFrom: 'Dès 50 $ (137 500 CDF)',
+    status: 'OPEN',
+    ticketsSold: 120,
+    totalCapacity: 300,
+    revenueUSD: 6000,
+    scannedEntries: 0,
+    organizerName: 'Club Hôtelier de Kinshasa',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+    description: 'Dîner gastronomique exclusif réunissant ambassadeurs, chefs étoilés et leaders d\'opinion pour célébrer le patrimoine culinaire et l\'hospitalité congolaise.',
+    metrics: [
+      { label: 'Chefs aux Fourneaux', value: '8 Maîtres' },
+      { label: 'Coupe d\'Honneur', value: 'Inclus' },
+      { label: 'Table Privée', value: 'VIP' }
+    ],
+    ctaText: 'Réserver ma Table'
   },
   {
     id: 'nuit-rumba',
     title: 'Les Nuits Royales de la Rumba',
+    subtitle: 'Show Pyrotechnique & Méga Concert.',
     category: 'CONCERT GÉANT LIVE',
+    activityType: 'Concert',
     badge: 'BIENTÔT EN VENTE',
     dateStr: '28 Novembre 2026',
     location: 'Stade des Martyrs',
@@ -181,7 +275,15 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     revenueUSD: 0,
     scannedEntries: 0,
     organizerName: 'Production Rumba Royale',
-    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
+    description: 'Le rendez-vous mythique au Stade des Martyrs réunissant 15 000 festivaliers pour une soirée pyrotechnique et musicale inoubliable.',
+    metrics: [
+      { label: 'Jauge Festive', value: '15 000 Fans' },
+      { label: 'Son & Lumière', value: 'Stade 360°' },
+      { label: 'Paiement Boissons', value: 'VUKA Cashless' }
+    ],
+    ctaText: 'Me Notifier à l\'Ouverture'
   }
 ];
 
@@ -210,11 +312,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(true);
   };
 
-  // Catalogue des événements (support de la publication par les organisateurs)
+  // Catalogue des événements (support de la publication et du mini-hero)
   const [publishedEvents, setPublishedEvents] = useState<VukaPublishedEvent[]>(() => {
     const saved = localStorage.getItem('vuka_published_events');
-    return saved ? JSON.parse(saved) : INITIAL_PUBLISHED_EVENTS;
+    if (saved) {
+      try {
+        const parsed: VukaPublishedEvent[] = JSON.parse(saved);
+        if (parsed.length >= 4 && parsed[0].activityType) {
+          return parsed;
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return INITIAL_PUBLISHED_EVENTS;
   });
+
+  // Modal de Publication & Filtres d'Activités
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [publishPreselectedType, setPublishPreselectedType] = useState<ActivityType | null>(null);
+  const [selectedActivityTypeFilter, setSelectedActivityTypeFilter] = useState<string>('Tous les types');
+
+  const openPublishModal = (preselectedType?: ActivityType) => {
+    setPublishPreselectedType(preselectedType || null);
+    setIsPublishModalOpen(true);
+  };
 
   const addOrganizerEvent = (newEventData: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => {
     const newEvent: VukaPublishedEvent = {
@@ -813,6 +935,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       buyTicket,
       publishedEvents,
       addOrganizerEvent,
+      isPublishModalOpen,
+      setIsPublishModalOpen,
+      publishPreselectedType,
+      openPublishModal,
+      selectedActivityTypeFilter,
+      setSelectedActivityTypeFilter,
       wallet,
       topUpWallet,
       refundWalletBalance,

@@ -11,7 +11,8 @@ import {
   Receipt,
   LogOut,
   Calendar,
-  Layers
+  Layers,
+  PlusCircle
 } from 'lucide-react';
 import { formatUSD } from '../../utils/formatters';
 import { VukaLogo } from './VukaLogo';
@@ -25,6 +26,7 @@ export const Header: React.FC = () => {
     logoutUser,
     setIsAuthModalOpen,
     setAuthModalMode,
+    openPublishModal,
     wallet
   } = useApp();
 
@@ -189,8 +191,18 @@ export const Header: React.FC = () => {
             </div>
           </nav>
 
-          {/* ZONE DROITE : Actions utilisateurs */}
+          {/* ZONE DROITE : Actions utilisateurs & Bouton Publier */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Bouton Publier une Activité (Événement, Donation, Concert, Festival, Conférence) */}
+            <button
+              type="button"
+              onClick={() => openPublishModal()}
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FFC21A] text-xs font-bold transition shadow-xs active:scale-95"
+              title="Publier un Événement, une Donation, un Concert, un Festival ou une Conférence"
+            >
+              <PlusCircle className="w-3.5 h-3.5 text-[#FFC21A]" />
+              <span>Publier</span>
+            </button>
 
             {/* Profil Utilisateur / Bouton Connexion */}
             {currentUser ? (
@@ -311,6 +323,21 @@ export const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-[#E5E0D8] bg-[#FBF6EE] px-4 py-4 space-y-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
           
+          {/* Action Publier Mobile */}
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openPublishModal();
+              }}
+              className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] text-[#FFC21A] text-xs font-bold text-center shadow-xs flex items-center justify-center gap-2 transition active:scale-95"
+            >
+              <PlusCircle className="w-4 h-4 text-[#FFC21A]" />
+              <span>Publier une Activité</span>
+            </button>
+          </div>
+
           {/* Section Compte Mobile */}
           {currentUser ? (
             <div className="p-4 rounded-2xl bg-white border border-[#E5E0D8] space-y-3">
