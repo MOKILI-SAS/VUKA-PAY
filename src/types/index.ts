@@ -177,6 +177,21 @@ export interface DailyClosingReport {
   closedAt?: string;
 }
 
+// Demande d'installation de stand exposant dans une activite
+export interface StandApplication {
+  id: string;
+  eventId: string;
+  eventName: string;
+  standName: string;
+  specialty: string;
+  applicantName: string;
+  applicantPhone: string;
+  applicantEmail: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  allocatedStandNumber?: number;
+}
+
 // Types d'activités publiables sur VUKA Pay
 export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence';
 

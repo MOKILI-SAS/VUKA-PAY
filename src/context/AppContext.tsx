@@ -14,7 +14,8 @@ import {
   ClientPortalTab,
   UserAccount,
   VukaPublishedEvent,
-  ActivityType
+  ActivityType,
+  StandApplication
 } from '../types';
 import { 
   MOCK_TICKETS, 
@@ -66,6 +67,25 @@ interface AppContextType {
   openPublishModal: (preselectedType?: ActivityType) => void;
   selectedActivityTypeFilter: string;
   setSelectedActivityTypeFilter: (filter: string) => void;
+  selectedRegionFilter: string;
+  setSelectedRegionFilter: (region: string) => void;
+
+  // Espace Dashboard Utilisateur / Standier
+  isUserDashboardOpen: boolean;
+  setIsUserDashboardOpen: (open: boolean) => void;
+  userDashboardInitialTab: 'PUBLISH' | 'STANDIER' | 'MY_ACTIVITIES';
+  openUserDashboard: (tab?: 'PUBLISH' | 'STANDIER' | 'MY_ACTIVITIES') => void;
+  standApplications: StandApplication[];
+  submitStandApplication: (data: Omit<StandApplication, 'id' | 'status' | 'createdAt'>) => StandApplication;
+
+  // Verification de validite de billet (Anti-Fraude)
+  isTicketVerificationOpen: boolean;
+  setIsTicketVerificationOpen: (open: boolean) => void;
+  verifyTicketByCode: (code: string) => {
+    status: 'VALID' | 'ALREADY_USED' | 'NOT_FOUND';
+    ticket?: PurchasedTicket;
+    details?: string;
+  };
   
   // Festivalier & Wallet
   wallet: FestivalierWallet;
@@ -179,41 +199,41 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
   },
   {
     id: 'afrotech-kin',
-    title: 'AfroTech Summit Kinshasa 2026',
-    subtitle: 'Le Carrefour Panafricain de l\'Innovation.',
-    category: 'TECH, FINTECH & STARTUPS',
+    title: 'AfroTech & Mining Summit Lubumbashi 2026',
+    subtitle: 'Le Carrefour de l\'Innovation & de l\'Énergie.',
+    category: 'TECH, MINES & STARTUPS',
     activityType: 'Conférence',
-    badge: 'CONFÉRENCE INTERNATIONALE',
+    badge: 'CONFÉRENCE MAJEURE',
     dateStr: '05 au 06 Novembre 2026',
-    location: 'Pullman Grand Hôtel Kinshasa',
-    city: 'Kinshasa, Gombe',
+    location: 'Bâtiment du 30 Juin • Lubumbashi',
+    city: 'Lubumbashi',
     priceFrom: 'Dès 35 $ (96 250 CDF)',
     status: 'OPEN',
     ticketsSold: 310,
     totalCapacity: 800,
     revenueUSD: 10850,
     scannedEntries: 0,
-    organizerName: 'AfroTech Network',
+    organizerName: 'AfroTech Network & Katanga Tech',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
-    description: 'Le sommet technologique majeur réunissant fondateurs de licornes, investisseurs capital-risque et décideurs institutionnels pour l\'accélération de l\'économie numérique en RDC.',
+    description: 'Le grand sommet technologique réunissant fondateurs, compagnies minières et investisseurs pour l\'accélération de l\'économie numérique et industrielle en RDC.',
     metrics: [
       { label: 'Keynotes & Panels', value: '45 Speakers' },
-      { label: 'Délégations', value: '14 Pays' },
+      { label: 'Délégations', value: '14 Villes' },
       { label: 'Badges Digitaux', value: 'RFID MIFARE' }
     ],
     ctaText: 'Obtenir mon Badge Pro'
   },
   {
     id: 'cantines-fondation',
-    title: 'Campagne Cantines Scolaires en Milieu Rural',
+    title: 'Campagne Cantines Scolaires à Goma & Nord-Kivu',
     subtitle: 'Nourrir un Enfant, Bâtir le Congo.',
     category: 'SOLIDARITÉ & IMPACT SOCIAL',
     activityType: 'Donation',
-    badge: 'COLLECTE NATIONALE SOLIDAIRE',
+    badge: 'COLLECTE SOLIDAIRE',
     dateStr: 'Campagne Permanente 2026',
-    location: 'Écoles Partenaires • Milieu Rural',
-    city: 'RDC',
+    location: 'Écoles Partenaires • Nord-Kivu & Goma',
+    city: 'Goma',
     priceFrom: 'Dès 2 $ (5 500 CDF)',
     status: 'OPEN',
     ticketsSold: 980,
@@ -223,13 +243,67 @@ const INITIAL_PUBLISHED_EVENTS: VukaPublishedEvent[] = [
     organizerName: 'Fondation Congolicious',
     isFeatured: true,
     imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
-    description: '100% des fonds Mobile Money collectés financent directement des déjeuners nutritifs quotidiens pour les écoliers des zones défavorisées de la RDC.',
+    description: '100% des fonds Mobile Money collectés financent directement des déjeuners nutritifs quotidiens pour les écoliers des zones défavorisées de Goma et du Nord-Kivu.',
     metrics: [
       { label: 'Repas Scolaires Financés', value: '1 200 / jour' },
       { label: 'Écoles Soutenues', value: '12 Centres' },
       { label: 'Reversement Mobile Money', value: '100% Direct' }
     ],
     ctaText: 'Faire un Don M-Pesa'
+  },
+  {
+    id: 'kisangani-forum',
+    title: 'Forum Économique & Fluvial de Kisangani',
+    subtitle: 'Le Hub Logistique & Commercial du Fleuve.',
+    category: 'COMMERCE, FLEUVE & LOGISTIQUE',
+    activityType: 'Conférence',
+    badge: 'RENCONTRE B2B',
+    dateStr: '14 au 16 Octobre 2026',
+    location: 'Palais du Fleuve • Kisangani',
+    city: 'Kisangani',
+    priceFrom: 'Dès 25 $ (68 750 CDF)',
+    status: 'OPEN',
+    ticketsSold: 180,
+    totalCapacity: 600,
+    revenueUSD: 4500,
+    scannedEntries: 0,
+    organizerName: 'Chambre de Commerce Boyoma',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=800&q=80',
+    description: 'Rencontre annuelle des opérateurs économiques, transporteurs fluviaux et transformateurs agricoles du Haut-Uélé, de la Tshopo et du grand bassin congolais.',
+    metrics: [
+      { label: 'Entreprises Exposantes', value: '50 Sociétés' },
+      { label: 'Ateliers Logistique', value: '8 Sessions' },
+      { label: 'Badges Pro', value: 'VUKA Pass' }
+    ],
+    ctaText: 'Participer au Forum'
+  },
+  {
+    id: 'matadi-arts',
+    title: 'Festival des Arts & Saveurs de Matadi',
+    subtitle: 'La Fête Culinaire & Musicale du Port.',
+    category: 'FESTIVAL & GASTRONOMIE',
+    activityType: 'Festival',
+    badge: 'FESTIVAL PORTUAIRE',
+    dateStr: '20 au 22 Novembre 2026',
+    location: 'Esplanade du Port • Matadi',
+    city: 'Matadi',
+    priceFrom: 'Dès 6 $ (16 500 CDF)',
+    status: 'OPEN',
+    ticketsSold: 520,
+    totalCapacity: 3500,
+    revenueUSD: 3120,
+    scannedEntries: 0,
+    organizerName: 'Collectif Culturel Kongo Central',
+    isFeatured: true,
+    imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80',
+    description: 'Trois journées de célébration gastronomique et musicale au bord du majestueux fleuve Congo à Matadi, avec stands de poissons frais et concerts au coucher de soleil.',
+    metrics: [
+      { label: 'Stands Poissons & Terroir', value: '16 Stands' },
+      { label: 'Concerts Fluviaux', value: '3 Soirées' },
+      { label: 'Cashless VUKA', value: '100% Mobile Money' }
+    ],
+    ctaText: 'Prendre mon Pass Matadi'
   },
   {
     id: 'salon-resto-kin',
@@ -332,6 +406,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [publishPreselectedType, setPublishPreselectedType] = useState<ActivityType | null>(null);
   const [selectedActivityTypeFilter, setSelectedActivityTypeFilter] = useState<string>('Tous les types');
+  const [selectedRegionFilter, setSelectedRegionFilter] = useState<string>('Toutes les villes');
+
+  // Espace Dashboard Utilisateur / Standier
+  const [isUserDashboardOpen, setIsUserDashboardOpen] = useState<boolean>(false);
+  const [userDashboardInitialTab, setUserDashboardInitialTab] = useState<'PUBLISH' | 'STANDIER' | 'MY_ACTIVITIES'>('PUBLISH');
+
+  const openUserDashboard = (tab?: 'PUBLISH' | 'STANDIER' | 'MY_ACTIVITIES') => {
+    if (tab) setUserDashboardInitialTab(tab);
+    setIsUserDashboardOpen(true);
+  };
+
+  const [standApplications, setStandApplications] = useState<StandApplication[]>(() => {
+    const saved = localStorage.getItem('vuka_stand_applications');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 'APP-ST-101',
+        eventId: 'cfw-6',
+        eventName: 'Congo Food Week — Saison 6',
+        standName: 'Chez Ntemba Grill & Braises',
+        specialty: 'Grillades & Capitaine Braisé',
+        applicantName: 'Dieudonné Ntemba',
+        applicantPhone: '+243 81 234 5678',
+        applicantEmail: 'dieudonne@chezntemba.cd',
+        status: 'APPROVED',
+        createdAt: '2026-09-01T10:00:00.000Z',
+        allocatedStandNumber: 1
+      }
+    ];
+  });
+
+  const submitStandApplication = (data: Omit<StandApplication, 'id' | 'status' | 'createdAt'>): StandApplication => {
+    const newApp: StandApplication = {
+      ...data,
+      id: `APP-ST-${Math.floor(100 + Math.random() * 900)}`,
+      status: 'PENDING',
+      createdAt: new Date().toISOString()
+    };
+    setStandApplications(prev => {
+      const updated = [newApp, ...prev];
+      localStorage.setItem('vuka_stand_applications', JSON.stringify(updated));
+      return updated;
+    });
+    return newApp;
+  };
+
+  // Modal de Vérification de Billet (Anti-Fraude)
+  const [isTicketVerificationOpen, setIsTicketVerificationOpen] = useState<boolean>(false);
+
+  const verifyTicketByCode = (code: string): {
+    status: 'VALID' | 'ALREADY_USED' | 'NOT_FOUND';
+    ticket?: PurchasedTicket;
+    details?: string;
+  } => {
+    const clean = code.trim().toUpperCase();
+    if (!clean) {
+      return { status: 'NOT_FOUND', details: 'Veuillez saisir une référence de billet.' };
+    }
+    const found = purchasedTickets.find(t => 
+      t.ticketId.toUpperCase() === clean || 
+      t.qrCodeToken.toUpperCase().includes(clean) ||
+      clean.includes(t.ticketId.toUpperCase())
+    );
+    if (!found) {
+      return {
+        status: 'NOT_FOUND',
+        details: 'Aucun billet correspondant à cette référence n’a été trouvé dans le registre officiel VUKA Pay.'
+      };
+    }
+    if (found.status === 'SCANNED_ENTERED') {
+      return {
+        status: 'ALREADY_USED',
+        ticket: found,
+        details: `Ce billet a déjà été validé à la porte le ${found.scannedAt ? new Date(found.scannedAt).toLocaleDateString('fr-FR') : 'jour de l\'événement'}.`
+      };
+    }
+    return {
+      status: 'VALID',
+      ticket: found,
+      details: 'Billet 100% authentique et valide. Prêt pour l’accès sécurisé.'
+    };
+  };
 
   const openPublishModal = (preselectedType?: ActivityType) => {
     setPublishPreselectedType(preselectedType || null);
@@ -556,8 +711,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setIsAuthModalOpen(false);
-    setAppViewMode('CLIENT_PORTAL');
-    setActiveClientTab('OVERVIEW');
     return newUser;
   };
 
@@ -575,7 +728,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(existingUser);
     localStorage.setItem('vuka_current_user', JSON.stringify(existingUser));
     setIsAuthModalOpen(false);
-    setAppViewMode('CLIENT_PORTAL');
     return existingUser;
   };
 
@@ -941,6 +1093,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openPublishModal,
       selectedActivityTypeFilter,
       setSelectedActivityTypeFilter,
+      selectedRegionFilter,
+      setSelectedRegionFilter,
+      isUserDashboardOpen,
+      setIsUserDashboardOpen,
+      userDashboardInitialTab,
+      openUserDashboard,
+      standApplications,
+      submitStandApplication,
+      isTicketVerificationOpen,
+      setIsTicketVerificationOpen,
+      verifyTicketByCode,
       wallet,
       topUpWallet,
       refundWalletBalance,

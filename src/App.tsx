@@ -13,6 +13,8 @@ import { ClientDashboard } from './components/client/ClientDashboard';
 import { BackofficeHub } from './components/backoffice/BackofficeHub';
 import { AuthModal } from './components/auth/AuthModal';
 import { PublishActivityModal } from './components/showcase/PublishActivityModal';
+import { TicketVerificationModal } from './components/ticketing/TicketVerificationModal';
+import { UserDashboardModal } from './components/dashboard/UserDashboardModal';
 import { TicketDefinition } from './types';
 
 const MainContent: React.FC = () => {
@@ -84,6 +86,12 @@ const MainContent: React.FC = () => {
 
       {/* Modal de Publication d'Activités (Événement, Donation, Concert, Festival, Conférence) */}
       <PublishActivityModal />
+
+      {/* Modal de Vérification de Billet (Anti-Fraude VUKA) */}
+      <TicketVerificationModal />
+
+      {/* Modal Dashboard Organisateur & Espace Standier */}
+      <UserDashboardModal />
 
       {/* Checkout Modal when buying a ticket */}
       {selectedTicketForCheckout && (

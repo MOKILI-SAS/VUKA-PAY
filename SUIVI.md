@@ -213,6 +213,31 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation opérationnel (HTTP 200 sur `http://localhost:5173/`).
 
+### Session 9 — 31 octobre 2026 (Midi)
+
+#### Actions Réalisées :
+1. **Épuration de la Bento Grid & Mini-Hero Pleine Largeur :**
+   - Suppression définitive des 4 cartes latérales droites (Pass Découverte, Pass 6 Jours, Pass VIP, Portefeuille).
+   - Extension du Mini-Hero rotatif automatique sur toute la largeur (100% width) avec intégration de visuels haute définition par activité.
+   - Ambiance visuelle apaisée et aérée inspirée des plateformes de référence mondiales (Tickera, Tikerama, Weezevent, Somba Ticket).
+2. **Sélecteur de Régions / Villes Congolaises :**
+   - Intégration d'un sélecteur de villes majeures de RDC : `Kinshasa, Lubumbashi, Goma, Kisangani, Matadi, Kolwezi, Bukavu` dans la barre de recherche.
+   - Filtrage croisé instantané par région et type d'activité dans la grille du catalogue.
+3. **Module de Vérification de Validité de Billet (Anti-Fraude) :**
+   - Création de `TicketVerificationModal.tsx` avec vérification cryptographique HMAC, statut en direct (Valide, Déjà Scanné, Non Reconnu) et boutons de test instantanés.
+   - Accès direct depuis le Header (desktop et mobile) et la barre d'outils.
+4. **Dashboard de Gestion Utilisateur & Espace Standier :**
+   - Création de `UserDashboardModal.tsx` accessible via le menu profil de l'utilisateur connecté.
+   - Intégration de l'Espace Standier pour postuler à un stand exposant sur une activité existante (CFW6, Matadi, etc.) ou lancer sa caisse POS Standier.
+   - Raccourcis directs vers la publication multi-formats, le portefeuille cashless et les billets achetés.
+5. **Apaisement de la Palette & Discipline des Couleurs :**
+   - Remplacement des aplats saturés par un design épuré, des cartes blanches avec bordures douces (#E5E0D8), fond sable reposant (#FBF6EE) et accents Braise (#FF6A2B) ciblés sur les CTAs prioritaires.
+6. **Validation Technique & Déploiement :**
+   - Tests unitaires MOKILI validés (`npm test` : 4/4 PASS).
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://localhost:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -232,6 +257,7 @@
 | **DEC-011** | 29/10/2026 | Réalignement complet sur le Framework MOKILI V2.0 | Mise à niveau des profils (P06 SaaS Principal, P07 Billetterie, P05 Frontend PWA, P08 API), adoption du standard AGENTS.md, synchronisation des 5 fichiers de gouvernance et conformité zero-emoji. | VALIDÉE |
 | **DEC-012** | 31/10/2026 | Épuration radicale de la vitrine & Responsivité mobile | Suppression des sections programmation/zones/témoignages/organisateurs, intégration du sélecteur de pass dans le modal de commande et boutons tactiles 44px. | VALIDÉE |
 | **DEC-013** | 31/10/2026 | Mini-Hero rotatif en boucle, Filtres normalisés & Publication | Slider en boucle des activités phares, filtres Événement/Donation/Concert/Festival/Conférence et workflow de publication multi-formats. | VALIDÉE |
+| **DEC-014** | 31/10/2026 | Mini-Hero Pleine Largeur, Vérification Billet, Espace Standier & Villes RDC | Suppression du bloc de 4 cartes, intégration du vérificateur de ticket HMAC, dashboard standier, sélecteur multi-régions et apaisement colorimétrique Tickera/Weezevent. | VALIDÉE |
 
 ---
 

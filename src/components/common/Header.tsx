@@ -12,7 +12,9 @@ import {
   LogOut,
   Calendar,
   Layers,
-  PlusCircle
+  PlusCircle,
+  LayoutDashboard,
+  ShieldCheck
 } from 'lucide-react';
 import { formatUSD } from '../../utils/formatters';
 import { VukaLogo } from './VukaLogo';
@@ -27,6 +29,8 @@ export const Header: React.FC = () => {
     setIsAuthModalOpen,
     setAuthModalMode,
     openPublishModal,
+    openUserDashboard,
+    setIsTicketVerificationOpen,
     wallet
   } = useApp();
 
@@ -118,6 +122,17 @@ export const Header: React.FC = () => {
               Tarifs
             </button>
 
+            {/* Outil Vérifier un ticket */}
+            <button 
+              type="button"
+              onClick={() => setIsTicketVerificationOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
+              title="Vérifier l'authenticité d'un ticket VUKA"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#166534]" />
+              <span>Vérifier un ticket</span>
+            </button>
+
             {/* Dropdown Solutions */}
             <div className="relative" ref={solutionsRef}>
               <button 
@@ -196,11 +211,18 @@ export const Header: React.FC = () => {
             {/* Bouton Publier une Activité (Événement, Donation, Concert, Festival, Conférence) */}
             <button
               type="button"
-              onClick={() => openPublishModal()}
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FFC21A] text-xs font-bold transition shadow-xs active:scale-95"
+              onClick={() => {
+                if (!currentUser) {
+                  setAuthModalMode('LOGIN');
+                  setIsAuthModalOpen(true);
+                } else {
+                  openPublishModal();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] text-xs font-bold transition shadow-xs active:scale-95"
               title="Publier un Événement, une Donation, un Concert, un Festival ou une Conférence"
             >
-              <PlusCircle className="w-3.5 h-3.5 text-[#FFC21A]" />
+              <PlusCircle className="w-3.5 h-3.5 text-[#FF6A2B]" />
               <span>Publier</span>
             </button>
 
@@ -211,7 +233,7 @@ export const Header: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 h-9 pl-2 pr-3 rounded-full bg-white hover:bg-[#F3ECE2] border border-[#D9D0C6] transition active:scale-95 shadow-xs"
+                  className="flex items-center gap-2.5 h-9 pl-2 pr-3 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] transition active:scale-95 shadow-xs"
                 >
                   <div className="w-6 h-6 rounded-full bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-bold text-[11px]">
                     {currentUser.name.charAt(0).toUpperCase()}
@@ -239,40 +261,63 @@ export const Header: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Raccourci 1 : Dashboard Organisateur & Espace Standier */}
                     <button
                       type="button"
-                      onClick={() => navigateToClientTab('OVERVIEW')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FBF6EE] hover:text-[#14110F] transition text-left"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        openUserDashboard();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#14110F] bg-[#FAF8F5] hover:bg-[#F3ECE2] transition text-left mb-1"
                     >
-                      <User className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Parcours Festivalier</span>
+                      <LayoutDashboard className="w-4 h-4 text-[#FF6A2B]" />
+                      <div className="truncate">
+                        <div>Dashboard de Gestion</div>
+                        <div className="text-[10px] text-[#7A7068] font-normal">Publier & Espace Standier</div>
+                      </div>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => navigateToClientTab('TICKETS')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FBF6EE] hover:text-[#14110F] transition text-left"
-                    >
-                      <Ticket className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Mes Billets & Pass</span>
-                    </button>
-
+                    {/* Raccourci 2 : Portefeuille Cashless */}
                     <button
                       type="button"
                       onClick={() => navigateToClientTab('WALLET')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FBF6EE] hover:text-[#14110F] transition text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
                     >
                       <Wallet className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Mon Portefeuille Cashless</span>
+                      <span>Mon Portefeuille</span>
                     </button>
 
+                    {/* Raccourci 3 : Mes Billets & Pass */}
                     <button
                       type="button"
-                      onClick={() => navigateToClientTab('HISTORY')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FBF6EE] hover:text-[#14110F] transition text-left"
+                      onClick={() => navigateToClientTab('TICKETS')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
                     >
-                      <Receipt className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Mes Reçus & Commandes</span>
+                      <Ticket className="w-4 h-4 text-[#FF6A2B]" />
+                      <span>Mes Tickets & Pass</span>
+                    </button>
+
+                    {/* Raccourci 4 : Mon Profil */}
+                    <button
+                      type="button"
+                      onClick={() => navigateToClientTab('PROFILE')}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
+                    >
+                      <User className="w-4 h-4 text-[#7A7068]" />
+                      <span>Mon Profil</span>
+                    </button>
+
+                    {/* Raccourci 5 : Vérifier un Ticket */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        setIsTicketVerificationOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-[#166534]" />
+                      <span>Vérifier un Billet</span>
                     </button>
 
                     <div className="pt-1 mt-1 border-t border-[#F3ECE2]">
@@ -282,7 +327,7 @@ export const Header: React.FC = () => {
                           logoutUser();
                           setUserDropdownOpen(false);
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#C62828] hover:bg-[#FBE5E5] transition text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#C62828] hover:bg-[#FEF2F2] transition text-left"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Se déconnecter</span>
@@ -299,7 +344,7 @@ export const Header: React.FC = () => {
                   setAuthModalMode('LOGIN');
                   setIsAuthModalOpen(true);
                 }}
-                className="inline-flex items-center gap-2 h-9 px-4 sm:px-5 rounded-full bg-white hover:bg-[#F3ECE2] border border-[#D9D0C6] hover:border-[#14110F] text-xs font-bold text-[#14110F] shadow-xs transition active:scale-95"
+                className="inline-flex items-center gap-2 h-9 px-4 sm:px-5 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] hover:border-[#14110F] text-xs font-bold text-[#14110F] shadow-xs transition active:scale-95"
               >
                 <User className="w-3.5 h-3.5 text-[#FF6A2B]" />
                 <span>Connexion</span>
@@ -329,11 +374,16 @@ export const Header: React.FC = () => {
               type="button"
               onClick={() => {
                 setMobileMenuOpen(false);
-                openPublishModal();
+                if (!currentUser) {
+                  setAuthModalMode('LOGIN');
+                  setIsAuthModalOpen(true);
+                } else {
+                  openPublishModal();
+                }
               }}
-              className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] text-[#FFC21A] text-xs font-bold text-center shadow-xs flex items-center justify-center gap-2 transition active:scale-95"
+              className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] text-[#FBF6EE] text-xs font-bold text-center shadow-xs flex items-center justify-center gap-2 transition active:scale-95"
             >
-              <PlusCircle className="w-4 h-4 text-[#FFC21A]" />
+              <PlusCircle className="w-4 h-4 text-[#FF6A2B]" />
               <span>Publier une Activité</span>
             </button>
           </div>
@@ -352,20 +402,30 @@ export const Header: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#F3ECE2]">
+              <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-[#F3ECE2]">
                 <button
                   type="button"
-                  onClick={() => navigateToClientTab('OVERVIEW')}
-                  className="py-2 px-3 rounded-xl bg-[#FBF6EE] border border-[#E5E0D8] text-xs font-semibold text-[#14110F] text-center"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openUserDashboard();
+                  }}
+                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
                 >
-                  Mon Espace
+                  Dashboard
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateToClientTab('WALLET')}
-                  className="py-2 px-3 rounded-xl bg-[#14110F] text-[#FBF6EE] font-semibold text-xs text-center"
+                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
                 >
-                  Mon Wallet
+                  Portefeuille
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateToClientTab('TICKETS')}
+                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
+                >
+                  Mes Tickets
                 </button>
               </div>
             </div>
@@ -385,6 +445,21 @@ export const Header: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* Outil Vérifier un ticket Mobile */}
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setIsTicketVerificationOpen(true);
+              }}
+              className="w-full py-2.5 px-4 rounded-xl border border-[#D9D0C6] bg-white text-xs font-semibold text-[#14110F] flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="w-4 h-4 text-[#166534]" />
+              <span>Vérifier la validité d'un ticket</span>
+            </button>
+          </div>
 
           {/* Liens de navigation mobile */}
           <div className="space-y-1">
