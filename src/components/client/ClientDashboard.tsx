@@ -48,6 +48,7 @@ import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
 import { DynamicQRCode } from '../wallet/DynamicQRCode';
 import { TicketPassView } from '../ticketing/TicketPassView';
+import { VukaLogo } from '../common/VukaLogo';
 import { 
   PurchasedTicket, 
   CashlessTransaction, 
@@ -494,18 +495,59 @@ export const ClientDashboard: React.FC = () => {
   // MODULE 4 : PARAMÈTRES DU PROFIL (SETTINGS)
   // ----------------------------------------------------
   const [editProfileName, setEditProfileName] = useState(currentUser?.name || wallet.festivalierName || '');
-  const [editProfilePhone, setEditProfilePhone] = useState(currentUser?.phone || wallet.phone || '');
+  const [editProfileCountryCode, setEditProfileCountryCode] = useState(currentUser?.countryCode || '+243');
+  const [editProfilePhone, setEditProfilePhone] = useState(
+    currentUser?.phone ? currentUser.phone.replace(/^\+\d+\s*/, '') : (wallet.phone ? wallet.phone.replace(/^\+\d+\s*/, '') : '812345678')
+  );
   const [editProfileEmail, setEditProfileEmail] = useState(currentUser?.email || '');
   const [editProfileAvatar, setEditProfileAvatar] = useState(currentUser?.avatarUrl || '');
+  const [editProfileCover, setEditProfileCover] = useState(currentUser?.coverUrl || '');
+  const [editProfileOrgName, setEditProfileOrgName] = useState(currentUser?.organizationName || '');
+  const [editProfileBio, setEditProfileBio] = useState(currentUser?.bio || '');
+  const [editProfileWebsite, setEditProfileWebsite] = useState(currentUser?.website || '');
   const [profileSuccessMsg, setProfileSuccessMsg] = useState(false);
+
+  // Sélecteurs de fichiers pour l'avatar et la bannière de couverture
+  const profileAvatarInputRef = useRef<HTMLInputElement | null>(null);
+  const profileCoverInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleProfileAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const res = reader.result as string;
+      setEditProfileAvatar(res);
+      updateUserProfile({ avatarUrl: res });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleProfileCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const res = reader.result as string;
+      setEditProfileCover(res);
+      updateUserProfile({ coverUrl: res });
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    const fullPhone = editProfilePhone.startsWith('+') ? editProfilePhone.trim() : `${editProfileCountryCode} ${editProfilePhone.trim()}`;
     updateUserProfile({
       name: editProfileName.trim(),
-      phone: editProfilePhone.trim(),
+      phone: fullPhone,
+      countryCode: editProfileCountryCode,
       email: editProfileEmail.trim(),
-      avatarUrl: editProfileAvatar.trim()
+      avatarUrl: editProfileAvatar.trim(),
+      coverUrl: editProfileCover.trim(),
+      organizationName: editProfileOrgName.trim(),
+      bio: editProfileBio.trim(),
+      website: editProfileWebsite.trim()
     });
     setProfileSuccessMsg(true);
     setTimeout(() => setProfileSuccessMsg(false), 3000);
@@ -544,7 +586,7 @@ export const ClientDashboard: React.FC = () => {
 
   // Méthode de rechargement : Mobile Money ou Carte Bancaire
   const [topUpMethod, setTopUpMethod] = useState<'MOBILE_MONEY' | 'CARD'>('MOBILE_MONEY');
-  const [topUpOperator, setTopUpOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL'>('MPESA');
+  const [topUpOperator, setTopUpOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL' | 'AFRIMONEY'>('MPESA');
   const [topUpPhone, setTopUpPhone] = useState(currentUser?.phone || wallet.phone || '+243 821821865');
   const [topUpCardHolder, setTopUpCardHolder] = useState(currentUser?.name || '');
   const [topUpCardNumber, setTopUpCardNumber] = useState('');
@@ -690,7 +732,9 @@ export const ClientDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(true)}
-            className="h-9 px-3 rounded-full bg-[#FAF8F5] border border-[#E5E0D8] text-[#14110F] text-xs font-heading font-bold flex items-center gap-1.5"
+            className={`h-9 px-3 rounded-full border text-xs font-heading font-bold flex items-center gap-1.5 ${
+              dashboardTheme === 'dark' ? 'bg-[#251F1B] border-[#38302A] text-[#FBF6EE]' : 'bg-[#FAF8F5] border-[#E5E0D8] text-[#14110F]'
+            }`}
           >
             <Menu className="w-4 h-4 text-[#FF6A2B]" />
             <span>Menu</span>
@@ -699,7 +743,9 @@ export const ClientDashboard: React.FC = () => {
           <button
             type="button"
             onClick={toggleTheme}
-            className="w-9 h-9 rounded-full bg-[#FAF8F5] border border-[#E5E0D8] text-[#14110F] flex items-center justify-center"
+            className={`w-9 h-9 rounded-full border flex items-center justify-center ${
+              dashboardTheme === 'dark' ? 'bg-[#251F1B] border-[#38302A] text-[#FFC21A]' : 'bg-[#FAF8F5] border-[#E5E0D8] text-[#14110F]'
+            }`}
             title="Basculer thème"
           >
             {dashboardTheme === 'dark' ? <Sun className="w-4 h-4 text-[#FFC21A]" /> : <Moon className="w-4 h-4 text-[#14110F]" />}
@@ -715,12 +761,17 @@ export const ClientDashboard: React.FC = () => {
             <span>Aller au site</span>
           </button>
 
+          {/* Cercle photo profil mobile */}
           <button
             type="button"
-            onClick={() => handleSelectTab('SCAN_PAY')}
-            className="h-8 px-2.5 rounded-full bg-[#14110F] text-[#FFC21A] text-xs font-bold flex items-center gap-1"
+            onClick={() => handleSelectTab('SETTINGS')}
+            className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#FF6A2B] flex items-center justify-center bg-[#14110F] text-[#FFC21A] font-bold text-xs"
           >
-            <Camera className="w-3.5 h-3.5 text-[#FF6A2B]" />
+            {currentUser?.avatarUrl ? (
+              <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
+            ) : (
+              <span>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : wallet.festivalierName.charAt(0).toUpperCase()}</span>
+            )}
           </button>
         </div>
       </div>
@@ -735,67 +786,54 @@ export const ClientDashboard: React.FC = () => {
       `}>
         <div className="flex flex-col h-full overflow-y-auto">
           
-          {/* Header Sidebar avec Thème et CTA Aller au site */}
+          {/* Header Sidebar avec Logo Officiel VUKA Pay */}
           <div className={`p-4 border-b flex items-center justify-between ${
             dashboardTheme === 'dark' ? 'border-[#2A2420]' : 'border-[#E5E0D8]'
           }`}>
-            <div>
-              <div className="text-base font-heading font-black tracking-tight text-[#FF6A2B]">
-                VUKA Pay
-              </div>
-              <div className={`text-[10px] font-mono ${dashboardTheme === 'dark' ? 'text-[#A69C94]' : 'text-[#7A7068]'}`}>
-                Fintech Événementielle
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setAppViewMode('PUBLIC_LANDING')}
+              className="flex items-center text-left focus:outline-none hover:opacity-95 transition-opacity"
+              title="VUKA Pay — Accueil"
+            >
+              <VukaLogo size="md" variant={dashboardTheme === 'dark' ? 'inverse' : 'default'} />
+            </button>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className={`p-2 rounded-full border transition ${
-                  dashboardTheme === 'dark' ? 'bg-[#251F1B] border-[#38302A] text-[#FFC21A]' : 'bg-[#FAF8F5] border-[#E5E0D8] text-[#14110F]'
-                }`}
-                title={dashboardTheme === 'dark' ? 'Activer mode clair' : 'Activer mode sombre'}
-              >
-                {dashboardTheme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAppViewMode('PUBLIC_LANDING')}
-                className="h-8 px-3 rounded-full bg-[#FF6A2B] hover:bg-[#e0561d] text-[#14110F] text-xs font-heading font-bold uppercase tracking-wider flex items-center gap-1 transition active:scale-95 shadow-xs"
-              >
-                <span>Aller au site</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMobileSidebarOpen(false)}
-                className="lg:hidden w-8 h-8 rounded-full bg-[#FAF8F5] text-[#14110F] flex items-center justify-center"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(false)}
+              className="lg:hidden w-8 h-8 rounded-full bg-[#FAF8F5] text-[#14110F] flex items-center justify-center"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {/* User Snapshot Card */}
-          <div className="p-4 mx-4 my-3 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] space-y-2">
+          <div className={`p-4 mx-4 my-3 rounded-2xl border space-y-2 ${
+            dashboardTheme === 'dark' ? 'bg-[#251F1B] border-[#38302A]' : 'bg-[#FAF8F5] border-[#E5E0D8]'
+          }`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-heading font-black text-sm shrink-0">
-                {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : wallet.festivalierName.charAt(0).toUpperCase()}
+              <div className="w-10 h-10 rounded-xl bg-[#14110F] border border-[#FF6A2B]/40 overflow-hidden text-[#FFC21A] flex items-center justify-center font-heading font-black text-sm shrink-0">
+                {currentUser?.avatarUrl ? (
+                  <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : wallet.festivalierName.charAt(0).toUpperCase()}</span>
+                )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-heading font-black text-[#14110F] truncate">
+                <div className={`text-xs font-heading font-black truncate ${dashboardTheme === 'dark' ? 'text-white' : 'text-[#14110F]'}`}>
                   {currentUser?.name || wallet.festivalierName}
                 </div>
-                <div className="text-[10px] text-[#7A7068] font-mono truncate">
+                <div className={`text-[10px] font-mono truncate ${dashboardTheme === 'dark' ? 'text-[#A69C94]' : 'text-[#7A7068]'}`}>
                   {currentUser?.phone || wallet.phone}
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#E5E0D8] flex items-center justify-between text-xs">
-              <span className="text-[10px] font-mono text-[#7A7068] uppercase">Solde</span>
+            <div className={`pt-2 border-t flex items-center justify-between text-xs ${
+              dashboardTheme === 'dark' ? 'border-[#38302A]' : 'border-[#E5E0D8]'
+            }`}>
+              <span className={`text-[10px] font-mono uppercase ${dashboardTheme === 'dark' ? 'text-[#A69C94]' : 'text-[#7A7068]'}`}>Solde</span>
               <span className="font-mono font-bold text-[#FF6A2B]">
                 {formatUSD(wallet.balanceUSD)}
               </span>
@@ -806,7 +844,9 @@ export const ClientDashboard: React.FC = () => {
           <nav className="flex-1 px-3 py-2 space-y-6">
             {navigationGroups.map((grp, gIdx) => (
               <div key={gIdx} className="space-y-1">
-                <div className="px-3 text-[10px] font-heading font-bold uppercase tracking-wider text-[#7A7068]">
+                <div className={`px-3 text-[10px] font-heading font-bold uppercase tracking-wider ${
+                  dashboardTheme === 'dark' ? 'text-[#8A8078]' : 'text-[#7A7068]'
+                }`}>
                   {grp.group}
                 </div>
 
@@ -821,10 +861,10 @@ export const ClientDashboard: React.FC = () => {
                       onClick={() => handleSelectTab(item.id)}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading font-bold transition text-left ${
                         isActive
-                          ? 'bg-[#14110F] text-[#FBF6EE] shadow-xs'
+                          ? (dashboardTheme === 'dark' ? 'bg-[#FF6A2B] text-[#14110F] shadow-xs' : 'bg-[#14110F] text-[#FBF6EE] shadow-xs')
                           : item.highlight
-                          ? 'bg-[#FFE3D3] text-[#14110F] hover:bg-[#ffd6be]'
-                          : 'text-[#4A433D] hover:text-[#14110F] hover:bg-[#FAF8F5]'
+                          ? (dashboardTheme === 'dark' ? 'bg-[#2E221B] text-[#FFC21A] hover:bg-[#3E2D22]' : 'bg-[#FFE3D3] text-[#14110F] hover:bg-[#ffd6be]')
+                          : (dashboardTheme === 'dark' ? 'text-[#D9D0C6] hover:text-white hover:bg-[#251F1B]' : 'text-[#4A433D] hover:text-[#14110F] hover:bg-[#FAF8F5]')
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -864,15 +904,31 @@ export const ClientDashboard: React.FC = () => {
             ))}
           </nav>
 
-          {/* Déconnexion en bas de Sidebar */}
-          <div className="p-4 border-t border-[#E5E0D8]">
+          {/* Déconnexion en bas de Sidebar avec cercle photo de profil */}
+          <div className={`p-4 border-t flex items-center justify-between gap-3 ${
+            dashboardTheme === 'dark' ? 'border-[#2A2420]' : 'border-[#E5E0D8]'
+          }`}>
             <button
               type="button"
               onClick={logoutUser}
-              className="w-full py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-heading font-bold flex items-center justify-center gap-2 transition"
+              className="flex-1 py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-heading font-bold flex items-center justify-center gap-2 transition"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Déconnexion</span>
+            </button>
+
+            {/* Cercle photo de profil à côté de Déconnexion */}
+            <button
+              type="button"
+              onClick={() => handleSelectTab('SETTINGS')}
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#FF6A2B] hover:scale-105 transition-transform shrink-0 flex items-center justify-center bg-[#14110F] text-[#FFC21A] font-bold text-xs shadow-xs"
+              title="Mon profil & Paramètres"
+            >
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
+              ) : (
+                <span>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : wallet.festivalierName.charAt(0).toUpperCase()}</span>
+              )}
             </button>
           </div>
 
@@ -891,6 +947,74 @@ export const ClientDashboard: React.FC = () => {
       {/* ZONE CENTRALE DE CONTENU DU DASHBOARD (Fluid & Pro) */}
       {/* ---------------------------------------------------- */}
       <main className="flex-1 lg:pl-72 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        {/* HEADER DÉDIÉ DU DASHBOARD (Aller au site + Bascule Light/Dark + Profil/Déconnexion) */}
+        <header className={`sticky top-0 z-30 -mt-2 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-6 flex items-center justify-between border-b backdrop-blur-md transition-colors ${
+          dashboardTheme === 'dark' ? 'bg-[#14110F]/90 border-[#2A2420]' : 'bg-[#FBF6EE]/90 border-[#E5E0D8]'
+        }`}>
+          {/* Côté Gauche : Bouton "Aller au site" */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setAppViewMode('PUBLIC_LANDING');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="h-9 px-4 rounded-full bg-[#FF6A2B] hover:bg-[#e0561d] text-[#14110F] text-xs font-heading font-black uppercase tracking-wider flex items-center gap-2 transition active:scale-95 shadow-xs"
+            >
+              <ArrowRight className="w-3.5 h-3.5 rotate-180 text-[#14110F]" />
+              <span>Aller au site</span>
+            </button>
+
+            <span className={`hidden sm:inline-block text-[11px] font-mono ${dashboardTheme === 'dark' ? 'text-[#A69C94]' : 'text-[#7A7068]'}`}>
+              Portail SaaS & Fintech
+            </span>
+          </div>
+
+          {/* Côté Droit : Bascule Light/Dark + Solde rapide + Avatar */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Bascule Light / Dark */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`p-2 rounded-full border transition active:scale-95 ${
+                dashboardTheme === 'dark'
+                  ? 'bg-[#1E1A17] border-[#38302A] text-[#FFC21A] hover:bg-[#2A2420]'
+                  : 'bg-white border-[#E5E0D8] text-[#14110F] hover:bg-[#FAF8F5]'
+              }`}
+              title={dashboardTheme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              aria-label="Basculer thème sombre / clair"
+            >
+              {dashboardTheme === 'dark' ? <Sun className="w-4 h-4 text-[#FFC21A]" /> : <Moon className="w-4 h-4 text-[#14110F]" />}
+            </button>
+
+            {/* Solde Vuka Wallet discret */}
+            <div 
+              onClick={() => handleSelectTab('WALLET')}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer hover:border-[#FF6A2B] transition ${
+                dashboardTheme === 'dark' ? 'bg-[#1E1A17] border-[#2A2420]' : 'bg-white border-[#E5E0D8]'
+              }`}
+              title="Accéder au portefeuille"
+            >
+              <Wallet className="w-3.5 h-3.5 text-[#FF6A2B]" />
+              <span className="font-mono text-xs font-black text-[#FF6A2B]">{formatUSD(wallet.balanceUSD)}</span>
+            </div>
+
+            {/* Cercle photo de profil */}
+            <button
+              type="button"
+              onClick={() => handleSelectTab('SETTINGS')}
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#FF6A2B] hover:scale-105 transition-transform flex items-center justify-center bg-[#14110F] text-[#FFC21A] font-bold text-xs shadow-xs"
+              title="Mon profil & Paramètres"
+            >
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-full h-full object-cover" />
+              ) : (
+                <span>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : wallet.festivalierName.charAt(0).toUpperCase()}</span>
+              )}
+            </button>
+          </div>
+        </header>
 
         {/* ---------------------------------------------------- */}
         {/* ONGLET 1 : VUE D'ENSEMBLE (OVERVIEW) — MES CHIFFRES */}
@@ -1424,11 +1548,12 @@ export const ClientDashboard: React.FC = () => {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block">
                         Opérateur Mobile Money (RDC)
                       </span>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {[
                           { id: 'MPESA', label: 'Vodacom M-Pesa' },
                           { id: 'ORANGE', label: 'Orange Money' },
-                          { id: 'AIRTEL', label: 'Airtel Money' }
+                          { id: 'AIRTEL', label: 'Airtel Money' },
+                          { id: 'AFRIMONEY', label: 'AfriMoney' }
                         ].map((op) => (
                           <button
                             key={op.id}
@@ -1542,7 +1667,7 @@ export const ClientDashboard: React.FC = () => {
                       <Smartphone className="w-4 h-4 text-[#14110F]" />
                     )}
                     <span>
-                      {isTopUpLoading ? 'Paiement en cours...' : `Recharger ${formatUSD(customTopUpAmt ? parseFloat(customTopUpAmt) || 0 : selectedTopUpAmt)} via ${topUpMethod === 'CARD' ? 'Carte Visa/Mastercard' : (topUpOperator === 'MPESA' ? 'Vodacom M-Pesa' : topUpOperator === 'ORANGE' ? 'Orange Money' : 'Airtel Money')}`}
+                      {isTopUpLoading ? 'Paiement en cours...' : `Recharger ${formatUSD(customTopUpAmt ? parseFloat(customTopUpAmt) || 0 : selectedTopUpAmt)} via ${topUpMethod === 'CARD' ? 'Carte Visa/Mastercard' : (topUpOperator === 'MPESA' ? 'Vodacom M-Pesa' : topUpOperator === 'ORANGE' ? 'Orange Money' : topUpOperator === 'AIRTEL' ? 'Airtel Money' : 'AfriMoney')}`}
                     </span>
                   </button>
                 </div>
@@ -2123,56 +2248,175 @@ export const ClientDashboard: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSaveProfile} className="space-y-4">
+              <form onSubmit={handleSaveProfile} className="space-y-5">
+                
+                {/* 1. Photo de Couverture / Bannière Organisation */}
                 <div>
-                  <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
-                    Nom Complet
+                  <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1.5">
+                    Photo de Couverture (Organisation / Événement)
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={editProfileName}
-                    onChange={(e) => setEditProfileName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
-                  />
+                  <div className="relative h-32 sm:h-36 rounded-2xl overflow-hidden border border-[#E5E0D8] bg-[#FAF8F5] group">
+                    {editProfileCover ? (
+                      <img src={editProfileCover} alt="Couverture" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-[#7A7068] space-y-1">
+                        <Upload className="w-6 h-6 text-[#FF6A2B]" />
+                        <span className="text-[11px] font-medium">Aucune bannière de couverture</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      ref={profileCoverInputRef}
+                      accept="image/*"
+                      onChange={handleProfileCoverChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => profileCoverInputRef.current?.click()}
+                      className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full bg-[#14110F]/80 hover:bg-[#14110F] text-white text-xs font-bold flex items-center gap-1.5 shadow-md backdrop-blur-xs transition"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-[#FF6A2B]" />
+                      <span>{editProfileCover ? 'Changer la bannière' : 'Importer une bannière'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
-                    Numéro de Téléphone (WhatsApp / Mobile Money)
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={editProfilePhone}
-                    onChange={(e) => setEditProfilePhone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
-                  />
+                {/* 2. Photo de Profil / Avatar depuis le gestionnaire de fichiers */}
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8]">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#FF6A2B] bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-black text-lg shrink-0 shadow-xs">
+                    {editProfileAvatar ? (
+                      <img src={editProfileAvatar} alt={editProfileName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{editProfileName ? editProfileName.charAt(0).toUpperCase() : 'U'}</span>
+                    )}
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <span className="text-xs font-bold text-[#14110F] block">Photo de Profil / Avatar Officiel</span>
+                    <p className="text-[11px] text-[#7A7068]">Sélectionnez une image carrée depuis votre gestionnaire de fichiers.</p>
+                    <input
+                      type="file"
+                      ref={profileAvatarInputRef}
+                      accept="image/*"
+                      onChange={handleProfileAvatarChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => profileAvatarInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#14110F] text-white hover:bg-[#2A2420] text-xs font-heading font-bold transition active:scale-95"
+                    >
+                      <Upload className="w-3 h-3 text-[#FF6A2B]" />
+                      <span>Choisir une image dans le gestionnaire</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
-                    Adresse Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={editProfileEmail}
-                    onChange={(e) => setEditProfileEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
-                  />
+                {/* 3. Nom & Organisation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
+                      Nom Complet *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editProfileName}
+                      onChange={(e) => setEditProfileName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
+                      Nom de l'Organisation / Collectif
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex : LAB3, Congo Food Week, ASBL..."
+                      value={editProfileOrgName}
+                      onChange={(e) => setEditProfileOrgName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
                 </div>
 
+                {/* 4. Téléphone avec Sélecteur de Code Pays */}
                 <div>
                   <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
-                    Photo de Profil / Avatar (URL ou Choix)
+                    Numéro WhatsApp & Mobile Money (Obligatoire) *
                   </label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={editProfileAvatar}
-                    onChange={(e) => setEditProfileAvatar(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                  <div className="flex gap-2">
+                    <select
+                      value={editProfileCountryCode}
+                      onChange={(e) => setEditProfileCountryCode(e.target.value)}
+                      className="w-32 px-3 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B] shrink-0"
+                    >
+                      <option value="+243">🇨🇩 +243 (RDC)</option>
+                      <option value="+33">🇫🇷 +33 (FR)</option>
+                      <option value="+32">🇧🇪 +32 (BE)</option>
+                      <option value="+1">🇺🇸 +1 (US/CA)</option>
+                      <option value="+44">🇬🇧 +44 (UK)</option>
+                      <option value="+242">🇨🇬 +242 (CG)</option>
+                      <option value="+237">🇨🇲 +237 (CM)</option>
+                      <option value="+225">🇨🇮 +225 (CI)</option>
+                      <option value="+221">🇸🇳 +221 (SN)</option>
+                      <option value="+250">🇷🇼 +250 (RW)</option>
+                      <option value="+254">🇰🇪 +254 (KE)</option>
+                      <option value="+27">🇿🇦 +27 (ZA)</option>
+                      <option value="+244">🇦🇴 +244 (AO)</option>
+                    </select>
+                    <input
+                      type="tel"
+                      required
+                      value={editProfilePhone}
+                      onChange={(e) => setEditProfilePhone(e.target.value)}
+                      placeholder="81 234 56 78"
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+                </div>
+
+                {/* 5. Email & Site Web */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
+                      Adresse Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={editProfileEmail}
+                      onChange={(e) => setEditProfileEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
+                      Site Web / Réseaux Sociaux
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={editProfileWebsite}
+                      onChange={(e) => setEditProfileWebsite(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+                </div>
+
+                {/* 6. Bio / Présentation de l'Organisateur */}
+                <div>
+                  <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1">
+                    Présentation / Biographie de l'Organisateur
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editProfileBio}
+                    onChange={(e) => setEditProfileBio(e.target.value)}
+                    placeholder="Présentez votre organisation ou vos activités événementielles..."
+                    className="w-full px-4 py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-medium text-[#14110F] focus:outline-none focus:border-[#FF6A2B] resize-none"
                   />
                 </div>
 
@@ -2181,7 +2425,7 @@ export const ClientDashboard: React.FC = () => {
                     type="submit"
                     className="w-full py-3 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-white font-heading font-bold text-xs uppercase tracking-wider transition active:scale-95"
                   >
-                    Enregistrer les Modifications
+                    Enregistrer les Informations du Profil
                   </button>
                 </div>
               </form>

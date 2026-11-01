@@ -47,8 +47,8 @@ const MainContent: React.FC = () => {
   // 2. SITE PUBLIC ET PORTAIL CLIENT FESTIVALIER
   return (
     <div className="min-h-screen flex flex-col bg-[#FBF6EE] text-[#14110F] selection:bg-[#FFE3D3] selection:text-[#14110F]">
-      {/* Top Navbar publique avec profil festivalier et navigation fluide */}
-      <Header />
+      {/* Top Navbar publique (uniquement sur la vitrine et page à propos, le dashboard ayant son propre header dédié) */}
+      {appViewMode !== 'CLIENT_PORTAL' && <Header />}
 
       {/* Main Views */}
       <main className="flex-1 pb-16">

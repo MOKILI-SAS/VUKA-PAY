@@ -42,6 +42,9 @@ export interface UserAccount {
   avatarUrl?: string;
   coverUrl?: string; // Photo de couverture pour profil ou organisation
   organizationName?: string;
+  bio?: string;
+  website?: string;
+  countryCode?: string; // Ex: '+243', '+33', '+1', etc.
   walletId: string;
   createdAt: string;
   isVerified: boolean;

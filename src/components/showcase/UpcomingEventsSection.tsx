@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Calendar, 
   MapPin, 
@@ -6,10 +6,12 @@ import {
   ArrowRight, 
   Heart, 
   Filter,
-  Check
+  Check,
+  Building
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { VukaPublishedEvent } from '../../types';
+import { OrganizerInfoModal } from './OrganizerInfoModal';
 
 interface UpcomingEventsSectionProps {
   onSelectEvent?: (event: VukaPublishedEvent) => void;
@@ -29,6 +31,8 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({
     followedOrganizers,
     toggleFollowOrganizer
   } = useApp();
+
+  const [selectedOrganizerName, setSelectedOrganizerName] = useState<string | null>(null);
 
   const handleEventClick = (event: VukaPublishedEvent) => {
     if (onSelectEvent) {
@@ -140,9 +144,17 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({
 
                     {/* Organisateur + Bouton S'abonner Subtil */}
                     <div className="flex items-center justify-between text-xs text-[#7A7068] pt-1">
-                      <span className="truncate pr-1">
-                        Par <strong className="text-[#14110F] font-semibold">{organizer}</strong>
-                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrganizerName(organizer);
+                        }}
+                        className="truncate pr-1 text-left hover:text-[#FF6A2B] transition-colors group/org"
+                        title={`Voir les informations et les événements de ${organizer}`}
+                      >
+                        Par <strong className="text-[#14110F] group-hover/org:text-[#FF6A2B] font-semibold underline decoration-[#D9D0C6] hover:decoration-[#FF6A2B]">{organizer}</strong>
+                      </button>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -202,6 +214,19 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({
             );
           })}
         </div>
+      )}
+
+      {/* Modal Fiche Informations Organisateur */}
+      {selectedOrganizerName && (
+        <OrganizerInfoModal
+          organizerName={selectedOrganizerName}
+          events={publishedEvents}
+          onClose={() => setSelectedOrganizerName(null)}
+          onSelectEvent={(ev) => {
+            setSelectedOrganizerName(null);
+            handleEventClick(ev);
+          }}
+        />
       )}
 
     </section>

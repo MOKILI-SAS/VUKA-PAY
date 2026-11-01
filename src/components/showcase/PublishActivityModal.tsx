@@ -142,6 +142,8 @@ export const PublishActivityModal: React.FC = () => {
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [dateStr, setDateStr] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('Kinshasa, Gombe');
   const [priceUSD, setPriceUSD] = useState<number>(10);
@@ -383,22 +385,70 @@ export const PublishActivityModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Date & Lieu */}
+              {/* Date & Horaires avec Sélecteur Calendrier et Heure */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-1">
-                    Date & Horaires *
+                    Date & Horaires de l'Événement *
                   </label>
-                  <div className="relative">
-                    <Calendar className="w-3.5 h-3.5 text-[#7A7068] absolute left-3 top-3" />
-                    <input
-                      type="text"
-                      required
-                      value={dateStr}
-                      onChange={(e) => setDateStr(e.target.value)}
-                      placeholder="Ex : Samedi 24 Octobre 2026 • 18h00"
-                      className="w-full bg-white border border-[#D9D0C6] rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm font-medium text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
-                    />
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={eventDate}
+                          onChange={(e) => {
+                            const d = e.target.value;
+                            setEventDate(d);
+                            if (d) {
+                              const [y, m, day] = d.split('-');
+                              const formattedDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(day)).toLocaleDateString('fr-FR', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              });
+                              setDateStr(eventTime ? `${formattedDate} • ${eventTime}` : formattedDate);
+                            }
+                          }}
+                          className="w-full bg-white border border-[#D9D0C6] rounded-xl px-2.5 py-2 text-xs font-medium text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                        />
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="time"
+                          value={eventTime}
+                          onChange={(e) => {
+                            const t = e.target.value;
+                            setEventTime(t);
+                            if (eventDate) {
+                              const [y, m, day] = eventDate.split('-');
+                              const formattedDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(day)).toLocaleDateString('fr-FR', {
+                                weekday: 'short',
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              });
+                              setDateStr(t ? `${formattedDate} • ${t}` : formattedDate);
+                            } else if (t) {
+                              setDateStr(prev => prev ? `${prev.split('•')[0].trim()} • ${t}` : `Horaire : ${t}`);
+                            }
+                          }}
+                          className="w-full bg-white border border-[#D9D0C6] rounded-xl px-2.5 py-2 text-xs font-medium text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                        />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <Calendar className="w-3.5 h-3.5 text-[#7A7068] absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        required
+                        value={dateStr}
+                        onChange={(e) => setDateStr(e.target.value)}
+                        placeholder="Ex : Samedi 24 Octobre 2026 • 18h00"
+                        className="w-full bg-white border border-[#D9D0C6] rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                      />
+                    </div>
                   </div>
                 </div>
 

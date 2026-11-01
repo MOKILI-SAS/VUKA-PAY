@@ -199,14 +199,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
   const [paymentMethod, setPaymentMethod] = useState<'WALLET' | 'VISA' | 'MOBILE_MONEY'>(canPayWithWallet ? 'WALLET' : 'MOBILE_MONEY');
 
   // Sous-questions Mobile Money & Carte Visa
-  const [mobileOperator, setMobileOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL'>('MPESA');
+  const [mobileOperator, setMobileOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL' | 'AFRIMONEY'>('MPESA');
   const [cardHolder, setCardHolder] = useState(currentUser?.name || '');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
 
   const [name, setName] = useState(currentUser?.name || '');
-  const [phone, setPhone] = useState(currentUser?.phone || '+243 ');
+  const [countryCode, setCountryCode] = useState('+243');
+  const [phone, setPhone] = useState(currentUser?.phone ? currentUser.phone.replace(/^\+\d+\s*/, '') : '81 234 56 78');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [loading, setLoading] = useState(false);
   const [purchasedTicketsList, setPurchasedTicketsList] = useState<PurchasedTicket[]>([]);
@@ -233,9 +234,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
       return;
     }
 
-    const cleanPhone = phone.trim();
-    if (cleanPhone.length < 10) {
-      setError('Numéro WhatsApp / Téléphone obligatoire invalide (ex: +243 81 234 5678).');
+    const fullPhone = phone.startsWith('+') ? phone.trim() : `${countryCode} ${phone.trim()}`;
+    if (phone.trim().length < 6) {
+      setError('Numéro WhatsApp / Téléphone obligatoire invalide.');
       return;
     }
 
@@ -277,7 +278,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
         currentTier.id, 
         quantity,
         name.trim(), 
-        cleanPhone, 
+        fullPhone, 
         cleanEmail,
         paymentMethod,
         {
@@ -691,11 +692,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#14110F] block">
                     Quel Mobile Money souhaitez-vous utiliser ?
                   </span>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {[
-                      { id: 'MPESA', label: 'M-Pesa Vodacom' },
+                      { id: 'MPESA', label: 'Vodacom M-Pesa' },
                       { id: 'ORANGE', label: 'Orange Money' },
-                      { id: 'AIRTEL', label: 'Airtel Money' }
+                      { id: 'AIRTEL', label: 'Airtel Money' },
+                      { id: 'AFRIMONEY', label: 'AfriMoney' }
                     ].map(op => (
                       <button
                         key={op.id}
@@ -816,24 +818,44 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
                 </div>
               </div>
 
-              {/* WhatsApp / Phone OBLIGATOIRE */}
+              {/* WhatsApp / Phone OBLIGATOIRE avec Sélecteur Code Pays */}
               <div>
-                <label className="block text-[11px] font-bold text-[#14110F] mb-1 uppercase tracking-wider flex items-center justify-between">
-                  <span>Numéro WhatsApp / Mobile Money (Obligatoire) *</span>
-                  <span className="text-[10px] text-[#7A7068] font-normal">Format RDC</span>
+                <label className="block text-[11px] font-bold text-[#14110F] mb-1 uppercase tracking-wider">
+                  Numéro WhatsApp / Mobile Money (Obligatoire) *
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7A7068]">
-                    <Smartphone className="w-4 h-4 text-[#FF6A2B]" />
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="w-28 px-2 py-2 rounded-xl bg-white border border-[#D9D0C6] text-[#14110F] text-xs font-bold focus:outline-none focus:border-[#FF6A2B] shrink-0"
+                  >
+                    <option value="+243">🇨🇩 +243 (RDC)</option>
+                    <option value="+33">🇫🇷 +33 (FR)</option>
+                    <option value="+32">🇧🇪 +32 (BE)</option>
+                    <option value="+1">🇺🇸 +1 (US/CA)</option>
+                    <option value="+44">🇬🇧 +44 (UK)</option>
+                    <option value="+242">🇨🇬 +242 (CG)</option>
+                    <option value="+237">🇨🇲 +237 (CM)</option>
+                    <option value="+225">🇨🇮 +225 (CI)</option>
+                    <option value="+221">🇸🇳 +221 (SN)</option>
+                    <option value="+250">🇷🇼 +250 (RW)</option>
+                    <option value="+254">🇰🇪 +254 (KE)</option>
+                    <option value="+27">🇿🇦 +27 (ZA)</option>
+                    <option value="+244">🇦🇴 +244 (AO)</option>
+                  </select>
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7A7068]">
+                      <Smartphone className="w-4 h-4 text-[#FF6A2B]" />
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="81 234 56 78"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#D9D0C6] text-[#14110F] font-mono placeholder-[#7A7068] text-xs focus:outline-none focus:border-[#FF6A2B]"
+                    />
                   </div>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+243 81 234 56 78"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#D9D0C6] text-[#14110F] font-mono placeholder-[#7A7068] text-xs focus:outline-none focus:border-[#FF6A2B]"
-                  />
                 </div>
                 <p className="text-[10px] text-[#7A7068] mt-0.5">
                   Vos {quantity} billets électroniques et codes d'accès sécurisés y seront expédiés.
