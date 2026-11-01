@@ -384,6 +384,7 @@
 | **DEC-017** | 01/11/2026 | Page Interne À Propos Dédiée, Auth Gate Publication, Catégorie Autre & Épuration des Textes | Déplacement des sections explicatives hors de la landing page, redirection login avant publication, catégorie Autre avec saisie libre et nettoyage des badges. | VALIDÉE |
 | **DEC-018** | 01/11/2026 | Billetterie Multi-Événements Universelle, Refonte Preuve de Paiement & Superposition Auth | Formules de pass conditionnées à la durée réelle de l'événement, bouton partage et téléchargement, superposition z-[70] de la connexion et retrait des mentions festivalier superflues. | VALIDÉE |
 | **DEC-019** | 01/11/2026 | Header Ultra-Sobre, Bouton Mon Profil Unique, Partage WhatsApp & Hero À Propos | Retrait des liens centraux du header, accès direct à la page dashboard unifiée à 5 onglets, partage WhatsApp / copie fiabilisé, refonte Bento charte VUKA de la page À Propos et lien footer. | VALIDÉE |
+| **DEC-020** | 01/11/2026 | Refonte Dashboard SaaS Fintech MOKILI V2.0, Épuration & Standard P06 | Refonte intégrale de ClientDashboard.tsx selon les standards MOKILI P06 SaaS / Fintech : master bar bidevise, 4 KPI unifiés, segmented control 6 onglets, pass modal haute résolution, historique ledger fiscal et zéro bruit visuel. | VALIDÉE |
 
 ---
 
@@ -409,3 +410,4 @@
 | **ABOUT-PAGE & CLEANUP** | Page Interne À Propos, Auth Gate Publier, Catégorie Autre | [PASS] Terminé | Landing 100% épurée, AboutPage interne, auth modal avant publier, build 0 erreur |
 | **MULTI-EVENTS & PROOF** | Billetterie Multi-Événements, Preuve Partager/Télécharger, Auth z-[70] | [PASS] Terminé | Formules adaptées à chaque activité, preuve compacte avec partage/téléchargement, connexion fluide |
 | **PROFILE-DASHBOARD & AP** | Header Épuré, Mon Profil Unique, Dashboard 5 Onglets, Hero À Propos | [PASS] Terminé | Header minimaliste, page dashboard complète (5 modules), WhatsApp direct, section 1 Bento VUKA |
+| **DASHBOARD-PREMIUM** | Refonte Dashboard P06 SaaS / Fintech MOKILI V2.0 | [PASS] Terminé | UI épurée sans slate, master balance bar, 4 KPI, pass modal haute fidélité, ledger fiscal |
