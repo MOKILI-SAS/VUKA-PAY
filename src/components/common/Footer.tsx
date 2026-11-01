@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Heart, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { VukaLogo } from './VukaLogo';
 import { LegalModal, LegalTab } from '../legal/LegalModal';
 
@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="border-t border-[#D9D0C6] bg-white text-[#4A433D] py-16 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {/* Brand Col */}
           <div className="space-y-4">
             <button
@@ -96,26 +96,10 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Impact & Partenaires */}
+          {/* Technologie & Infrastructures */}
           <div>
             <h4 className="text-xs font-bold text-[#14110F] uppercase tracking-wider mb-4">
-              Modèle Solidaire
-            </h4>
-            <div className="p-4 rounded-[16px] bg-[#FFE3D3]/40 border border-[#FF6A2B]/20 text-xs space-y-2">
-              <div className="flex items-center gap-1.5 text-[#14110F] font-bold">
-                <Heart className="w-4 h-4 text-[#C62828]" />
-                <span>10% reversés à la Fondation</span>
-              </div>
-              <p className="text-[#4A433D] leading-relaxed font-normal">
-                Sur chaque transaction effectuée sur les 23 stands du Congo Food Week 6, 10% financent des actions d'impact social pour la Fondation Congolicious (cantines scolaires en milieu rural).
-              </p>
-            </div>
-          </div>
-
-          {/* Technologie & LAB3 */}
-          <div>
-            <h4 className="text-xs font-bold text-[#14110F] uppercase tracking-wider mb-4">
-              Infrastructures RDC
+              Infrastructures
             </h4>
             <ul className="space-y-2 text-xs text-[#7A7068] font-medium">
               <li className="flex items-center gap-2">

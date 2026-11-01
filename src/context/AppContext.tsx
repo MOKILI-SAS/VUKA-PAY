@@ -56,7 +56,18 @@ interface AppContextType {
   // Billetterie & Activités
   tickets: TicketDefinition[];
   purchasedTickets: PurchasedTicket[];
-  buyTicket: (ticketDefId: string, buyerName: string, buyerPhone: string, buyerEmail: string) => Promise<PurchasedTicket>;
+  buyTicket: (
+    ticketDefId: string, 
+    buyerName: string, 
+    buyerPhone: string, 
+    buyerEmail: string,
+    eventInfo?: {
+      eventId?: string;
+      eventTitle?: string;
+      tierName?: string;
+      priceUSD?: number;
+    }
+  ) => Promise<PurchasedTicket>;
   publishedEvents: VukaPublishedEvent[];
   addOrganizerEvent: (newEvent: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => void;
   
@@ -662,28 +673,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('vuka_transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  // Achat de billet en ligne (Module VUKA Ticket)
+  // Achat de billet en ligne (Module VUKA Ticket - Universel multi-événements)
   const buyTicket = async (
     ticketDefId: string, 
     buyerName: string, 
     buyerPhone: string, 
-    buyerEmail: string
+    buyerEmail: string,
+    eventInfo?: {
+      eventId?: string;
+      eventTitle?: string;
+      tierName?: string;
+      priceUSD?: number;
+    }
   ): Promise<PurchasedTicket> => {
     const ticketDef = tickets.find(t => t.id === ticketDefId);
-    if (!ticketDef) throw new Error("Billet introuvable");
+    if (!ticketDef && !eventInfo) throw new Error("Billet introuvable");
 
     // Simuler latence réseau M-Pesa C2B
     await new Promise(r => setTimeout(r, 600));
 
-    const ticketId = `TCK-CFW6-${Math.floor(1000 + Math.random() * 9000)}`;
+    const prefix = eventInfo?.eventId 
+      ? eventInfo.eventId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase()
+      : (ticketDefId.startsWith('pass-') ? 'CFW6' : 'VUKA');
+    const ticketId = `TCK-${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const effectivePrice = eventInfo?.priceUSD ?? ticketDef?.priceUSD ?? 10;
+    const effectiveName = eventInfo?.tierName 
+      ? (eventInfo.eventTitle ? `${eventInfo.eventTitle} — ${eventInfo.tierName}` : eventInfo.tierName)
+      : (ticketDef?.name || 'Billet Officiel VUKA');
+
     const newPurchasedTicket: PurchasedTicket = {
       ticketId,
       ticketDefId,
-      ticketName: ticketDef.name,
+      ticketName: effectiveName,
       buyerName,
       buyerPhone,
       buyerEmail,
-      pricePaidUSD: ticketDef.priceUSD,
+      pricePaidUSD: effectivePrice,
       purchaseDate: new Date().toISOString(),
       qrCodeToken: `VUKA-${ticketId}-${Date.now()}`,
       status: 'VALID'
@@ -691,25 +717,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setPurchasedTickets(prev => [newPurchasedTicket, ...prev]);
 
-    // Mettre à jour la quantité restante
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketDefId) {
-        return { ...t, remainingQuantity: Math.max(0, t.remainingQuantity - 1) };
-      }
-      return t;
-    }));
+    // Mettre à jour la quantité restante si le ticket de base existe
+    if (ticketDef) {
+      setTickets(prev => prev.map(t => {
+        if (t.id === ticketDefId) {
+          return { ...t, remainingQuantity: Math.max(0, t.remainingQuantity - 1) };
+        }
+        return t;
+      }));
+    }
 
-    // Mettre à jour les statistiques de l'événement vedette
-    setPublishedEvents(prev => prev.map(evt => {
-      if (evt.id === 'cfw-6') {
-        return {
-          ...evt,
-          ticketsSold: evt.ticketsSold + 1,
-          revenueUSD: evt.revenueUSD + ticketDef.priceUSD
-        };
-      }
-      return evt;
-    }));
+    // Mettre à jour les statistiques de l'événement correspondant
+    const targetEventId = eventInfo?.eventId || (ticketDefId.startsWith('pass-') ? 'cfw-6' : undefined);
+    if (targetEventId) {
+      setPublishedEvents(prev => prev.map(evt => {
+        if (evt.id === targetEventId) {
+          return {
+            ...evt,
+            ticketsSold: evt.ticketsSold + 1,
+            revenueUSD: evt.revenueUSD + effectivePrice
+          };
+        }
+        return evt;
+      }));
+    }
 
     // Si le festivalier n'était pas connecté, créer sa session automatiquement pour qu'il voie son billet
     if (!currentUser) {

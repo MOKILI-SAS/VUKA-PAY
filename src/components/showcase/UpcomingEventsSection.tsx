@@ -9,8 +9,17 @@ import {
   Check
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { VukaPublishedEvent } from '../../types';
 
-export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void }> = ({ onSelectEventTickets }) => {
+interface UpcomingEventsSectionProps {
+  onSelectEvent?: (event: VukaPublishedEvent) => void;
+  onSelectEventTickets?: () => void;
+}
+
+export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({ 
+  onSelectEvent,
+  onSelectEventTickets 
+}) => {
   const { 
     publishedEvents, 
     selectedActivityTypeFilter, 
@@ -20,6 +29,14 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
     followedOrganizers,
     toggleFollowOrganizer
   } = useApp();
+
+  const handleEventClick = (event: VukaPublishedEvent) => {
+    if (onSelectEvent) {
+      onSelectEvent(event);
+    } else if (onSelectEventTickets) {
+      onSelectEventTickets();
+    }
+  };
 
   const filteredEvents = publishedEvents.filter(event => {
     // 1. Filtre par type
@@ -63,7 +80,7 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
             return (
               <div
                 key={event.id}
-                onClick={onSelectEventTickets}
+                onClick={() => handleEventClick(event)}
                 className="cursor-pointer rounded-2xl border border-[#E5E0D8] hover:border-[#14110F]/30 bg-white shadow-xs hover:shadow-md overflow-hidden flex flex-col justify-between transition-all group"
               >
                 {/* 1. Image en vedette avec bouton Like & Tag épuré */}
@@ -167,7 +184,7 @@ export const UpcomingEventsSection: React.FC<{ onSelectEventTickets: () => void 
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSelectEventTickets();
+                        handleEventClick(event);
                       }}
                       className="h-8 px-3.5 rounded-full bg-[#14110F] hover:bg-[#FF6A2B] text-white hover:text-[#14110F] font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shrink-0 shadow-xs"
                     >

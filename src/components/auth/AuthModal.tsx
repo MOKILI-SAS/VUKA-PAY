@@ -89,7 +89,7 @@ export const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className="relative w-full max-w-md bg-white rounded-[28px] border border-[#D9D0C6] shadow-2xl p-6 sm:p-8 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -105,10 +105,12 @@ export const AuthModal: React.FC = () => {
 
         {/* Header Branding */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFE3D3] border border-[#FF6A2B]/20 text-xs font-bold text-[#14110F] uppercase tracking-wider mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A2B]" />
-            <span>{isOrganizerAuthMode ? 'Espace Organisateur & Billetterie' : 'Espace Festivalier VUKA Pay'}</span>
-          </div>
+          {isOrganizerAuthMode && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFE3D3] border border-[#FF6A2B]/20 text-xs font-bold text-[#14110F] uppercase tracking-wider mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A2B]" />
+              <span>Espace Organisateur & Billetterie</span>
+            </div>
+          )}
           <h2 className="text-2xl font-bold text-[#14110F] tracking-tight font-heading">
             {isOrganizerAuthMode 
               ? 'Connexion Organisateur' 
@@ -236,7 +238,7 @@ export const AuthModal: React.FC = () => {
                 <span>Création en cours...</span>
               ) : (
                 <>
-                  <span>Créer mon Compte Festivalier</span>
+                  <span>Créer mon Compte</span>
                   <ArrowRight className="w-3.5 h-3.5 text-[#14110F]" />
                 </>
               )}

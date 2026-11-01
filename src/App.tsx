@@ -14,17 +14,24 @@ import { AuthModal } from './components/auth/AuthModal';
 import { PublishActivityModal } from './components/showcase/PublishActivityModal';
 import { TicketVerificationModal } from './components/ticketing/TicketVerificationModal';
 import { UserDashboardModal } from './components/dashboard/UserDashboardModal';
-import { TicketDefinition } from './types';
+import { TicketDefinition, VukaPublishedEvent } from './types';
 
 const MainContent: React.FC = () => {
   const { appViewMode, setAppViewMode, setActiveClientTab, tickets } = useApp();
   const [selectedTicketForCheckout, setSelectedTicketForCheckout] = useState<TicketDefinition | null>(null);
+  const [selectedEventForCheckout, setSelectedEventForCheckout] = useState<VukaPublishedEvent | null>(null);
 
   const handleOpenPassCheckout = (ticket?: TicketDefinition) => {
     const chosenTicket = ticket || tickets.find((t) => t.id === 'pass-6-days') || tickets[0];
     if (chosenTicket) {
       setSelectedTicketForCheckout(chosenTicket);
+      setSelectedEventForCheckout(null);
     }
+  };
+
+  const handleSelectEvent = (event: VukaPublishedEvent) => {
+    setSelectedEventForCheckout(event);
+    setSelectedTicketForCheckout(null);
   };
 
   const handleExploreStands = () => {
@@ -56,12 +63,19 @@ const MainContent: React.FC = () => {
             <TicketmasterHeroBento 
               onExploreTickets={() => handleOpenPassCheckout()} 
               onExploreStands={handleExploreStands}
-              onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket)}
+              onSelectTicket={(ticket) => {
+                setSelectedTicketForCheckout(ticket);
+                setSelectedEventForCheckout(null);
+              }}
+              onSelectEvent={handleSelectEvent}
             />
 
             {/* 3. Section Grille des Événements */}
             <div id="evenements" className="space-y-2">
-              <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
+              <UpcomingEventsSection 
+                onSelectEvent={handleSelectEvent}
+                onSelectEventTickets={() => handleOpenPassCheckout()} 
+              />
             </div>
 
             {/* 4. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
@@ -71,7 +85,10 @@ const MainContent: React.FC = () => {
 
         {/* VUE 2 : PAGE INTERNE À PROPOS (Comment ça marche, Tarifs, Solutions) */}
         {appViewMode === 'ABOUT_PAGE' && (
-          <AboutPage onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket || null)} />
+          <AboutPage onSelectTicket={(ticket) => {
+            setSelectedTicketForCheckout(ticket || null);
+            setSelectedEventForCheckout(null);
+          }} />
         )}
 
         {/* VUE 3 : ESPACE FESTIVALIER & PARCOURS CLIENT */}
@@ -93,11 +110,15 @@ const MainContent: React.FC = () => {
       {/* Modal Dashboard Organisateur & Espace Standier */}
       <UserDashboardModal />
 
-      {/* Checkout Modal when buying a ticket */}
-      {selectedTicketForCheckout && (
+      {/* Checkout Modal when buying a ticket or registering for an event */}
+      {(selectedTicketForCheckout || selectedEventForCheckout) && (
         <CheckoutModal
+          event={selectedEventForCheckout}
           ticket={selectedTicketForCheckout}
-          onClose={() => setSelectedTicketForCheckout(null)}
+          onClose={() => {
+            setSelectedTicketForCheckout(null);
+            setSelectedEventForCheckout(null);
+          }}
         />
       )}
 

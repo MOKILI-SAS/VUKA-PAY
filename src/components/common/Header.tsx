@@ -36,18 +36,13 @@ export const Header: React.FC = () => {
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  const aboutRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Fermeture au clic extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (aboutRef.current && !aboutRef.current.contains(event.target as Node)) {
-        setAboutDropdownOpen(false);
-      }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserDropdownOpen(false);
       }
@@ -67,24 +62,6 @@ export const Header: React.FC = () => {
       }
     }, 100);
     setMobileMenuOpen(false);
-  };
-
-  const navigateToAboutSection = (sectionId?: string) => {
-    if (appViewMode !== 'ABOUT_PAGE') {
-      setAppViewMode('ABOUT_PAGE');
-    }
-    setAboutDropdownOpen(false);
-    setMobileMenuOpen(false);
-    setTimeout(() => {
-      if (sectionId) {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-          return;
-        }
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
   };
 
   const navigateToClientTab = (tab: 'OVERVIEW' | 'TICKETS' | 'WALLET' | 'HISTORY' | 'PROFILE') => {
@@ -116,97 +93,34 @@ export const Header: React.FC = () => {
           </div>
 
           {/* ZONE CENTRALE : Navigation sobre et aérée (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
             <button 
               type="button"
               onClick={() => scrollToSection('evenements')}
-              className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
+              className={`px-4 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
+                appViewMode === 'PUBLIC_LANDING' 
+                  ? 'text-[#14110F] bg-black/[0.06] font-semibold' 
+                  : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
+              }`}
             >
               Événements
             </button>
 
-            {/* Dropdown À Propos regroupant : Comment ça marche, Tarifs et Solutions */}
-            <div className="relative" ref={aboutRef}>
-              <button 
-                type="button"
-                onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
-                  aboutDropdownOpen || appViewMode === 'ABOUT_PAGE'
-                    ? 'text-[#14110F] bg-black/[0.06]' 
-                    : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
-                }`}
-                aria-expanded={aboutDropdownOpen}
-              >
-                <span>À Propos</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-[#7A7068] transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {aboutDropdownOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl bg-white border border-[#E5E0D8] shadow-xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {/* Vue Globale : Page Interne À Propos */}
-                  <button 
-                    type="button"
-                    onClick={() => navigateToAboutSection()}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] text-[#14110F] border border-[#D9D0C6] flex items-center justify-center shrink-0">
-                      <Info className="w-4 h-4 text-[#14110F]" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Découvrir VUKA Pay</div>
-                      <div className="text-[11px] text-[#7A7068]">Page de présentation officielle</div>
-                    </div>
-                  </button>
-
-                  <div className="my-1 border-t border-[#F3ECE2]" />
-
-                  {/* Section 1 : Comment ça marche */}
-                  <button 
-                    type="button"
-                    onClick={() => navigateToAboutSection('cashless-section')}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#FFE3D3] text-[#FF6A2B] flex items-center justify-center shrink-0">
-                      <Wallet className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Comment ça marche</div>
-                      <div className="text-[11px] text-[#7A7068]">Pass numérique & cashless sans contact</div>
-                    </div>
-                  </button>
-
-                  {/* Section 2 : Tarifs */}
-                  <button 
-                    type="button"
-                    onClick={() => navigateToAboutSection('tarifs')}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#FFF3CC] text-[#14110F] flex items-center justify-center shrink-0">
-                      <Receipt className="w-4 h-4 text-[#14110F]" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Tarifs & Pass</div>
-                      <div className="text-[11px] text-[#7A7068]">Pass festivalier & 10% solidaire</div>
-                    </div>
-                  </button>
-
-                  {/* Section 3 : Solutions */}
-                  <button 
-                    type="button"
-                    onClick={() => navigateToAboutSection('solutions')}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#F3ECE2] text-[#4A433D] flex items-center justify-center shrink-0">
-                      <Layers className="w-4 h-4 text-[#0E5A8A]" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Nos Solutions</div>
-                      <div className="text-[11px] text-[#7A7068]">Billetterie, Cashless & Bornes POS</div>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Bouton direct cliquable À Propos */}
+            <button 
+              type="button"
+              onClick={() => {
+                setAppViewMode('ABOUT_PAGE');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`px-4 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
+                appViewMode === 'ABOUT_PAGE' 
+                  ? 'text-[#14110F] bg-black/[0.06] font-semibold' 
+                  : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
+              }`}
+            >
+              À Propos
+            </button>
           </nav>
 
           {/* ZONE DROITE : Actions utilisateurs (Connexion / Profil) */}
@@ -416,46 +330,30 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => scrollToSection('evenements')}
-              className="w-full text-left py-2 px-3 rounded-xl text-sm font-semibold text-[#4A433D] hover:bg-white"
+              className={`w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold transition ${
+                appViewMode === 'PUBLIC_LANDING' 
+                  ? 'bg-[#14110F] text-[#FBF6EE]' 
+                  : 'text-[#4A433D] hover:bg-white'
+              }`}
             >
               Événements
             </button>
 
-            {/* Sections regroupées sous À Propos */}
-            <div className="pt-2 pb-1 space-y-1">
-              <button
-                type="button"
-                onClick={() => navigateToAboutSection()}
-                className="w-full text-left py-2 px-3 rounded-xl text-xs font-bold text-[#14110F] bg-white border border-[#E5E0D8] flex items-center justify-between"
-              >
-                <span>À Propos de VUKA Pay</span>
-                <span className="text-[10px] text-[#FF6A2B] uppercase font-mono">Page interne</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateToAboutSection('cashless-section')}
-                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#FF6A2B]" />
-                Comment ça marche
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateToAboutSection('tarifs')}
-                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#FFC21A]" />
-                Tarifs & Pass
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateToAboutSection('solutions')}
-                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#0E5A8A]" />
-                Nos Solutions
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAppViewMode('ABOUT_PAGE');
+                setMobileMenuOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold transition ${
+                appViewMode === 'ABOUT_PAGE' 
+                  ? 'bg-[#14110F] text-[#FBF6EE]' 
+                  : 'text-[#4A433D] hover:bg-white'
+              }`}
+            >
+              À Propos
+            </button>
           </div>
         </div>
       )}

@@ -14,12 +14,14 @@ interface TicketmasterHeroBentoProps {
   onExploreTickets: () => void;
   onExploreStands: () => void;
   onSelectTicket?: (ticket: TicketDefinition) => void;
+  onSelectEvent?: (event: VukaPublishedEvent) => void;
 }
 
 export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
   onExploreTickets,
   onExploreStands,
   onSelectTicket,
+  onSelectEvent,
 }) => {
   const { tickets, publishedEvents } = useApp();
 
@@ -62,7 +64,9 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
   };
 
   const handleCtaClick = () => {
-    if (currentEvent?.id === 'cfw-6') {
+    if (onSelectEvent && currentEvent) {
+      onSelectEvent(currentEvent);
+    } else if (currentEvent?.id === 'cfw-6') {
       const found = tickets.find(t => t.id === 'pass-6-days') || tickets[0];
       if (onSelectTicket && found) {
         onSelectTicket(found);
@@ -70,12 +74,7 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
         onExploreTickets();
       }
     } else {
-      const el = document.getElementById('evenements');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        onExploreTickets();
-      }
+      onExploreTickets();
     }
   };
 

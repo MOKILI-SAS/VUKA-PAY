@@ -306,6 +306,32 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
 
+### Session 10 — 01 novembre 2026
+
+#### Actions Réalisées :
+1. **Nettoyage & Alignement Footer / Header :**
+   - Suppression du bloc « Modèle Solidaire » (10% reversés à la Fondation) dans le footer.
+   - Remplacement du libellé « Infrastructures RDC » par « Infrastructures » dans les colonnes du footer.
+   - Remplacement du menu dropdown « À Propos » par un bouton cliquable direct menant vers la page interne dédiée présentant les 4 sections (Présentation, Comment ça marche, Tarifs, Solutions).
+2. **Refonte UX & Responsive de la Preuve de Paiement (Capture 1) :**
+   - Ajustement des dimensions pour supprimer les débordements verticaux sur écrans standards et portables (`max-h-[92vh]`, QR Code optimisé à 180px `w-32/w-36`, espacements sobres).
+   - Ajout d'une barre d'outils harmonisée à 4 boutons : « Télécharger » (export du billet et reçu cryptographique), « Partager » (Web Share API native avec fallback copie presse-papier et confirmation visuelle), « Imprimer » et « Tester l'Accès ».
+   - Mise à jour du bouton d'action principal en « Voir dans mon espace » (remplaçant « Voir dans mon espace festivalier »).
+3. **Billetterie Multi-Événements & Gestion des Formules de Pass :**
+   - Découplage de la billetterie : VUKA Pay est une super application de billetterie universelle dont CFW6 n'est qu'un événement phare parmi d'autres.
+   - Le clic sur le CTA du Hero ouvre directement le modal de paiement pour l'activité active (CFW6, Kinshasa Jazz, AfroTech Summit, Gala des Ambassadeurs, etc.).
+   - Les formules de pass multi-jours ne sont proposées qu'aux activités se déroulant sur plusieurs jours ; les événements d'une soirée (ex: Gala des Ambassadeurs) proposent exclusivement les types de billets adaptés (Standard / VIP Privilège) au tarif réel de l'événement.
+   - Extension de `buyTicket` pour générer des billets aux préfixes et intitulés dynamiques (`TCK-[PREFIX]-[NUM]`) et incrémenter le chiffre d'affaires de l'événement cible.
+4. **Modal d'Authentification & Bascule Fluide depuis Checkout :**
+   - Suppression de la mention « Espace Festivalier VUKA Pay » dans l'en-tête du modal d'authentification.
+   - Remplacement de « Créer mon Compte Festivalier » par « Créer mon Compte ».
+   - Élévation du z-index à `z-[70]` garantissant une superposition immédiate au-dessus du modal de paiement avec réinjection automatique du compte utilisateur et préremplissage des champs de réservation.
+5. **Validation & Tests Automatisés :**
+   - Compilation TypeScript sans faute (`npx tsc -b` : 0 erreur).
+   - Suite de tests unitaires MOKILI exécutée avec succès (`npm test` : 4/4 PASS).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -329,6 +355,7 @@
 | **DEC-015** | 31/10/2026 | Hero Eventbrite, É-vote, Likes/Follows & Apaisement Cartes | Hero bannière épurée 1 CTA, atténuation du mur de boutons orange vers boutons sobres, likes/abonnements discrets, filtres unifiés avec É-vote et villes RDC, header ultra-sobre. | VALIDÉE |
 | **DEC-016** | 01/11/2026 | Recherche & Publier au-dessus du Hero, Menu À Propos, Retrait Staff & Équilibre Hero | Barre de recherche au-dessus du hero avec bouton Publier, regroupement en menu À Propos, suppression staff footer, opacité photo hero rehaussée. | VALIDÉE |
 | **DEC-017** | 01/11/2026 | Page Interne À Propos Dédiée, Auth Gate Publication, Catégorie Autre & Épuration des Textes | Déplacement des sections explicatives hors de la landing page, redirection login avant publication, catégorie Autre avec saisie libre et nettoyage des badges. | VALIDÉE |
+| **DEC-018** | 01/11/2026 | Billetterie Multi-Événements Universelle, Refonte Preuve de Paiement & Superposition Auth | Formules de pass conditionnées à la durée réelle de l'événement, bouton partage et téléchargement, superposition z-[70] de la connexion et retrait des mentions festivalier superflues. | VALIDÉE |
 
 ---
 
@@ -352,3 +379,4 @@
 | **EVENTBRITE & É-VOTE** | Hero Eventbrite, É-vote, Likes/Follow & Grille apaisée | [PASS] Terminé | Hero 1 CTA, cartes sobres sans fatigue visuelle, é-vote, build 0 erreur, preview 200 OK |
 | **TOP-SEARCH & ABOUT** | Recherche au-dessus Hero, Menu À Propos, 0 Staff & Hero Équilibré | [PASS] Terminé | Barre & Publier top, À Propos dropdown, 0 staff, photos hero visibles, preview 200 OK |
 | **ABOUT-PAGE & CLEANUP** | Page Interne À Propos, Auth Gate Publier, Catégorie Autre | [PASS] Terminé | Landing 100% épurée, AboutPage interne, auth modal avant publier, build 0 erreur |
+| **MULTI-EVENTS & PROOF** | Billetterie Multi-Événements, Preuve Partager/Télécharger, Auth z-[70] | [PASS] Terminé | Formules adaptées à chaque activité, preuve compacte avec partage/téléchargement, connexion fluide |
