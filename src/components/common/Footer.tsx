@@ -130,6 +130,17 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 font-medium">
             <button
               type="button"
+              onClick={() => {
+                setAppViewMode('ABOUT_PAGE');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:text-[#14110F] hover:underline transition cursor-pointer"
+            >
+              À Propos
+            </button>
+            <span className="text-[#D9D0C6] hidden sm:inline">•</span>
+            <button
+              type="button"
               onClick={() => openLegal('PRIVACY')}
               className="hover:text-[#14110F] hover:underline transition cursor-pointer"
             >

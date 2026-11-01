@@ -332,6 +332,33 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
 
+### Session 11 — 01 novembre 2026
+
+#### Actions Réalisées :
+1. **Épuration Totale du Header & Accès Direct « Mon Profil » :**
+   - Suppression des boutons « Événements » et « À Propos » de l'en-tête (version desktop et tiroir mobile) pour une lisibilité maximale.
+   - Suppression du menu dropdown multi-options lors de la connexion : affichage d'un unique bouton d'accès « Mon Profil » avec avatar et solde direct.
+   - Clic sur « Mon Profil » basculant directement sur la page interne complète du Dashboard utilisateur.
+2. **Dashboard Utilisateur Unifié (5 Modules de Gestion) :**
+   - Implémentation des 5 options directes sous forme d'onglets ergonomiques :
+     1. `Dashboard` : Vue d'ensemble, mes statistiques, raccourcis « Publier une Activité » et « Espace Standier », suivi des publications.
+     2. `Portefeuille` : Solde bidevise USD/CDF, recharges instantanées M-Pesa C2B, QR code dynamique 30s HMAC et remboursement.
+     3. `Mes Tickets` : Consultation des billets électroniques achetés avec QR code, actions directes WhatsApp, téléchargement et impression.
+     4. `Mon Profil` : Informations du compte, statut vérifié et déconnexion sécurisée.
+     5. `Vérifier un Billet` : Vérificateur officiel anti-fraude VUKA Pay directement intégré au Dashboard avec détection cryptographique immédiate.
+3. **Fiabilisation du Partage & Retrait du Bouton « Tester » :**
+   - Suppression du bouton « Tester » (qui servait de raccourci technique vers le scanner staff des portes) de la preuve d'achat client.
+   - Intégration d'un bouton de partage direct sur WhatsApp (`https://api.whatsapp.com/send`) et d'un bouton de copie universelle avec feedback visuel garanti.
+4. **Refonte Première Section de la Page À Propos & Footer :**
+   - Suppression du bouton de retour aux événements et des 4 boutons d'ancrage en haut de `/apropos/`.
+   - Reconfiguration complète de la première section en Hero Bento immersif aux couleurs de la charte VUKA (Braise, Nuit, Soleil, Fleuve, Sable, zéro emoji).
+   - Ajout du bouton « À Propos » au footer sur la même ligne que les mentions légales, préservant l'alignement et le design existant.
+5. **Validation Technique & Tests MOKILI :**
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Suite de tests unitaires MOKILI exécutée avec succès (`npm test` : 4/4 PASS).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -356,6 +383,7 @@
 | **DEC-016** | 01/11/2026 | Recherche & Publier au-dessus du Hero, Menu À Propos, Retrait Staff & Équilibre Hero | Barre de recherche au-dessus du hero avec bouton Publier, regroupement en menu À Propos, suppression staff footer, opacité photo hero rehaussée. | VALIDÉE |
 | **DEC-017** | 01/11/2026 | Page Interne À Propos Dédiée, Auth Gate Publication, Catégorie Autre & Épuration des Textes | Déplacement des sections explicatives hors de la landing page, redirection login avant publication, catégorie Autre avec saisie libre et nettoyage des badges. | VALIDÉE |
 | **DEC-018** | 01/11/2026 | Billetterie Multi-Événements Universelle, Refonte Preuve de Paiement & Superposition Auth | Formules de pass conditionnées à la durée réelle de l'événement, bouton partage et téléchargement, superposition z-[70] de la connexion et retrait des mentions festivalier superflues. | VALIDÉE |
+| **DEC-019** | 01/11/2026 | Header Ultra-Sobre, Bouton Mon Profil Unique, Partage WhatsApp & Hero À Propos | Retrait des liens centraux du header, accès direct à la page dashboard unifiée à 5 onglets, partage WhatsApp / copie fiabilisé, refonte Bento charte VUKA de la page À Propos et lien footer. | VALIDÉE |
 
 ---
 
@@ -380,3 +408,4 @@
 | **TOP-SEARCH & ABOUT** | Recherche au-dessus Hero, Menu À Propos, 0 Staff & Hero Équilibré | [PASS] Terminé | Barre & Publier top, À Propos dropdown, 0 staff, photos hero visibles, preview 200 OK |
 | **ABOUT-PAGE & CLEANUP** | Page Interne À Propos, Auth Gate Publier, Catégorie Autre | [PASS] Terminé | Landing 100% épurée, AboutPage interne, auth modal avant publier, build 0 erreur |
 | **MULTI-EVENTS & PROOF** | Billetterie Multi-Événements, Preuve Partager/Télécharger, Auth z-[70] | [PASS] Terminé | Formules adaptées à chaque activité, preuve compacte avec partage/téléchargement, connexion fluide |
+| **PROFILE-DASHBOARD & AP** | Header Épuré, Mon Profil Unique, Dashboard 5 Onglets, Hero À Propos | [PASS] Terminé | Header minimaliste, page dashboard complète (5 modules), WhatsApp direct, section 1 Bento VUKA |

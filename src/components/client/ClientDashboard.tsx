@@ -22,7 +22,10 @@ import {
   Store,
   AlertCircle,
   ExternalLink,
-  LogOut
+  LogOut,
+  LayoutDashboard,
+  Search,
+  XCircle
 } from 'lucide-react';
 import { DynamicQRCode } from '../wallet/DynamicQRCode';
 import { TicketPassView } from '../ticketing/TicketPassView';
@@ -40,8 +43,32 @@ export const ClientDashboard: React.FC = () => {
     purchasedTickets,
     transactions,
     stands,
-    setAppViewMode
+    setAppViewMode,
+    openPublishModal,
+    openUserDashboard,
+    verifyTicketByCode
   } = useApp();
+
+  // Verification de billet dans le dashboard
+  const [verifyInputCode, setVerifyInputCode] = useState('');
+  const [verifyResult, setVerifyResult] = useState<{
+    searched: boolean;
+    status: 'VALID' | 'ALREADY_USED' | 'NOT_FOUND';
+    ticket?: any;
+    details?: string;
+  }>({ searched: false, status: 'NOT_FOUND' });
+
+  const handleVerifyTicket = (codeOverride?: string) => {
+    const code = codeOverride || verifyInputCode;
+    if (!code.trim()) return;
+    const res = verifyTicketByCode(code.trim());
+    setVerifyResult({
+      searched: true,
+      status: res.status,
+      ticket: res.ticket,
+      details: res.details
+    });
+  };
 
   // Recharges
   const [selectedAmount, setSelectedAmount] = useState<number>(10);
@@ -150,25 +177,25 @@ export const ClientDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Navigation par Onglets */}
+      {/* 2. Navigation par Onglets Principaux du Dashboard */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
         {[
-          { id: 'OVERVIEW', label: 'Parcours Festivalier', icon: Compass },
-          { id: 'TICKETS', label: `Mes Billets (${purchasedTickets.length})`, icon: Ticket },
-          { id: 'WALLET', label: 'Portefeuille Cashless', icon: Wallet },
-          { id: 'HISTORY', label: 'Mes Commandes & Reçus', icon: Receipt },
-          { id: 'PROFILE', label: 'Profil & Sécurité', icon: User }
+          { id: 'OVERVIEW', label: 'Dashboard', icon: LayoutDashboard },
+          { id: 'WALLET', label: 'Portefeuille', icon: Wallet },
+          { id: 'TICKETS', label: `Mes Tickets (${purchasedTickets.length})`, icon: Ticket },
+          { id: 'PROFILE', label: 'Mon Profil', icon: User },
+          { id: 'VERIFY', label: 'Vérifier un Billet', icon: ShieldCheck }
         ].map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeClientTab === tab.id;
+          const isActive = activeClientTab === tab.id || (tab.id === 'OVERVIEW' && activeClientTab === 'DASHBOARD');
           return (
             <button
               key={tab.id}
               onClick={() => setActiveClientTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-full text-xs font-display font-bold transition-all shrink-0 ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-full text-xs font-heading font-bold transition-all shrink-0 ${
                 isActive
                   ? 'bg-[#FF6A2B] text-[#14110F] shadow-md shadow-[#FF6A2B]/20'
-                  : 'bg-white text-slate-600 hover:text-[#14110F] border border-slate-200 hover:bg-[#FBF6EE]'
+                  : 'bg-white text-[#4A433D] hover:text-[#14110F] border border-slate-200 hover:bg-[#FBF6EE]'
               }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-[#14110F]' : 'text-slate-400'}`} />
@@ -178,10 +205,43 @@ export const ClientDashboard: React.FC = () => {
         })}
       </div>
 
-      {/* 3. CONTENU : ONGLET 1 - VUE D'ENSEMBLE & PARCOURS FESTIVALIER */}
-      {activeClientTab === 'OVERVIEW' && (
-        <div className="space-y-8">
+      {/* 3. CONTENU : ONGLET 1 - DASHBOARD (VUE D'ENSEMBLE, PUBLIER, STANDIER) */}
+      {(activeClientTab === 'OVERVIEW' || activeClientTab === 'DASHBOARD') && (
+        <div className="space-y-6">
           
+          {/* Raccourcis Dashboard : Publier une activité & Espace Standier */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-5 rounded-[24px] bg-white border border-[#D9D0C6] shadow-xs flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF6A2B] font-mono block">Organisateur</span>
+                <h4 className="text-sm sm:text-base font-bold font-heading text-[#14110F]">Publier une Activité</h4>
+                <p className="text-xs text-[#7A7068]">Créez votre événement, concert, festival, conférence ou collecte solidaire.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => openPublishModal()}
+                className="h-10 px-4 rounded-full bg-[#14110F] hover:bg-[#FF6A2B] text-white hover:text-[#14110F] text-xs font-bold shrink-0 transition active:scale-95 shadow-xs"
+              >
+                + Publier
+              </button>
+            </div>
+
+            <div className="p-5 rounded-[24px] bg-white border border-[#D9D0C6] shadow-xs flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0E5A8A] font-mono block">Exposant & Stand</span>
+                <h4 className="text-sm sm:text-base font-bold font-heading text-[#14110F]">Espace Standier</h4>
+                <p className="text-xs text-[#7A7068]">Postulez pour installer votre stand dans une activité ou festival existant.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => openUserDashboard('STANDIER')}
+                className="h-10 px-4 rounded-full bg-[#F3ECE2] hover:bg-[#D9D0C6] text-[#14110F] text-xs font-bold shrink-0 transition active:scale-95 shadow-xs"
+              >
+                Espace Stand
+              </button>
+            </div>
+          </div>
+
           {/* Progression du Parcours Festivalier */}
           <div className="p-6 sm:p-8 rounded-[32px] bg-white border border-slate-200 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -860,6 +920,131 @@ export const ClientDashboard: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. CONTENU : ONGLET 5 - VÉRIFIER UN BILLET (Anti-Fraude Officiel VUKA) */}
+      {activeClientTab === 'VERIFY' && (
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="p-6 sm:p-8 rounded-[32px] bg-white border border-[#D9D0C6] shadow-sm space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#E2F3E9] text-[#166534] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-heading font-bold text-[#14110F]">
+                  Vérificateur de Billet Officiel
+                </h2>
+                <p className="text-xs text-[#7A7068]">
+                  Contrôle d'authenticité cryptographique et détection anti-fraude VUKA Pay
+                </p>
+              </div>
+            </div>
+
+            {/* Formulaire de recherche de billet */}
+            <form 
+              onSubmit={(e) => { 
+                e.preventDefault(); 
+                handleVerifyTicket(); 
+              }} 
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-xs font-bold text-[#14110F] uppercase tracking-wider block mb-1.5">
+                  Référence du Billet ou Jeton Cryptographique
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7A7068]">
+                    <Search className="w-4 h-4 text-[#FF6A2B]" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: TCK-CFW6-8210 ou VUKA-..."
+                    value={verifyInputCode}
+                    onChange={(e) => setVerifyInputCode(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] font-mono text-xs font-bold text-[#14110F] uppercase tracking-wider focus:outline-none focus:border-[#FF6A2B]"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 px-6 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-white font-bold text-xs uppercase tracking-wider shadow-sm transition active:scale-95 flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4 text-[#FF6A2B]" />
+                <span>Vérifier l'Authenticité</span>
+              </button>
+            </form>
+
+            {/* Résultat de vérification */}
+            {verifyResult.searched && (
+              <div className="pt-4 border-t border-[#F3ECE2] space-y-4 animate-in fade-in duration-200">
+                {verifyResult.status === 'VALID' && verifyResult.ticket && (
+                  <div className="p-4 rounded-2xl bg-[#E2F3E9] border border-[#167A42]/30 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#167A42]">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Billet Authentique & Valide (Non Scanné)</span>
+                    </div>
+                    <div className="text-xs text-[#14110F] space-y-1 font-mono">
+                      <div>Activité : <strong>{verifyResult.ticket.ticketName}</strong></div>
+                      <div>Titulaire : {verifyResult.ticket.buyerName}</div>
+                      <div>Référence : {verifyResult.ticket.ticketId}</div>
+                      <div>Montant : {formatUSD(verifyResult.ticket.pricePaidUSD)}</div>
+                    </div>
+                  </div>
+                )}
+
+                {verifyResult.status === 'ALREADY_USED' && (
+                  <div className="p-4 rounded-2xl bg-[#FFFBEB] border border-[#F59E0B]/30 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#B45309]">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>Billet Déjà Scanné à l'Entrée</span>
+                    </div>
+                    <p className="text-xs text-[#7A7068]">
+                      {verifyResult.details}
+                    </p>
+                  </div>
+                )}
+
+                {verifyResult.status === 'NOT_FOUND' && (
+                  <div className="p-4 rounded-2xl bg-[#FEF2F2] border border-[#DC2626]/30 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#DC2626]">
+                      <XCircle className="w-4 h-4" />
+                      <span>Billet Inconnu ou Falsifié</span>
+                    </div>
+                    <p className="text-xs text-[#7A7068]">
+                      {verifyResult.details || "Cette référence n'existe pas dans le registre officiel VUKA Pay."}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Raccourci vers mes propres billets si existants */}
+            {purchasedTickets.length > 0 && (
+              <div className="pt-2 border-t border-[#F3ECE2]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-2">
+                  Tester avec l'un de mes billets :
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {purchasedTickets.slice(0, 3).map((t) => (
+                    <button
+                      key={t.ticketId}
+                      type="button"
+                      onClick={() => {
+                        setVerifyInputCode(t.ticketId);
+                        handleVerifyTicket(t.ticketId);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F3ECE2] border border-[#D9D0C6] text-xs font-mono font-bold text-[#14110F] transition"
+                    >
+                      {t.ticketId}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

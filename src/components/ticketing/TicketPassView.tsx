@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { PurchasedTicket } from '../../types';
 import { formatUSD } from '../../utils/formatters';
-import { QrCode, ShieldCheck, Download, Printer, Share2, Radio, Check } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { QrCode, Download, Printer, Copy, Check, Radio, Send } from 'lucide-react';
 
 export const TicketPassView: React.FC<{ ticket: PurchasedTicket }> = ({ ticket }) => {
-  const { setCurrentRole } = useApp();
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -62,28 +60,50 @@ Propulsé par MOKILI — Plateforme VUKA Pay RDC
     URL.revokeObjectURL(url);
   };
 
-  const handleShare = async () => {
-    const shareText = `Mon Billet Officiel VUKA Pay (${ticket.ticketId}) pour "${ticket.ticketName}". Titulaire: ${ticket.buyerName}. Valide et vérifiable sur VUKA Pay.`;
-    
-    if (navigator.share) {
+  const getShareText = () => {
+    return `Billet Officiel VUKA Pay (${ticket.ticketId})\nActivité : ${ticket.ticketName}\nTitulaire : ${ticket.buyerName}\nStatut : Valide\nConsultez et vérifiez sur : ${window.location.origin}`;
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(getShareText());
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleCopy = async () => {
+    const text = `${getShareText()}\n${window.location.href}`;
+    let success = false;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       try {
-        await navigator.share({
-          title: `Billet VUKA Pay - ${ticket.ticketId}`,
-          text: shareText,
-          url: window.location.href
-        });
-        return;
-      } catch (err) {
-        // Fallback to clipboard
+        await navigator.clipboard.writeText(text);
+        success = true;
+      } catch {
+        success = false;
       }
     }
 
-    try {
-      await navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
+    if (!success) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+        success = true;
+      } catch {
+        success = false;
+      }
+    }
+
+    if (success) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      // Ignoré
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -110,7 +130,7 @@ Propulsé par MOKILI — Plateforme VUKA Pay RDC
       {/* Main Ticket Body */}
       <div className="p-4 sm:p-5 space-y-4">
         
-        {/* QR Code Centerpiece - Compact pour préserver l'écran */}
+        {/* QR Code Centerpiece */}
         <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-[#E5E0D8]">
           {qrDataUrl ? (
             <img 
@@ -168,59 +188,58 @@ Propulsé par MOKILI — Plateforme VUKA Pay RDC
           </div>
         </div>
 
-        {/* Action Toolbar Coordonnée : Télécharger, Partager, Imprimer, Tester */}
+        {/* Feedback Visuel lors de la copie */}
+        {copied && (
+          <div className="p-2 rounded-xl bg-[#167A42]/20 border border-[#167A42]/40 text-[#4ADE80] text-xs font-semibold flex items-center justify-center gap-1.5 animate-in fade-in duration-150">
+            <Check className="w-4 h-4 text-[#4ADE80]" />
+            <span>Lien et résumé du billet copiés dans le presse-papier !</span>
+          </div>
+        )}
+
+        {/* Action Toolbar : Télécharger, WhatsApp, Copier, Imprimer (Tester retiré) */}
         <div className="pt-2 border-t border-[#2A2420] grid grid-cols-2 sm:grid-cols-4 gap-2">
           {/* 1. Télécharger */}
           <button
             type="button"
             onClick={handleDownload}
-            className="py-2 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
-            title="Télécharger le fichier billet électronique"
+            className="py-2.5 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
+            title="Télécharger le billet texte officiel"
           >
             <Download className="w-3.5 h-3.5 text-[#FF6A2B]" />
             <span>Télécharger</span>
           </button>
 
-          {/* 2. Partager */}
+          {/* 2. Partager sur WhatsApp */}
           <button
             type="button"
-            onClick={handleShare}
-            className="py-2 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
-            title="Partager mon billet ou copier le résumé"
+            onClick={handleShareWhatsApp}
+            className="py-2.5 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
+            title="Envoyer le billet directement par WhatsApp"
           >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-[#167A42]" />
-                <span className="text-[#167A42]">Copié !</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-3.5 h-3.5 text-[#FFC21A]" />
-                <span>Partager</span>
-              </>
-            )}
+            <Send className="w-3.5 h-3.5 text-[#25D366]" />
+            <span>WhatsApp</span>
           </button>
 
-          {/* 3. Imprimer */}
+          {/* 3. Copier Lien / Reçu */}
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="py-2.5 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
+            title="Copier les références du billet"
+          >
+            <Copy className="w-3.5 h-3.5 text-[#FFC21A]" />
+            <span>Copier</span>
+          </button>
+
+          {/* 4. Imprimer */}
           <button
             type="button"
             onClick={handlePrint}
-            className="py-2 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
+            className="py-2.5 px-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] border border-[#2A2420] text-[11px] font-semibold text-[#F5F3EF] flex items-center justify-center gap-1.5 transition active:scale-95"
             title="Imprimer le pass"
           >
             <Printer className="w-3.5 h-3.5 text-[#F5F3EF]" />
             <span>Imprimer</span>
-          </button>
-
-          {/* 4. Tester l'Accès */}
-          <button
-            type="button"
-            onClick={() => setCurrentRole('STAFF_ACCESS')}
-            className="py-2 px-2 rounded-xl bg-[#FF6A2B] hover:bg-[#E24E10] text-[11px] font-bold text-[#14110F] flex items-center justify-center gap-1.5 transition active:scale-95"
-            title="Basculer vers le scanner de contrôle d'accès"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-[#14110F]" />
-            <span>Tester</span>
           </button>
         </div>
 

@@ -19,13 +19,15 @@ export type BackofficeModule =
   | 'ACCESS_CONTROL'   // Scanners portes & contrôle anti-passback
   | 'SUPER_ADMIN';     // Console Trésorerie, Payouts & Stocks
 
-// Onglets du Dashboard Client Festivalier
+// Onglets du Dashboard Utilisateur
 export type ClientPortalTab = 
-  | 'OVERVIEW'   // Suivi du parcours festivalier
-  | 'TICKETS'    // Mes Billets & QR dynamique
-  | 'WALLET'     // Mon Portefeuille & Recharges M-Pesa
-  | 'HISTORY'    // Mes Commandes & Reçus
-  | 'PROFILE';   // Mes Informations & Sécurité
+  | 'OVERVIEW'   // Dashboard (Vue d'ensemble, mes publications & stands)
+  | 'DASHBOARD'  // Alias Dashboard
+  | 'WALLET'     // Portefeuille Cashless & Recharges M-Pesa
+  | 'TICKETS'    // Mes Billets & Pass
+  | 'PROFILE'    // Mon Profil & Sécurité
+  | 'VERIFY'     // Vérifier un Billet (Anti-Fraude)
+  | 'HISTORY';   // Mes Commandes & Reçus
 
 // Compte utilisateur client festivalier
 export interface UserAccount {

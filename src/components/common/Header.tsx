@@ -1,21 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
-  Ticket, 
-  Wallet, 
-  Store, 
   Menu, 
   X,
-  ChevronDown,
-  User,
-  Receipt,
-  LogOut,
-  Calendar,
-  Layers,
-  PlusCircle,
-  LayoutDashboard,
-  ShieldCheck,
-  Info
+  User
 } from 'lucide-react';
 import { formatUSD } from '../../utils/formatters';
 import { VukaLogo } from './VukaLogo';
@@ -26,48 +14,23 @@ export const Header: React.FC = () => {
     setAppViewMode,
     setActiveClientTab,
     currentUser,
-    logoutUser,
     setIsAuthModalOpen,
     setAuthModalMode,
-    openPublishModal,
-    openUserDashboard,
-    setIsTicketVerificationOpen,
     wallet
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // Fermeture au clic extérieur
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setUserDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const scrollToSection = (sectionId: string) => {
-    if (appViewMode !== 'PUBLIC_LANDING') {
-      setAppViewMode('PUBLIC_LANDING');
-    }
-    setTimeout(() => {
-      const el = document.getElementById(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+  const handleOpenProfile = () => {
+    setAppViewMode('CLIENT_PORTAL');
+    setActiveClientTab('OVERVIEW');
     setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const navigateToClientTab = (tab: 'OVERVIEW' | 'TICKETS' | 'WALLET' | 'HISTORY' | 'PROFILE') => {
-    setAppViewMode('CLIENT_PORTAL');
-    setActiveClientTab(tab);
-    setUserDropdownOpen(false);
+  const handleLoginClick = () => {
+    setAuthModalMode('LOGIN');
+    setIsAuthModalOpen(true);
     setMobileMenuOpen(false);
   };
 
@@ -92,157 +55,35 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          {/* ZONE CENTRALE : Navigation sobre et aérée (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
-            <button 
-              type="button"
-              onClick={() => scrollToSection('evenements')}
-              className={`px-4 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
-                appViewMode === 'PUBLIC_LANDING' 
-                  ? 'text-[#14110F] bg-black/[0.06] font-semibold' 
-                  : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
-              }`}
-            >
-              Événements
-            </button>
-
-            {/* Bouton direct cliquable À Propos */}
-            <button 
-              type="button"
-              onClick={() => {
-                setAppViewMode('ABOUT_PAGE');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`px-4 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
-                appViewMode === 'ABOUT_PAGE' 
-                  ? 'text-[#14110F] bg-black/[0.06] font-semibold' 
-                  : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
-              }`}
-            >
-              À Propos
-            </button>
-          </nav>
-
-          {/* ZONE DROITE : Actions utilisateurs (Connexion / Profil) */}
+          {/* ZONE DROITE : Actions utilisateurs (Connexion ou "Mon Profil") */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Profil Utilisateur / Bouton Connexion */}
             {currentUser ? (
-              /* Utilisateur connecté : Pilule sobre */
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 h-9 pl-2 pr-3 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] transition active:scale-95 shadow-xs"
-                >
-                  <div className="w-6 h-6 rounded-full bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-bold text-[11px]">
-                    {currentUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-left hidden sm:block">
-                    <span className="text-xs font-semibold text-[#14110F] leading-none block">
-                      {currentUser.name.split(' ')[0]}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono font-bold text-[#FF6A2B] hidden md:inline">
-                    {formatUSD(wallet.balanceUSD)}
-                  </span>
-                  <ChevronDown className={`w-3 h-3 text-[#7A7068] transition-transform duration-200 ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Utilisateur */}
-                {userDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-64 rounded-2xl bg-white border border-[#E5E0D8] shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="p-3 border-b border-[#F3ECE2] mb-1">
-                      <div className="text-xs font-bold text-[#14110F]">{currentUser.name}</div>
-                      <div className="text-[11px] text-[#7A7068] font-mono truncate">{currentUser.phone || currentUser.email}</div>
-                      <div className="mt-2 flex items-center justify-between text-xs pt-2 border-t border-[#F3ECE2]">
-                        <span className="text-[#7A7068] font-medium">Solde Cashless :</span>
-                        <span className="font-bold text-[#14110F] font-mono">{formatUSD(wallet.balanceUSD)}</span>
-                      </div>
-                    </div>
-
-                    {/* Raccourci 1 : Dashboard Organisateur & Espace Standier */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        openUserDashboard();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#14110F] bg-[#FAF8F5] hover:bg-[#F3ECE2] transition text-left mb-1"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-[#FF6A2B]" />
-                      <div className="truncate">
-                        <div>Dashboard de Gestion</div>
-                        <div className="text-[10px] text-[#7A7068] font-normal">Publier & Espace Standier</div>
-                      </div>
-                    </button>
-
-                    {/* Raccourci 2 : Portefeuille Cashless */}
-                    <button
-                      type="button"
-                      onClick={() => navigateToClientTab('WALLET')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
-                    >
-                      <Wallet className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Mon Portefeuille</span>
-                    </button>
-
-                    {/* Raccourci 3 : Mes Billets & Pass */}
-                    <button
-                      type="button"
-                      onClick={() => navigateToClientTab('TICKETS')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
-                    >
-                      <Ticket className="w-4 h-4 text-[#FF6A2B]" />
-                      <span>Mes Tickets & Pass</span>
-                    </button>
-
-                    {/* Raccourci 4 : Mon Profil */}
-                    <button
-                      type="button"
-                      onClick={() => navigateToClientTab('PROFILE')}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
-                    >
-                      <User className="w-4 h-4 text-[#7A7068]" />
-                      <span>Mon Profil</span>
-                    </button>
-
-                    {/* Raccourci 5 : Vérifier un Ticket */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        setIsTicketVerificationOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#4A433D] hover:bg-[#FAF8F5] hover:text-[#14110F] transition text-left"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-[#166534]" />
-                      <span>Vérifier un Billet</span>
-                    </button>
-
-                    <div className="pt-1 mt-1 border-t border-[#F3ECE2]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          logoutUser();
-                          setUserDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#C62828] hover:bg-[#FEF2F2] transition text-left"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Se déconnecter</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Visiteur non connecté : Bouton épuré sobre */
+              /* Utilisateur connecté : Bouton direct "Mon Profil" */
               <button
                 type="button"
-                onClick={() => {
-                  setAuthModalMode('LOGIN');
-                  setIsAuthModalOpen(true);
-                }}
+                onClick={handleOpenProfile}
+                className={`flex items-center gap-2 h-9 pl-2 pr-4 rounded-full border transition active:scale-95 shadow-xs ${
+                  appViewMode === 'CLIENT_PORTAL'
+                    ? 'bg-[#14110F] text-white border-[#14110F]'
+                    : 'bg-white hover:bg-[#FAF8F5] text-[#14110F] border-[#D9D0C6] hover:border-[#14110F]/30'
+                }`}
+                title="Accéder à Mon Profil & Dashboard"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-bold text-[11px]">
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-xs font-bold font-heading">
+                  Mon Profil
+                </span>
+                <span className="text-[11px] font-mono font-bold text-[#FF6A2B] hidden sm:inline pl-1 border-l border-[#E5E0D8]">
+                  {formatUSD(wallet.balanceUSD)}
+                </span>
+              </button>
+            ) : (
+              /* Visiteur non connecté : Bouton sobre Connexion */
+              <button
+                type="button"
+                onClick={handleLoginClick}
                 className="inline-flex items-center gap-2 h-9 px-4 sm:px-5 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#D9D0C6] hover:border-[#14110F] text-xs font-bold text-[#14110F] shadow-xs transition active:scale-95"
               >
                 <User className="w-3.5 h-3.5 text-[#FF6A2B]" />
@@ -250,7 +91,7 @@ export const Header: React.FC = () => {
               </button>
             )}
 
-            {/* Bouton Hamburger Mobile */}
+            {/* Bouton Hamburger Mobile (affiché uniquement sur petits écrans) */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -265,96 +106,36 @@ export const Header: React.FC = () => {
 
       {/* TIROIR MOBILE ÉPURÉ */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#E5E0D8] bg-[#FBF6EE] px-4 py-4 space-y-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
-          
-          {/* Section Compte Mobile */}
+        <div className="md:hidden border-t border-[#E5E0D8] bg-[#FBF6EE] px-4 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-200">
           {currentUser ? (
-            <div className="p-4 rounded-2xl bg-white border border-[#E5E0D8] space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-sm text-[#14110F]">{currentUser.name}</div>
-                  <div className="text-xs text-[#7A7068] font-mono">{currentUser.phone || currentUser.email}</div>
+            <button
+              type="button"
+              onClick={handleOpenProfile}
+              className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#D9D0C6] text-xs font-bold text-[#14110F] shadow-xs active:scale-95 transition"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#14110F] text-[#FFC21A] flex items-center justify-center font-bold text-xs">
+                  {currentUser.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-[#7A7068] uppercase font-semibold block">Solde Cashless</span>
-                  <span className="text-sm font-bold text-[#FF6A2B] font-mono">{formatUSD(wallet.balanceUSD)}</span>
+                <div className="text-left">
+                  <div className="font-heading text-sm">Mon Profil</div>
+                  <div className="text-[11px] text-[#7A7068] font-normal">{currentUser.name}</div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-[#F3ECE2]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    openUserDashboard();
-                  }}
-                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
-                >
-                  Dashboard
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateToClientTab('WALLET')}
-                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
-                >
-                  Portefeuille
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateToClientTab('TICKETS')}
-                  className="py-2 px-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-[11px] font-bold text-[#14110F] text-center"
-                >
-                  Mes Tickets
-                </button>
-              </div>
-            </div>
+              <span className="text-xs font-bold text-[#FF6A2B] font-mono">
+                {formatUSD(wallet.balanceUSD)}
+              </span>
+            </button>
           ) : (
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthModalMode('LOGIN');
-                  setIsAuthModalOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-xs font-bold text-[#FBF6EE] text-center shadow-xs flex items-center justify-center gap-2 transition"
-              >
-                <User className="w-4 h-4 text-[#FF6A2B]" />
-                <span>Se connecter / Mon Compte</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleLoginClick}
+              className="w-full min-h-[44px] py-2.5 px-4 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-xs font-bold text-[#FBF6EE] text-center shadow-xs flex items-center justify-center gap-2 transition"
+            >
+              <User className="w-4 h-4 text-[#FF6A2B]" />
+              <span>Connexion</span>
+            </button>
           )}
-
-          {/* Liens de navigation mobile */}
-          <div className="space-y-1">
-            <button
-              type="button"
-              onClick={() => scrollToSection('evenements')}
-              className={`w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold transition ${
-                appViewMode === 'PUBLIC_LANDING' 
-                  ? 'bg-[#14110F] text-[#FBF6EE]' 
-                  : 'text-[#4A433D] hover:bg-white'
-              }`}
-            >
-              Événements
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setAppViewMode('ABOUT_PAGE');
-                setMobileMenuOpen(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold transition ${
-                appViewMode === 'ABOUT_PAGE' 
-                  ? 'bg-[#14110F] text-[#FBF6EE]' 
-                  : 'text-[#4A433D] hover:bg-white'
-              }`}
-            >
-              À Propos
-            </button>
-          </div>
         </div>
       )}
     </header>
