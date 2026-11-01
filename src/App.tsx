@@ -6,8 +6,7 @@ import { TicketmasterSearchHeader } from './components/showcase/TicketmasterSear
 import { TicketmasterHeroBento } from './components/showcase/TicketmasterHeroBento';
 import { UpcomingEventsSection } from './components/showcase/UpcomingEventsSection';
 import { TrendingSearches } from './components/showcase/TrendingSearches';
-import { PerforatedTicketSection } from './components/showcase/PerforatedTicketSection';
-import { SolutionsGalaxy } from './components/showcase/SolutionsGalaxy';
+import { AboutPage } from './components/about/AboutPage';
 import { CheckoutModal } from './components/ticketing/CheckoutModal';
 import { ClientDashboard } from './components/client/ClientDashboard';
 import { BackofficeHub } from './components/backoffice/BackofficeHub';
@@ -65,18 +64,17 @@ const MainContent: React.FC = () => {
               <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
             </div>
 
-            {/* 3. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
+            {/* 4. Section "RECHERCHES POPULAIRES" avec carrousel horizontal tactile */}
             <TrendingSearches onSelectItem={() => handleOpenPassCheckout()} />
-
-            {/* 5. Grand Ticket Perforé Braise (#FF6A2B) & Nuit (#14110F) avec QR Code Scannable */}
-            <PerforatedTicketSection onExploreTickets={() => handleOpenPassCheckout()} />
-
-            {/* 6. Les 3 Piliers d'Expertise VUKA Pay (Fluide, Chaleureux 10% Solidaire, Fiable) */}
-            <SolutionsGalaxy onSelectTicket={() => handleOpenPassCheckout()} />
           </div>
         )}
 
-        {/* VUE 2 : ESPACE FESTIVALIER & PARCOURS CLIENT */}
+        {/* VUE 2 : PAGE INTERNE À PROPOS (Comment ça marche, Tarifs, Solutions) */}
+        {appViewMode === 'ABOUT_PAGE' && (
+          <AboutPage onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket || null)} />
+        )}
+
+        {/* VUE 3 : ESPACE FESTIVALIER & PARCOURS CLIENT */}
         {appViewMode === 'CLIENT_PORTAL' && (
           <ClientDashboard />
         )}

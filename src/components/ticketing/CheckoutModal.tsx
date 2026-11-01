@@ -145,10 +145,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ ticket, onClose })
           <div>
             {/* Header */}
             <div className="mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFE3D3] text-[#14110F] text-xs font-bold uppercase tracking-wider mb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A2B]" />
-                <span>Paiement M-Pesa & Billetterie Officielle</span>
-              </div>
               <h3 className="text-2xl font-bold text-[#14110F] font-heading">
                 Finaliser l'achat de votre Pass
               </h3>

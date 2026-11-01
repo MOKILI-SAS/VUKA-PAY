@@ -14,7 +14,8 @@ import {
   Layers,
   PlusCircle,
   LayoutDashboard,
-  ShieldCheck
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import { formatUSD } from '../../utils/formatters';
 import { VukaLogo } from './VukaLogo';
@@ -68,6 +69,24 @@ export const Header: React.FC = () => {
     setMobileMenuOpen(false);
   };
 
+  const navigateToAboutSection = (sectionId?: string) => {
+    if (appViewMode !== 'ABOUT_PAGE') {
+      setAppViewMode('ABOUT_PAGE');
+    }
+    setAboutDropdownOpen(false);
+    setMobileMenuOpen(false);
+    setTimeout(() => {
+      if (sectionId) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  };
+
   const navigateToClientTab = (tab: 'OVERVIEW' | 'TICKETS' | 'WALLET' | 'HISTORY' | 'PROFILE') => {
     setAppViewMode('CLIENT_PORTAL');
     setActiveClientTab(tab);
@@ -112,7 +131,7 @@ export const Header: React.FC = () => {
                 type="button"
                 onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
-                  aboutDropdownOpen 
+                  aboutDropdownOpen || appViewMode === 'ABOUT_PAGE'
                     ? 'text-[#14110F] bg-black/[0.06]' 
                     : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
                 }`}
@@ -124,13 +143,27 @@ export const Header: React.FC = () => {
 
               {aboutDropdownOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl bg-white border border-[#E5E0D8] shadow-xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {/* Vue Globale : Page Interne À Propos */}
+                  <button 
+                    type="button"
+                    onClick={() => navigateToAboutSection()}
+                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] text-[#14110F] border border-[#D9D0C6] flex items-center justify-center shrink-0">
+                      <Info className="w-4 h-4 text-[#14110F]" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Découvrir VUKA Pay</div>
+                      <div className="text-[11px] text-[#7A7068]">Page de présentation officielle</div>
+                    </div>
+                  </button>
+
+                  <div className="my-1 border-t border-[#F3ECE2]" />
+
                   {/* Section 1 : Comment ça marche */}
                   <button 
                     type="button"
-                    onClick={() => { 
-                      scrollToSection('cashless-section'); 
-                      setAboutDropdownOpen(false); 
-                    }}
+                    onClick={() => navigateToAboutSection('cashless-section')}
                     className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#FFE3D3] text-[#FF6A2B] flex items-center justify-center shrink-0">
@@ -145,10 +178,7 @@ export const Header: React.FC = () => {
                   {/* Section 2 : Tarifs */}
                   <button 
                     type="button"
-                    onClick={() => {
-                      scrollToSection('tarifs');
-                      setAboutDropdownOpen(false);
-                    }}
+                    onClick={() => navigateToAboutSection('tarifs')}
                     className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#FFF3CC] text-[#14110F] flex items-center justify-center shrink-0">
@@ -163,10 +193,7 @@ export const Header: React.FC = () => {
                   {/* Section 3 : Solutions */}
                   <button 
                     type="button"
-                    onClick={() => {
-                      scrollToSection('tarifs');
-                      setAboutDropdownOpen(false);
-                    }}
+                    onClick={() => navigateToAboutSection('solutions')}
                     className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#F3ECE2] text-[#4A433D] flex items-center justify-center shrink-0">
@@ -396,12 +423,17 @@ export const Header: React.FC = () => {
 
             {/* Sections regroupées sous À Propos */}
             <div className="pt-2 pb-1 space-y-1">
-              <span className="px-3 text-[11px] font-bold text-[#7A7068] uppercase tracking-wider block">
-                À Propos
-              </span>
               <button
                 type="button"
-                onClick={() => scrollToSection('cashless-section')}
+                onClick={() => navigateToAboutSection()}
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-bold text-[#14110F] bg-white border border-[#E5E0D8] flex items-center justify-between"
+              >
+                <span>À Propos de VUKA Pay</span>
+                <span className="text-[10px] text-[#FF6A2B] uppercase font-mono">Page interne</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateToAboutSection('cashless-section')}
                 className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
               >
                 <span className="w-2 h-2 rounded-full bg-[#FF6A2B]" />
@@ -409,7 +441,7 @@ export const Header: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => scrollToSection('tarifs')}
+                onClick={() => navigateToAboutSection('tarifs')}
                 className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
               >
                 <span className="w-2 h-2 rounded-full bg-[#FFC21A]" />
@@ -417,7 +449,7 @@ export const Header: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => scrollToSection('tarifs')}
+                onClick={() => navigateToAboutSection('solutions')}
                 className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
               >
                 <span className="w-2 h-2 rounded-full bg-[#0E5A8A]" />

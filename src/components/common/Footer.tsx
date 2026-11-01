@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Heart, ExternalLink } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { Heart, ExternalLink } from 'lucide-react';
 import { VukaLogo } from './VukaLogo';
 import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 export const Footer: React.FC = () => {
+  const { setAppViewMode } = useApp();
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalTab, setLegalTab] = useState<LegalTab>('PRIVACY');
 
@@ -18,14 +20,19 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand Col */}
           <div className="space-y-4">
-            <VukaLogo size="md" />
+            <button
+              type="button"
+              onClick={() => {
+                setAppViewMode('PUBLIC_LANDING');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-left cursor-pointer"
+            >
+              <VukaLogo size="md" />
+            </button>
             <p className="text-sm text-[#7A7068] leading-relaxed font-normal">
               Super App de billetterie, contrôle d'accès et paiement cashless 100% sans contact. Plateforme événementielle multi-événements accueillant festivals, concerts et salons en RDC (dont le Congo Food Week 6 en événement vedette).
             </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E2F3E9] border border-[#167A42]/20 text-xs text-[#167A42] font-semibold">
-              <ShieldCheck className="w-4 h-4 text-[#167A42]" />
-              <span>Souveraineté des données & Sécurité bancaire</span>
-            </div>
           </div>
 
           {/* Solutions */}
@@ -35,28 +42,56 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <span className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppViewMode('ABOUT_PAGE');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium text-left"
+                >
                   <span className="w-2 h-2 rounded-full bg-[#FF6A2B]"></span>
                   VUKA Ticket — Billetterie en ligne
-                </span>
+                </button>
               </li>
               <li>
-                <span className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppViewMode('ABOUT_PAGE');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium text-left"
+                >
                   <span className="w-2 h-2 rounded-full bg-[#0E5A8A]"></span>
                   VUKA Access — Contrôle d'accès RFID
-                </span>
+                </button>
               </li>
               <li>
-                <span className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppViewMode('ABOUT_PAGE');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium text-left"
+                >
                   <span className="w-2 h-2 rounded-full bg-[#FFC21A]"></span>
                   VUKA Pay — Portefeuille & Cashless
-                </span>
+                </button>
               </li>
               <li>
-                <span className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppViewMode('ABOUT_PAGE');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-[#4A433D] hover:text-[#FF6A2B] transition cursor-pointer flex items-center gap-2 font-medium text-left"
+                >
                   <span className="w-2 h-2 rounded-full bg-[#14110F]"></span>
                   VUKA POS — Terminaux Caisse Sunmi
-                </span>
+                </button>
               </li>
             </ul>
           </div>

@@ -17,7 +17,8 @@ import {
   Heart, 
   Utensils, 
   Award,
-  Radio
+  Radio,
+  MoreHorizontal
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatCDF } from '../../utils/formatters';
@@ -111,6 +112,19 @@ const ACTIVITY_TYPE_CONFIGS: TypeConfig[] = [
       'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80'
     ]
+  },
+  {
+    type: 'Autre',
+    label: 'Autre',
+    tagline: 'Autre format d’activité, salon ou rencontre personnalisée',
+    badge: 'ACTIVITÉ PARTICULIÈRE',
+    icon: MoreHorizontal,
+    defaultPrice: '10 $',
+    defaultCategory: 'AUTRE FORMAT',
+    defaultImages: [
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80'
+    ]
   }
 ];
 
@@ -123,6 +137,7 @@ export const PublishActivityModal: React.FC = () => {
   } = useApp();
 
   const [selectedType, setSelectedType] = useState<ActivityType>('Événement');
+  const [customCategory, setCustomCategory] = useState('');
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [dateStr, setDateStr] = useState('');
@@ -189,10 +204,10 @@ export const PublishActivityModal: React.FC = () => {
 
     addOrganizerEvent({
       title: title.trim(),
-      subtitle: subtitle.trim() || activeConfig.tagline,
-      category: activeConfig.defaultCategory,
+      subtitle: subtitle.trim() || (selectedType === 'Autre' && customCategory.trim() ? customCategory.trim() : activeConfig.tagline),
+      category: selectedType === 'Autre' && customCategory.trim() ? customCategory.trim() : activeConfig.defaultCategory,
       activityType: selectedType,
-      badge: activeConfig.badge,
+      badge: selectedType === 'Autre' && customCategory.trim() ? customCategory.trim().toUpperCase() : activeConfig.badge,
       dateStr: dateStr.trim(),
       location: location.trim(),
       city: city.trim(),
@@ -266,10 +281,6 @@ export const PublishActivityModal: React.FC = () => {
           <div>
             {/* Header */}
             <div className="mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFE3D3] text-[#14110F] text-xs font-bold uppercase tracking-wider mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF6A2B]" />
-                <span>Publication VUKA Pay</span>
-              </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-[#14110F] tracking-tight font-heading">
                 Publier une Activité
               </h2>
@@ -278,13 +289,13 @@ export const PublishActivityModal: React.FC = () => {
               </p>
             </div>
 
-            {/* Step 1 : Sélection du Type d'Activité (5 options demandées) */}
+            {/* Step 1 : Sélection du Type d'Activité */}
             <div className="mb-6">
               <label className="text-[11px] font-bold uppercase tracking-wider text-[#7A7068] block mb-2.5">
                 1. Sélectionner le type d’activité
               </label>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                 {ACTIVITY_TYPE_CONFIGS.map((cfg) => {
                   const Icon = cfg.icon;
                   const isSelected = selectedType === cfg.type;
@@ -309,6 +320,21 @@ export const PublishActivityModal: React.FC = () => {
                   );
                 })}
               </div>
+
+              {selectedType === 'Autre' && (
+                <div className="mt-3 p-3 rounded-2xl bg-[#FAF8F5] border border-[#D9D0C6] animate-in fade-in duration-150">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-1">
+                    Préciser la catégorie ou le format de votre activité
+                  </label>
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="Ex: Tournoi E-Sport, Masterclass, Salon du Livre, Webinaire..."
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9D0C6] bg-white text-xs font-semibold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                  />
+                </div>
+              )}
 
               <div className="mt-2.5 p-2.5 rounded-xl bg-[#FBF6EE] border border-[#D9D0C6] text-xs text-[#7A7068] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#FF6A2B] shrink-0" />
@@ -480,10 +506,9 @@ export const PublishActivityModal: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full min-h-[48px] rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider shadow-sm transition active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full min-h-[48px] rounded-full bg-[#FF6A2B] hover:bg-[#E24E10] text-[#14110F] font-bold text-xs uppercase tracking-wider shadow-sm transition active:scale-95 flex items-center justify-center"
                 >
-                  <Sparkles className="w-4 h-4 text-[#14110F]" />
-                  <span>Publier mon {selectedType} sur VUKA Pay</span>
+                  <span>Publier mon événement</span>
                 </button>
               </div>
 

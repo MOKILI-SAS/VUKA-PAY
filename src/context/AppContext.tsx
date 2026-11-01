@@ -442,6 +442,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Modal de Publication & Filtres d'Activités
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [publishPreselectedType, setPublishPreselectedType] = useState<ActivityType | null>(null);
+  const [pendingPostAuthAction, setPendingPostAuthAction] = useState<'PUBLISH_MODAL' | null>(null);
   const [selectedActivityTypeFilter, setSelectedActivityTypeFilter] = useState<string>('Tous les types');
   const [selectedRegionFilter, setSelectedRegionFilter] = useState<string>('Toutes les villes');
 
@@ -554,6 +555,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const openPublishModal = (preselectedType?: ActivityType) => {
     setPublishPreselectedType(preselectedType || null);
+    if (!currentUser) {
+      setPendingPostAuthAction('PUBLISH_MODAL');
+      setAuthModalMode('LOGIN');
+      setIsAuthModalOpen(true);
+      return;
+    }
     setIsPublishModalOpen(true);
   };
 
@@ -775,6 +782,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setIsAuthModalOpen(false);
+    if (pendingPostAuthAction === 'PUBLISH_MODAL') {
+      setPendingPostAuthAction(null);
+      setIsPublishModalOpen(true);
+    }
     return newUser;
   };
 
@@ -792,6 +803,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(existingUser);
     localStorage.setItem('vuka_current_user', JSON.stringify(existingUser));
     setIsAuthModalOpen(false);
+    if (pendingPostAuthAction === 'PUBLISH_MODAL') {
+      setPendingPostAuthAction(null);
+      setIsPublishModalOpen(true);
+    }
     return existingUser;
   };
 

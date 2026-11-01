@@ -300,12 +300,6 @@ export const AuthModal: React.FC = () => {
             </button>
           </form>
         )}
-
-        {/* Security assurance */}
-        <div className="mt-6 pt-4 border-t border-[#F3ECE2] flex items-center justify-center gap-2 text-[11px] text-[#7A7068] font-medium">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#167A42]" />
-          <span>Sécurité bancaire & Souveraineté des données RDC</span>
-        </div>
       </div>
     </div>
   );

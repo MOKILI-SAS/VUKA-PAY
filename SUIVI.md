@@ -283,6 +283,29 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
 
+### Session 12 — 01 novembre 2026 (Midi)
+
+#### Actions Réalisées :
+1. **Page Interne Dédiée « À Propos » & Épuration Totale de la Landing Page :**
+   - Retrait complet des sections *Comment ça marche* (Ticket Perforé) et *Tarifs & Solutions* de la Landing Page (`PUBLIC_LANDING`), qui est désormais 100% dédiée au catalogue, à la recherche et aux événements à l'affiche.
+   - Création du composant dédié `AboutPage.tsx` accessible via `ABOUT_PAGE`, regroupant la présentation, *Comment ça marche*, *Tarifs & Modèle Solidaire 10%* et *Nos Solutions*, avec bouton de retour aux événements.
+2. **Workflow d'Authentification Pré-Publication (Sign-In Gate) :**
+   - Vérification systématique de l'état de connexion lors d'un clic sur « Publier » ou « Publier mon événement ».
+   - Si non connecté, affichage immédiat du modal de connexion/création de compte, avec redirection automatique vers le formulaire de publication dès validation.
+3. **Catégorie « Autre » dans la Publication Multi-Activités :**
+   - Ajout du type `'Autre'` dans l'énumération `ActivityType` et dans la grille de sélection du modal de publication.
+   - Affichage d'un champ de saisie dynamique pour spécifier un format sur-mesure (ex: Tournoi, Masterclass, Salon, etc.).
+4. **Nettoyage Textuel & Conformité Graphique :**
+   - Suppression de la mention « Souveraineté des données & Sécurité bancaire » du Footer et d'AuthModal.
+   - Retrait de l'icône dans le CTA de soumission et standardisation du libellé sur « Publier mon événement ».
+   - Suppression du badge « Publication VUKA Pay » dans le modal de publication.
+   - Suppression du badge « Paiement M-Pesa & Billetterie Officielle » dans CheckoutModal.
+5. **Validation Technique & Déploiement :**
+   - Tests unitaires MOKILI validés (`npm test` : 4/4 PASS).
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -305,6 +328,7 @@
 | **DEC-014** | 31/10/2026 | Mini-Hero Pleine Largeur, Vérification Billet, Espace Standier & Villes RDC | Suppression du bloc de 4 cartes, intégration du vérificateur de ticket HMAC, dashboard standier, sélecteur multi-régions et apaisement colorimétrique Tickera/Weezevent. | VALIDÉE |
 | **DEC-015** | 31/10/2026 | Hero Eventbrite, É-vote, Likes/Follows & Apaisement Cartes | Hero bannière épurée 1 CTA, atténuation du mur de boutons orange vers boutons sobres, likes/abonnements discrets, filtres unifiés avec É-vote et villes RDC, header ultra-sobre. | VALIDÉE |
 | **DEC-016** | 01/11/2026 | Recherche & Publier au-dessus du Hero, Menu À Propos, Retrait Staff & Équilibre Hero | Barre de recherche au-dessus du hero avec bouton Publier, regroupement en menu À Propos, suppression staff footer, opacité photo hero rehaussée. | VALIDÉE |
+| **DEC-017** | 01/11/2026 | Page Interne À Propos Dédiée, Auth Gate Publication, Catégorie Autre & Épuration des Textes | Déplacement des sections explicatives hors de la landing page, redirection login avant publication, catégorie Autre avec saisie libre et nettoyage des badges. | VALIDÉE |
 
 ---
 
@@ -327,3 +351,4 @@
 | **MINI-HERO & PUBLISH** | Mini-hero rotatif, filtres 5 types & bouton publier | [PASS] Terminé | Mini-hero 5.5s, filtres 5 types, PublishActivityModal, test & preview 200 OK |
 | **EVENTBRITE & É-VOTE** | Hero Eventbrite, É-vote, Likes/Follow & Grille apaisée | [PASS] Terminé | Hero 1 CTA, cartes sobres sans fatigue visuelle, é-vote, build 0 erreur, preview 200 OK |
 | **TOP-SEARCH & ABOUT** | Recherche au-dessus Hero, Menu À Propos, 0 Staff & Hero Équilibré | [PASS] Terminé | Barre & Publier top, À Propos dropdown, 0 staff, photos hero visibles, preview 200 OK |
+| **ABOUT-PAGE & CLEANUP** | Page Interne À Propos, Auth Gate Publier, Catégorie Autre | [PASS] Terminé | Landing 100% épurée, AboutPage interne, auth modal avant publier, build 0 erreur |

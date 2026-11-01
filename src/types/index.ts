@@ -9,6 +9,7 @@ export type UserRole =
 // Modes de vue principaux de la plateforme
 export type AppViewMode = 
   | 'PUBLIC_LANDING'    // Landing page Weezevent/Ticketmaster publique
+  | 'ABOUT_PAGE'        // Page interne À Propos (Comment ça marche, Tarifs, Solutions)
   | 'CLIENT_PORTAL'     // Espace client & Dashboard festivalier
   | 'BACKOFFICE_STAFF'; // Espace pro sécurisé (Caisse POS, Contrôle Accès, Admin)
 
@@ -193,7 +194,7 @@ export interface StandApplication {
 }
 
 // Types d'activités publiables sur VUKA Pay
-export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence' | 'É-vote';
+export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence' | 'É-vote' | 'Autre';
 
 // Événement ou activité publiée sur la plateforme VUKA Pay
 export interface VukaPublishedEvent {
