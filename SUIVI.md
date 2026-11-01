@@ -386,6 +386,7 @@
 | **DEC-019** | 01/11/2026 | Header Ultra-Sobre, Bouton Mon Profil Unique, Partage WhatsApp & Hero À Propos | Retrait des liens centraux du header, accès direct à la page dashboard unifiée à 5 onglets, partage WhatsApp / copie fiabilisé, refonte Bento charte VUKA de la page À Propos et lien footer. | VALIDÉE |
 | **DEC-020** | 01/11/2026 | Refonte Dashboard SaaS Fintech MOKILI V2.0, Épuration & Standard P06 | Refonte intégrale de ClientDashboard.tsx selon les standards MOKILI P06 SaaS / Fintech : master bar bidevise, 4 KPI unifiés, segmented control 6 onglets, pass modal haute résolution, historique ledger fiscal et zéro bruit visuel. | VALIDÉE |
 | **DEC-021** | 01/11/2026 | Responsivité Mobile-First, Achat Multi-Places, Scanner Caméra & Sidebar Dashboard Pro | Header sans hamburger sur mobile, recherche & publier 100% responsive, achat de billets avec quantité et paiement portefeuille/M-Pesa, sidebar gauche fixe sans footer, scanner caméra QR pour payer les stands, espace Marchand (catalogue, QR unitaire, compta & CSV), espace Organisateur (multi-jours, lien de paiement direct, marchands, % commission et CSV). | VALIDÉE |
+| **DEC-022** | 01/11/2026 | Modes Paiement Multiples, Upload Photos Gestionnaire & Approbation Marchands | 3 modes de checkout (Vuka Wallet, Visa, Mobile Money), sélection jours conditionnelle, upload d'images réelles (bannière/avatar/couverture), confirmation mot de passe, onboarding standier et workflow de validation marchand par l'organisateur. | VALIDÉE |
 
 ---
 
@@ -413,3 +414,4 @@
 | **PROFILE-DASHBOARD & AP** | Header Épuré, Mon Profil Unique, Dashboard 5 Onglets, Hero À Propos | [PASS] Terminé | Header minimaliste, page dashboard complète (5 modules), WhatsApp direct, section 1 Bento VUKA |
 | **DASHBOARD-PREMIUM** | Refonte Dashboard P06 SaaS / Fintech MOKILI V2.0 | [PASS] Terminé | UI épurée sans slate, master balance bar, 4 KPI, pass modal haute fidélité, ledger fiscal |
 | **DASHBOARD-SIDEBAR-PRO** | Sidebar Dashboard Fixe, Scanner Caméra, Standier & Organisateur CSV | [PASS] Terminé | Menu latéral gauche fixe, scanner webcam pour payer, compta standier & organisateur avec export CSV |
+| **PAYMENTS-UPLOAD-STANDS** | Modes Paiement Multiples, Upload Fichiers & Approbation Stands | [PASS] Terminé | Vuka Wallet/Visa/Mobile Money, upload photos de profil/couverture/événements, confirmation mot de passe, approbation marchand |

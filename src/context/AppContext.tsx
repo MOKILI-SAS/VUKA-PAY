@@ -75,7 +75,7 @@ interface AppContextType {
     buyerName: string, 
     buyerPhone: string, 
     buyerEmail: string,
-    paymentMethod: 'MPESA' | 'WALLET',
+    paymentMethod: 'MPESA' | 'WALLET' | 'VISA' | 'MOBILE_MONEY',
     eventInfo?: {
       eventId?: string;
       eventTitle?: string;
@@ -103,8 +103,18 @@ interface AppContextType {
   updateStandCommissionRate: (standId: string, commissionPercent: number) => void;
   addStandToOrganizerEvent: (eventId: string, stand: { name: string; ownerPhone: string; commissionPercent: number; category?: string }) => void;
   removeStandFromOrganizerEvent: (eventId: string, standId: string) => void;
+  createMerchantStand: (data: { name: string; category: string; ownerPhone: string; eventId?: string; locationZone?: string }) => Stand;
+  updateMerchantStand: (standId: string, data: Partial<Stand>) => void;
+  deleteMerchantStand: (standId: string) => void;
+  approveStandForEvent: (standId: string) => void;
+  rejectStandForEvent: (standId: string) => void;
+  customProductCategories: string[];
+  addCustomProductCategory: (category: string) => void;
   publishedEvents: VukaPublishedEvent[];
   addOrganizerEvent: (newEvent: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => void;
+  updateOrganizerEvent: (eventId: string, data: Partial<VukaPublishedEvent>) => void;
+  deleteOrganizerEvent: (eventId: string) => void;
+  toggleOrganizerEventStatus: (eventId: string) => void;
   
   // Publication d'Activités & Filtres
   isPublishModalOpen: boolean;
@@ -141,7 +151,8 @@ interface AppContextType {
   
   // Festivalier & Wallet
   wallet: FestivalierWallet;
-  topUpWallet: (amountUSD: number, phoneMpesa: string) => Promise<boolean>;
+  topUpWallet: (amountUSD: number, phoneMpesa: string, operatorName?: string) => Promise<boolean>;
+  topUpWalletWithCard: (amountUSD: number, cardDetails: { cardNumber: string; cardHolder: string; expiry: string; cvv: string }) => Promise<boolean>;
   refundWalletBalance: (phoneMpesa: string) => Promise<{ success: boolean; amountRefundedUSD: number }>;
   linkRFIDToWallet: (rfidTagId: string) => void;
   
@@ -611,15 +622,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addOrganizerEvent = (newEventData: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => {
+    const userEvents = publishedEvents.filter(e => e.ownerUserId === currentUser?.id);
+    if (userEvents.length >= 5) {
+      throw new Error("Vous avez atteint la limite maximale de 5 événements créés.");
+    }
     const newEvent: VukaPublishedEvent = {
       ...newEventData,
       id: `evt-${Date.now().toString().slice(-6)}`,
       ticketsSold: 0,
       revenueUSD: 0,
-      scannedEntries: 0
+      scannedEntries: 0,
+      ownerUserId: currentUser?.id,
+      isActive: true,
+      organizerName: newEventData.organizerName || currentUser?.name || 'Organisateur Officiel'
     };
     setPublishedEvents(prev => {
       const updated = [newEvent, ...prev];
+      localStorage.setItem('vuka_published_events', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateOrganizerEvent = (eventId: string, data: Partial<VukaPublishedEvent>) => {
+    setPublishedEvents(prev => {
+      const updated = prev.map(evt => evt.id === eventId ? { ...evt, ...data } : evt);
+      localStorage.setItem('vuka_published_events', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteOrganizerEvent = (eventId: string) => {
+    setPublishedEvents(prev => {
+      const updated = prev.filter(evt => evt.id !== eventId);
+      localStorage.setItem('vuka_published_events', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const toggleOrganizerEventStatus = (eventId: string) => {
+    setPublishedEvents(prev => {
+      const updated = prev.map((evt): VukaPublishedEvent => {
+        if (evt.id === eventId) {
+          const nextStatus: 'OPEN' | 'COMING_SOON' = evt.status === 'OPEN' ? 'COMING_SOON' : 'OPEN';
+          const nextActive = evt.isActive === false ? true : false;
+          return { ...evt, status: nextStatus, isActive: nextActive };
+        }
+        return evt;
+      });
       localStorage.setItem('vuka_published_events', JSON.stringify(updated));
       return updated;
     });
@@ -644,13 +693,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Stands & Menus
   const [stands, setStands] = useState<Stand[]>(() => {
     const saved = localStorage.getItem('vuka_stands');
-    return saved ? JSON.parse(saved) : MOCK_STANDS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.map((s: Stand) => ({
+          ...s,
+          approvalStatus: s.approvalStatus || 'APPROVED',
+          isActive: s.isActive !== undefined ? s.isActive : true
+        }));
+      } catch {}
+    }
+    return MOCK_STANDS.map(s => ({
+      ...s,
+      approvalStatus: 'APPROVED' as const,
+      isActive: true,
+      eventId: s.eventId || 'cfw-6',
+      eventName: s.eventName || 'Congo Food Week — Saison 6'
+    }));
   });
   const [activeStandId, setActiveStandId] = useState<string>('stand-1');
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
     const saved = localStorage.getItem('vuka_menu_items');
     return saved ? JSON.parse(saved) : MOCK_MENU_ITEMS;
   });
+
+  // Catégories de produits personnalisables
+  const [customProductCategories, setCustomProductCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('vuka_custom_product_categories');
+    return saved ? JSON.parse(saved) : [
+      'Plat Chaud / Gastronomie',
+      'Boisson / Cocktail',
+      'Dessert / Pâtisserie',
+      'Snack / Street-Food'
+    ];
+  });
+
+  const addCustomProductCategory = (category: string) => {
+    const trimmed = category.trim();
+    if (!trimmed) return;
+    setCustomProductCategories(prev => {
+      if (prev.includes(trimmed)) return prev;
+      const updated = [...prev, trimmed];
+      localStorage.setItem('vuka_custom_product_categories', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Espace Marchand & Standier
   const [myMerchantStandId, setMyMerchantStandId] = useState<string>(() => {
@@ -739,7 +826,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     buyerName: string, 
     buyerPhone: string, 
     buyerEmail: string,
-    paymentMethod: 'MPESA' | 'WALLET' = 'MPESA',
+    paymentMethod: 'MPESA' | 'WALLET' | 'VISA' | 'MOBILE_MONEY' = 'MOBILE_MONEY',
     eventInfo?: {
       eventId?: string;
       eventTitle?: string;
@@ -757,7 +844,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Si paiement par portefeuille Cashless, vérifier et débiter le solde
     if (paymentMethod === 'WALLET') {
       if (wallet.balanceUSD < totalPrice) {
-        throw new Error(`Solde insuffisant dans votre portefeuille (${formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille ou choisir M-Pesa.`);
+        throw new Error(`Solde insuffisant dans votre portefeuille (${formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille ou choisir un autre moyen.`);
       }
       const newBalance = Math.round((wallet.balanceUSD - totalPrice) * 100) / 100;
       setWallet(prev => {
@@ -766,7 +853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return updated;
       });
     } else {
-      // Simulation latence réseau M-Pesa C2B
+      // Simulation confirmation paiement
       await new Promise(r => setTimeout(r, 600));
     }
 
@@ -1062,16 +1149,92 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Recharge du portefeuille numérique (Module VUKA Pay)
-  const topUpWallet = async (amountUSD: number, phoneMpesa: string): Promise<boolean> => {
+  const createMerchantStand = (data: { name: string; category: string; ownerPhone: string; eventId?: string; locationZone?: string }): Stand => {
+    const newStandNumber = stands.length + 1;
+    const targetEvent = publishedEvents.find(e => e.id === data.eventId);
+    const newStand: Stand = {
+      id: `stand-${Date.now().toString().slice(-5)}`,
+      number: newStandNumber,
+      name: data.name.trim(),
+      category: data.category.trim() || 'Gastronomie & Spécialités',
+      ownerName: currentUser?.name || 'Gérant Standier',
+      ownerPhoneMpesa: data.ownerPhone.trim(),
+      locationZone: data.locationZone || 'Zone Exposants',
+      totalSalesUSD: 0,
+      transactionsCount: 0,
+      isOnline: true,
+      isActive: true,
+      eventId: data.eventId,
+      eventName: targetEvent?.title,
+      commissionPercent: targetEvent?.commissionRatePercent || 10,
+      approvalStatus: 'PENDING',
+      ownerUserId: currentUser?.id,
+      createdAt: new Date().toISOString()
+    };
+    setStands(prev => {
+      const updated = [newStand, ...prev];
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+    setMyMerchantStandId(newStand.id);
+    if (data.eventId) {
+      setMerchantLinkedEventId(data.eventId);
+    }
+    return newStand;
+  };
+
+  const updateMerchantStand = (standId: string, data: Partial<Stand>) => {
+    setStands(prev => {
+      const updated = prev.map(s => {
+        if (s.id === standId) {
+          const next = { ...s, ...data };
+          if (data.eventId && data.eventId !== s.eventId) {
+            const targetEvent = publishedEvents.find(e => e.id === data.eventId);
+            next.eventName = targetEvent?.title;
+            next.approvalStatus = 'PENDING';
+          }
+          return next;
+        }
+        return s;
+      });
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteMerchantStand = (standId: string) => {
+    setStands(prev => {
+      const updated = prev.filter(s => s.id !== standId);
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const approveStandForEvent = (standId: string) => {
+    setStands(prev => {
+      const updated = prev.map(s => s.id === standId ? { ...s, approvalStatus: 'APPROVED' as const } : s);
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const rejectStandForEvent = (standId: string) => {
+    setStands(prev => {
+      const updated = prev.map(s => s.id === standId ? { ...s, approvalStatus: 'REJECTED' as const } : s);
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Recharge du portefeuille numérique (Module VUKA Pay Multi-Moyens)
+  const topUpWallet = async (amountUSD: number, phoneMpesa: string, operatorName: string = 'Mobile Money'): Promise<boolean> => {
     if (amountUSD <= 0) return false;
 
-    // Simulation confirmation M-Pesa
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 600));
 
     setWallet(prev => ({
       ...prev,
-      balanceUSD: prev.balanceUSD + amountUSD,
+      balanceUSD: Math.round((prev.balanceUSD + amountUSD) * 100) / 100,
       lastTopUpDate: new Date().toISOString()
     }));
 
@@ -1086,7 +1249,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       commissionAmountUSD: 0,
       merchantNetUSD: amountUSD,
       isSynced: !isOffline,
-      notes: `Recharge M-Pesa instantanée`
+      notes: `Recharge ${operatorName} (${phoneMpesa})`
+    };
+
+    setTransactions(prev => [newTx, ...prev]);
+    return true;
+  };
+
+  const topUpWalletWithCard = async (
+    amountUSD: number, 
+    cardDetails: { cardNumber: string; cardHolder: string; expiry: string; cvv: string }
+  ): Promise<boolean> => {
+    if (amountUSD <= 0) return false;
+    await new Promise(r => setTimeout(r, 800));
+
+    setWallet(prev => ({
+      ...prev,
+      balanceUSD: Math.round((prev.balanceUSD + amountUSD) * 100) / 100,
+      lastTopUpDate: new Date().toISOString()
+    }));
+
+    const last4 = cardDetails.cardNumber.replace(/\s+/g, '').slice(-4) || '••••';
+    const newTx: CashlessTransaction = {
+      id: `TXN-CARD-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      type: 'TOPUP',
+      amountUSD,
+      festivalierId: wallet.id,
+      festivalierPhone: currentUser?.phone || wallet.phone,
+      paymentMethod: 'MPESA_C2B',
+      commissionAmountUSD: 0,
+      merchantNetUSD: amountUSD,
+      isSynced: !isOffline,
+      notes: `Recharge Carte Bancaire Visa/Mastercard (•••• ${last4})`
     };
 
     setTransactions(prev => [newTx, ...prev]);
@@ -1513,8 +1708,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateStandCommissionRate,
       addStandToOrganizerEvent,
       removeStandFromOrganizerEvent,
+      createMerchantStand,
+      updateMerchantStand,
+      deleteMerchantStand,
+      approveStandForEvent,
+      rejectStandForEvent,
+      customProductCategories,
+      addCustomProductCategory,
       publishedEvents,
       addOrganizerEvent,
+      updateOrganizerEvent,
+      deleteOrganizerEvent,
+      toggleOrganizerEventStatus,
       isPublishModalOpen,
       setIsPublishModalOpen,
       publishPreselectedType,
@@ -1538,6 +1743,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       toggleFollowOrganizer,
       wallet,
       topUpWallet,
+      topUpWalletWithCard,
       refundWalletBalance,
       linkRFIDToWallet,
       stands,

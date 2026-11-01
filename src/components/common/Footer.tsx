@@ -116,7 +116,7 @@ export const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A2B]"></span>
-                <span>Passerelle M-Pesa Vodacom intégrée</span>
+                <span>Paiement Mobile Money et Visa intégrée</span>
               </li>
             </ul>
           </div>

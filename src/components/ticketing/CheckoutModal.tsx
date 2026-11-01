@@ -180,16 +180,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
   // Quantité (1 à 10 places)
   const [quantity, setQuantity] = useState<number>(1);
 
-  // Mode de paiement : Portefeuille Cashless ou M-Pesa
-  const totalAmountUSD = currentTier.priceUSD * quantity;
-  const canPayWithWallet = wallet.balanceUSD >= totalAmountUSD;
-  const [paymentMethod, setPaymentMethod] = useState<'MPESA' | 'WALLET'>(canPayWithWallet ? 'WALLET' : 'MPESA');
+  // Nombre de jours (pour les événements de plusieurs jours)
+  const isMultiDayEvent = isMultiDay;
+  const maxDaysCount = activeEvent?.daysCount || 6;
+  const [daysCount, setDaysCount] = useState<number>(1);
 
-  useEffect(() => {
-    if (!canPayWithWallet && paymentMethod === 'WALLET') {
-      setPaymentMethod('MPESA');
+  // Prix unitaire effectif selon les jours sélectionnés
+  const effectiveUnitPrice = useMemo(() => {
+    if (isMultiDayEvent && !currentTier.id.includes('full') && !currentTier.id.includes('6-days')) {
+      return currentTier.priceUSD * daysCount;
     }
-  }, [canPayWithWallet, paymentMethod]);
+    return currentTier.priceUSD;
+  }, [isMultiDayEvent, currentTier, daysCount]);
+
+  // Mode de paiement : Vuka Wallet, Visa, Mobile Money
+  const totalAmountUSD = effectiveUnitPrice * quantity;
+  const canPayWithWallet = wallet.balanceUSD >= totalAmountUSD;
+  const [paymentMethod, setPaymentMethod] = useState<'WALLET' | 'VISA' | 'MOBILE_MONEY'>(canPayWithWallet ? 'WALLET' : 'MOBILE_MONEY');
+
+  // Sous-questions Mobile Money & Carte Visa
+  const [mobileOperator, setMobileOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL'>('MPESA');
+  const [cardHolder, setCardHolder] = useState(currentUser?.name || '');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
 
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '+243 ');
@@ -204,6 +218,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
       if (!name) setName(currentUser.name);
       if (!phone || phone === '+243 ') setPhone(currentUser.phone);
       if (!email) setEmail(currentUser.email);
+      if (!cardHolder) setCardHolder(currentUser.name);
     }
   }, [currentUser]);
 
@@ -230,6 +245,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
       return;
     }
 
+    if (paymentMethod === 'WALLET' && !canPayWithWallet) {
+      setError(`Solde insuffisant dans votre portefeuille Vuka (${formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille ou choisir un autre moyen.`);
+      return;
+    }
+
+    if (paymentMethod === 'VISA') {
+      if (!cardHolder.trim()) {
+        setError('Veuillez renseigner le nom figurant sur la carte bancaire.');
+        return;
+      }
+      if (cardNumber.replace(/\s/g, '').length < 15) {
+        setError('Numéro de carte bancaire invalide (16 chiffres requis).');
+        return;
+      }
+      if (!cardExpiry.includes('/') || cardExpiry.trim().length < 5) {
+        setError('Date d’expiration de carte invalide (format MM/AA).');
+        return;
+      }
+      if (cardCvv.trim().length < 3) {
+        setError('Code de sécurité CVV invalide (3 chiffres).');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -244,8 +283,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
         {
           eventId: activeEvent?.id,
           eventTitle: activeEvent?.title,
-          tierName: currentTier.name,
-          priceUSD: currentTier.priceUSD
+          tierName: isMultiDayEvent && daysCount > 1 ? `${currentTier.name} (${daysCount} Jours)` : currentTier.name,
+          priceUSD: effectiveUnitPrice
         }
       );
       
@@ -508,10 +547,50 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
                 </div>
               </div>
 
+              {/* SÉLECTEUR DU NOMBRE DE JOURS (Uniquement pour les événements sur plusieurs jours) */}
+              {isMultiDayEvent && (
+                <div className="pt-2 border-t border-[#D9D0C6]/60 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-heading font-bold text-[#14110F] block">
+                      Nombre de jours
+                    </span>
+                    <span className="text-[10px] text-[#7A7068] block">
+                      Journées de présence au festival
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDaysCount(d => Math.max(1, d - 1))}
+                      disabled={daysCount <= 1}
+                      className="w-8 h-8 rounded-full bg-white border border-[#D9D0C6] text-[#14110F] hover:bg-[#F3ECE2] flex items-center justify-center transition disabled:opacity-30 active:scale-95"
+                      aria-label="Diminuer les jours"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+
+                    <span className="w-8 text-center font-heading font-black text-sm text-[#14110F] font-mono">
+                      {daysCount}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setDaysCount(d => Math.min(maxDaysCount, d + 1))}
+                      disabled={daysCount >= maxDaysCount}
+                      className="w-8 h-8 rounded-full bg-[#14110F] text-white hover:bg-[#2A2420] flex items-center justify-center transition disabled:opacity-30 active:scale-95"
+                      aria-label="Augmenter les jours"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-[#FF6A2B]" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* TOTAL GLOBAL CALCULÉ */}
               <div className="pt-2 border-t border-[#D9D0C6]/60 flex items-center justify-between">
                 <span className="text-xs font-bold text-[#7A7068] uppercase font-mono">
-                  Total à régler ({quantity} place{quantity > 1 ? 's' : ''})
+                  Total à régler ({quantity} place{quantity > 1 ? 's' : ''}{isMultiDayEvent && daysCount > 1 ? ` • ${daysCount}j` : ''})
                 </span>
                 <div className="text-right">
                   <div className="text-lg font-black text-[#FF6A2B] font-mono tabular-nums">
@@ -524,30 +603,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
               </div>
             </div>
 
-            {/* SÉLECTEUR DU MODE DE PAIEMENT : WALLET OU MPESA */}
-            <div className="mb-3 space-y-1.5">
+            {/* SÉLECTEUR DU MODE DE PAIEMENT : VUKA WALLET, VISA, MOBILE MONEY */}
+            <div className="mb-3 space-y-2">
               <label className="block text-[11px] font-bold text-[#14110F] uppercase tracking-wider">
                 Mode de Paiement
               </label>
               
-              <div className="grid grid-cols-2 gap-2">
-                {/* Option 1 : Portefeuille Cashless */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {/* Option 1 : Vuka Wallet */}
                 <button
                   type="button"
-                  onClick={() => {
-                    if (canPayWithWallet) setPaymentMethod('WALLET');
-                  }}
-                  disabled={!canPayWithWallet}
+                  onClick={() => setPaymentMethod('WALLET')}
                   className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
                     paymentMethod === 'WALLET'
                       ? 'bg-[#14110F] text-white border-[#14110F] shadow-xs'
-                      : canPayWithWallet
-                      ? 'bg-white hover:bg-[#FAF8F5] text-[#14110F] border-[#D9D0C6]'
-                      : 'bg-slate-50 text-slate-400 border-slate-200 opacity-60 cursor-not-allowed'
+                      : 'bg-white hover:bg-[#FAF8F5] text-[#14110F] border-[#D9D0C6]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-heading font-bold">Portefeuille VUKA</span>
+                    <span className="text-xs font-heading font-bold">Vuka Wallet</span>
                     <Wallet className={`w-3.5 h-3.5 ${paymentMethod === 'WALLET' ? 'text-[#FF6A2B]' : 'text-slate-400'}`} />
                   </div>
                   <span className="text-[10px] font-mono">
@@ -555,30 +629,160 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
                   </span>
                 </button>
 
-                {/* Option 2 : Mobile Money M-Pesa */}
+                {/* Option 2 : Visa */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod('MPESA')}
+                  onClick={() => setPaymentMethod('VISA')}
                   className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                    paymentMethod === 'MPESA'
+                    paymentMethod === 'VISA'
+                      ? 'bg-[#14110F] text-white border-[#14110F] shadow-xs'
+                      : 'bg-white hover:bg-[#FAF8F5] text-[#14110F] border-[#D9D0C6]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-heading font-bold">Visa</span>
+                    <CreditCard className={`w-3.5 h-3.5 ${paymentMethod === 'VISA' ? 'text-[#FF6A2B]' : 'text-slate-400'}`} />
+                  </div>
+                  <span className="text-[10px] font-mono">
+                    Carte Bancaire
+                  </span>
+                </button>
+
+                {/* Option 3 : Mobile Money */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('MOBILE_MONEY')}
+                  className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                    paymentMethod === 'MOBILE_MONEY'
                       ? 'bg-[#14110F] text-white border-[#14110F] shadow-xs'
                       : 'bg-white hover:bg-[#FAF8F5] text-[#14110F] border-[#D9D0C6]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-heading font-bold">Mobile Money</span>
-                    <Smartphone className={`w-3.5 h-3.5 ${paymentMethod === 'MPESA' ? 'text-[#FF6A2B]' : 'text-slate-400'}`} />
+                    <Smartphone className={`w-3.5 h-3.5 ${paymentMethod === 'MOBILE_MONEY' ? 'text-[#FF6A2B]' : 'text-slate-400'}`} />
                   </div>
                   <span className="text-[10px] font-mono">
-                    M-Pesa / Orange / Airtel
+                    Paiement Mobile
                   </span>
                 </button>
               </div>
 
-              {!canPayWithWallet && (
-                <p className="text-[10px] text-[#7A7068] pt-0.5">
-                  Solde portefeuille insuffisant ({formatUSD(wallet.balanceUSD)}). Le paiement par Mobile Money est sélectionné.
-                </p>
+              {/* Sous-questions selon le mode de paiement sélectionné */}
+              {paymentMethod === 'WALLET' && (
+                <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#D9D0C6] text-xs space-y-1">
+                  <div className="flex items-center justify-between font-bold text-[#14110F]">
+                    <span>Paiement Cashless Direct</span>
+                    <span className="text-[#FF6A2B] font-mono">{formatUSD(totalAmountUSD)}</span>
+                  </div>
+                  <p className="text-[10px] text-[#7A7068]">
+                    Le montant sera instantanément prélevé de votre solde disponible. Aucun frais de passerelle.
+                  </p>
+                  {!canPayWithWallet && (
+                    <p className="text-[10px] text-[#C62828] font-bold">
+                      Solde insuffisant ({formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille ou choisir Visa / Mobile Money.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {paymentMethod === 'MOBILE_MONEY' && (
+                <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#D9D0C6] space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#14110F] block">
+                    Quel Mobile Money souhaitez-vous utiliser ?
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'MPESA', label: 'M-Pesa Vodacom' },
+                      { id: 'ORANGE', label: 'Orange Money' },
+                      { id: 'AIRTEL', label: 'Airtel Money' }
+                    ].map(op => (
+                      <button
+                        key={op.id}
+                        type="button"
+                        onClick={() => setMobileOperator(op.id as any)}
+                        className={`py-2 px-1 text-center rounded-lg text-xs font-bold transition border ${
+                          mobileOperator === op.id
+                            ? 'bg-[#14110F] text-white border-[#14110F]'
+                            : 'bg-white text-[#14110F] border-[#D9D0C6] hover:bg-[#F3ECE2]'
+                        }`}
+                      >
+                        {op.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-[#7A7068]">
+                    Une invitation de paiement push sera envoyée sur votre numéro pour saisir votre code secret.
+                  </p>
+                </div>
+              )}
+
+              {paymentMethod === 'VISA' && (
+                <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#D9D0C6] space-y-2.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#14110F] block">
+                    Coordonnées de votre Carte Bancaire
+                  </span>
+                  <div>
+                    <label className="text-[10px] font-bold text-[#7A7068] uppercase block mb-1">Nom sur la Carte</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex : Christian Mwamba"
+                      value={cardHolder}
+                      onChange={(e) => setCardHolder(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-[#D9D0C6] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-[#7A7068] uppercase block mb-1">Numéro de Carte (16 chiffres)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={19}
+                      placeholder="4000 1234 5678 9010"
+                      value={cardNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+                        setCardNumber(val);
+                      }}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-[#D9D0C6] text-xs font-mono font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-[#7A7068] uppercase block mb-1">Expiration (MM/AA)</label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={5}
+                        placeholder="12/28"
+                        value={cardExpiry}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2, 4);
+                          setCardExpiry(val);
+                        }}
+                        className="w-full px-3 py-2 rounded-lg bg-white border border-[#D9D0C6] text-xs font-mono font-bold text-center text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-[#7A7068] uppercase block mb-1">CVV (3 chiffres)</label>
+                      <input
+                        type="password"
+                        required
+                        maxLength={4}
+                        placeholder="123"
+                        value={cardCvv}
+                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                        className="w-full px-3 py-2 rounded-lg bg-white border border-[#D9D0C6] text-xs font-mono font-bold text-center text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#167A42] font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Paiement sécurisé crypté SSL 256 bits & 3D Secure</span>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -670,7 +874,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ event, ticket, onC
                   ) : (
                     <>
                       <span>
-                        Régler {formatUSD(totalAmountUSD)} ({quantity} place{quantity > 1 ? 's' : ''})
+                        Régler {formatUSD(totalAmountUSD)} via {paymentMethod === 'WALLET' ? 'Vuka Wallet' : (paymentMethod === 'VISA' ? 'Carte Visa' : 'Mobile Money')}
                       </span>
                       <ArrowRight className="w-4 h-4 text-[#14110F]" />
                     </>

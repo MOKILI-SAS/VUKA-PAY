@@ -38,7 +38,11 @@ import {
   ArrowRight,
   Radio,
   User,
-  Heart
+  Heart,
+  Sun,
+  Moon,
+  CreditCard,
+  Upload
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
@@ -87,8 +91,33 @@ export const ClientDashboard: React.FC = () => {
     deleteMerchantProduct,
     updateStandCommissionRate,
     addStandToOrganizerEvent,
-    removeStandFromOrganizerEvent
+    removeStandFromOrganizerEvent,
+    topUpWalletWithCard,
+    createMerchantStand,
+    updateMerchantStand,
+    deleteMerchantStand,
+    approveStandForEvent,
+    rejectStandForEvent,
+    customProductCategories,
+    addCustomProductCategory,
+    addOrganizerEvent,
+    updateOrganizerEvent,
+    deleteOrganizerEvent,
+    toggleOrganizerEventStatus
   } = useApp();
+
+  // Gestion du thème Sombre / Clair (persistant)
+  const [dashboardTheme, setDashboardTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('vuka_dashboard_theme') as 'light' | 'dark') || 'light';
+  });
+
+  const toggleTheme = () => {
+    setDashboardTheme(prev => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('vuka_dashboard_theme', next);
+      return next;
+    });
+  };
 
   // État du tiroir de navigation mobile
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -99,6 +128,21 @@ export const ClientDashboard: React.FC = () => {
   // Billet en cours d'édition RFID
   const [ticketToLinkRFID, setTicketToLinkRFID] = useState<string | null>(null);
   const [ticketRfidInput, setTicketRfidInput] = useState('');
+
+  // Référence sélecteur de fichier d'avatar / photo de profil
+  const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Url = reader.result as string;
+      setEditProfileAvatar(base64Url);
+      updateUserProfile({ avatarUrl: base64Url });
+    };
+    reader.readAsDataURL(file);
+  };
 
   // ----------------------------------------------------
   // MODULE 1 : SCANNER CAMÉRA POUR PAYER (SCAN_PAY)
@@ -119,6 +163,58 @@ export const ClientDashboard: React.FC = () => {
   const [scanPaymentSuccess, setScanPaymentSuccess] = useState<CashlessTransaction | null>(null);
   const [scanPaymentError, setScanPaymentError] = useState<string | null>(null);
   const [isScanProcessing, setIsScanProcessing] = useState(false);
+
+  // Saisie manuelle du code QR en alternative propre à la caméra
+  const [manualQrInput, setManualQrInput] = useState('');
+  const [manualQrError, setManualQrError] = useState<string | null>(null);
+
+  const handleManualQrSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setManualQrError(null);
+    const code = manualQrInput.trim();
+    if (!code) return;
+
+    try {
+      if (code.includes('VUKA:PAY:')) {
+        const urlParams = new URLSearchParams(code.replace('VUKA:PAY:', ''));
+        const standId = urlParams.get('STAND');
+        const prodId = urlParams.get('PROD');
+        const priceStr = urlParams.get('PRICE');
+        const name = urlParams.get('NAME');
+
+        if (standId && prodId && priceStr) {
+          const stand = stands.find(s => s.id === standId) || stands[0];
+          setScannedProductInfo({
+            standId,
+            standName: stand?.name || 'Stand Partenaire',
+            productId: prodId,
+            productName: name ? decodeURIComponent(name) : 'Produit Exposant',
+            priceUSD: parseFloat(priceStr) || 5
+          });
+          stopCamera();
+          setManualQrInput('');
+          return;
+        }
+      }
+    } catch {}
+
+    const foundProd = menuItems.find(m => m.id === code || m.name.toLowerCase().includes(code.toLowerCase()));
+    if (foundProd) {
+      const stand = stands.find(s => s.id === foundProd.standId) || stands[0];
+      setScannedProductInfo({
+        standId: stand.id,
+        standName: stand.name,
+        productId: foundProd.id,
+        productName: foundProd.name,
+        priceUSD: foundProd.priceUSD
+      });
+      stopCamera();
+      setManualQrInput('');
+      return;
+    }
+
+    setManualQrError("Code ou référence QR non reconnue. Veuillez vérifier la saisie.");
+  };
 
   // Démarrer la caméra quand l'onglet SCAN_PAY est actif
   useEffect(() => {
@@ -146,10 +242,10 @@ export const ClientDashboard: React.FC = () => {
           videoRef.current.play().catch(() => {});
         }
       } else {
-        setCameraError("La caméra n'est pas supportée sur ce navigateur. Utilisez le simulateur de scan ci-dessous.");
+        setCameraError("La caméra n'est pas supportée sur ce navigateur. Utilisez la saisie manuelle ci-dessous.");
       }
     } catch {
-      setCameraError("Accès caméra refusé ou non disponible. Vous pouvez utiliser le simulateur de scan de stand ci-dessous.");
+      setCameraError("Accès caméra non disponible. Vous pouvez saisir le code manuellement ci-dessous.");
     }
   };
 
@@ -159,20 +255,6 @@ export const ClientDashboard: React.FC = () => {
       streamRef.current = null;
     }
     setCameraActive(false);
-  };
-
-  // Simuler le scan d'un produit depuis un stand marchand
-  const handleSimulateScan = (standId: string, item: MenuItem) => {
-    const stand = stands.find(s => s.id === standId) || stands[0];
-    stopCamera();
-    setScannedProductInfo({
-      standId: stand.id,
-      standName: stand.name,
-      productId: item.id,
-      productName: item.name,
-      priceUSD: item.priceUSD
-    });
-    setScanPaymentError(null);
   };
 
   const handleConfirmScanPayment = async () => {
@@ -202,7 +284,9 @@ export const ClientDashboard: React.FC = () => {
   // ----------------------------------------------------
   // MODULE 2 : ESPACE MARCHAND & STANDIER (STAND_MERCHANT)
   // ----------------------------------------------------
-  const currentMerchantStand = stands.find(s => s.id === myMerchantStandId) || stands[0];
+  // Stands rattachés au compte utilisateur
+  const userMerchantStands = stands.filter(s => s.ownerUserId === currentUser?.id || (currentUser?.phone && s.ownerPhoneMpesa === currentUser?.phone) || s.id === myMerchantStandId);
+  const currentMerchantStand = stands.find(s => s.id === myMerchantStandId) || userMerchantStands[0] || stands[0];
   const merchantProducts = menuItems.filter(p => p.standId === currentMerchantStand?.id);
   const merchantTransactions = transactions.filter(t => t.standId === currentMerchantStand?.id && t.type === 'PAYMENT');
   
@@ -211,13 +295,49 @@ export const ClientDashboard: React.FC = () => {
   const merchantTotalCommissionUSD = Math.round((merchantGrossSalesUSD * (merchantCommissionRate / 100)) * 100) / 100;
   const merchantNetPayoutUSD = Math.round((merchantGrossSalesUSD - merchantTotalCommissionUSD) * 100) / 100;
 
+  // Modal Création Stand Marchand
+  const [createStandModalOpen, setCreateStandModalOpen] = useState(false);
+  const [newStandFormName, setNewStandFormName] = useState('');
+  const [newStandFormCategory, setNewStandFormCategory] = useState('Grillades & Poissons');
+  const [newStandFormPhone, setNewStandFormPhone] = useState(currentUser?.phone || '+243 ');
+  const [newStandFormEventId, setNewStandFormEventId] = useState(publishedEvents[0]?.id || 'cfw-6');
+  const [newStandFormZone, setNewStandFormZone] = useState('Allée Gourmande — Stand Exposant');
+
+  const handleCreateStandSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStandFormName.trim()) return;
+    const created = createMerchantStand({
+      name: newStandFormName.trim(),
+      category: newStandFormCategory.trim(),
+      ownerPhone: newStandFormPhone.trim(),
+      eventId: newStandFormEventId,
+      locationZone: newStandFormZone.trim()
+    });
+    setMyMerchantStandId(created.id);
+    setCreateStandModalOpen(false);
+    setNewStandFormName('');
+  };
+
   // Modal Ajout/Modification de Produit Marchand
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<MenuItem | null>(null);
   const [prodName, setProdName] = useState('');
-  const [prodCategory, setProdCategory] = useState<'FOOD' | 'DRINK' | 'DESSERT' | 'SNACK'>('FOOD');
+  const [prodCategory, setProdCategory] = useState<string>('Plat Chaud / Gastronomie');
   const [prodPrice, setProdPrice] = useState<string>('5');
   const [prodStock, setProdStock] = useState<string>('50');
+
+  // Ajout de nouvelle catégorie personnalisée
+  const [isAddingCustomCategory, setIsAddingCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
+
+  const handleAddCustomCategorySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customCategoryInput.trim()) return;
+    addCustomProductCategory(customCategoryInput.trim());
+    setProdCategory(customCategoryInput.trim());
+    setCustomCategoryInput('');
+    setIsAddingCustomCategory(false);
+  };
 
   // Modal QR Code Unique Produit pour impression et partage
   const [qrProductModal, setQrProductModal] = useState<MenuItem | null>(null);
@@ -238,9 +358,10 @@ export const ClientDashboard: React.FC = () => {
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
     setProdName('');
-    setProdCategory('FOOD');
+    setProdCategory(customProductCategories[0] || 'Plat Chaud / Gastronomie');
     setProdPrice('5');
     setProdStock('50');
+    setIsAddingCustomCategory(false);
     setProductModalOpen(true);
   };
 
@@ -421,15 +542,72 @@ export const ClientDashboard: React.FC = () => {
   const [isTopUpLoading, setIsTopUpLoading] = useState(false);
   const [topUpSuccess, setTopUpSuccess] = useState(false);
 
+  // Méthode de rechargement : Mobile Money ou Carte Bancaire
+  const [topUpMethod, setTopUpMethod] = useState<'MOBILE_MONEY' | 'CARD'>('MOBILE_MONEY');
+  const [topUpOperator, setTopUpOperator] = useState<'MPESA' | 'ORANGE' | 'AIRTEL'>('MPESA');
+  const [topUpPhone, setTopUpPhone] = useState(currentUser?.phone || wallet.phone || '+243 821821865');
+  const [topUpCardHolder, setTopUpCardHolder] = useState(currentUser?.name || '');
+  const [topUpCardNumber, setTopUpCardNumber] = useState('');
+  const [topUpCardExpiry, setTopUpCardExpiry] = useState('');
+  const [topUpCardCvv, setTopUpCardCvv] = useState('');
+  const [topUpCardError, setTopUpCardError] = useState<string | null>(null);
+
   const [refundPhone, setRefundPhone] = useState(currentUser?.phone || wallet.phone || '+243 ');
   const [isRefunding, setIsRefunding] = useState(false);
   const [refundSuccessMsg, setRefundSuccessMsg] = useState<string | null>(null);
+
+  const handleTopUpSubmit = async () => {
+    const amount = customTopUpAmt ? parseFloat(customTopUpAmt) || 0 : selectedTopUpAmt;
+    if (amount <= 0) return;
+
+    setIsTopUpLoading(true);
+    setTopUpSuccess(false);
+    setTopUpCardError(null);
+
+    if (topUpMethod === 'CARD') {
+      if (!topUpCardHolder.trim()) {
+        setTopUpCardError('Veuillez saisir le nom sur la carte');
+        setIsTopUpLoading(false);
+        return;
+      }
+      const rawCard = topUpCardNumber.replace(/\s+/g, '');
+      if (rawCard.length < 16) {
+        setTopUpCardError('Numéro de carte incomplet (16 chiffres requis)');
+        setIsTopUpLoading(false);
+        return;
+      }
+      if (!topUpCardExpiry || topUpCardExpiry.length < 5) {
+        setTopUpCardError('Date d\'expiration invalide (MM/AA)');
+        setIsTopUpLoading(false);
+        return;
+      }
+      if (!topUpCardCvv || topUpCardCvv.length < 3) {
+        setTopUpCardError('Code de sécurité CVV invalide (3 chiffres)');
+        setIsTopUpLoading(false);
+        return;
+      }
+
+      await topUpWalletWithCard(amount, {
+        cardHolder: topUpCardHolder,
+        cardNumber: rawCard,
+        expiry: topUpCardExpiry,
+        cvv: topUpCardCvv
+      });
+    } else {
+      await topUpWallet(amount, topUpPhone, topUpOperator);
+    }
+
+    setIsTopUpLoading(false);
+    setTopUpSuccess(true);
+    setCustomTopUpAmt('');
+    setTimeout(() => setTopUpSuccess(false), 4000);
+  };
 
   const handleTopUp = async (amount: number) => {
     if (amount <= 0) return;
     setIsTopUpLoading(true);
     setTopUpSuccess(false);
-    await topUpWallet(amount, currentUser?.phone || wallet.phone);
+    await topUpWallet(amount, currentUser?.phone || wallet.phone, topUpOperator);
     setIsTopUpLoading(false);
     setTopUpSuccess(true);
     setTimeout(() => setTopUpSuccess(false), 3500);
@@ -498,34 +676,52 @@ export const ClientDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF6EE] flex flex-col lg:flex-row">
+    <div className={`min-h-screen flex flex-col lg:flex-row transition-colors duration-200 ${
+      dashboardTheme === 'dark' ? 'bg-[#14110F] text-[#FBF6EE]' : 'bg-[#FBF6EE] text-[#14110F]'
+    }`}>
       
       {/* ---------------------------------------------------- */}
       {/* BARRE MOBILE SUPÉRIEURE (Petits écrans) */}
       {/* ---------------------------------------------------- */}
-      <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-[#E5E0D8] px-4 py-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setMobileSidebarOpen(true)}
-          className="h-9 px-3 rounded-full bg-[#FAF8F5] border border-[#E5E0D8] text-[#14110F] text-xs font-heading font-bold flex items-center gap-1.5"
-        >
-          <Menu className="w-4 h-4 text-[#FF6A2B]" />
-          <span>Menu Dashboard</span>
-        </button>
+      <div className={`lg:hidden sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b ${
+        dashboardTheme === 'dark' ? 'bg-[#1A1613] border-[#2A2420]' : 'bg-white border-[#E5E0D8]'
+      }`}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="h-9 px-3 rounded-full bg-[#FAF8F5] border border-[#E5E0D8] text-[#14110F] text-xs font-heading font-bold flex items-center gap-1.5"
+          >
+            <Menu className="w-4 h-4 text-[#FF6A2B]" />
+            <span>Menu</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-full bg-[#FAF8F5] border border-[#E5E0D8] text-[#14110F] flex items-center justify-center"
+            title="Basculer thème"
+          >
+            {dashboardTheme === 'dark' ? <Sun className="w-4 h-4 text-[#FFC21A]" /> : <Moon className="w-4 h-4 text-[#14110F]" />}
+          </button>
+        </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => handleSelectTab('SCAN_PAY')}
-            className="h-8 px-3 rounded-full bg-[#14110F] text-[#FFC21A] text-xs font-bold flex items-center gap-1"
+            onClick={() => setAppViewMode('PUBLIC_LANDING')}
+            className="h-8 px-3 rounded-full bg-[#FF6A2B] text-[#14110F] text-xs font-heading font-bold flex items-center gap-1"
           >
-            <Camera className="w-3.5 h-3.5 text-[#FF6A2B]" />
-            <span>Scanner</span>
+            <span>Aller au site</span>
           </button>
 
-          <span className="text-xs font-mono font-bold text-[#FF6A2B] px-2.5 py-1 rounded-full bg-[#FFE3D3]">
-            {formatUSD(wallet.balanceUSD)}
-          </span>
+          <button
+            type="button"
+            onClick={() => handleSelectTab('SCAN_PAY')}
+            className="h-8 px-2.5 rounded-full bg-[#14110F] text-[#FFC21A] text-xs font-bold flex items-center gap-1"
+          >
+            <Camera className="w-3.5 h-3.5 text-[#FF6A2B]" />
+          </button>
         </div>
       </div>
 
@@ -533,33 +729,53 @@ export const ClientDashboard: React.FC = () => {
       {/* SIDEBAR FIXE GAUCHE (Desktop) & TIROIR (Mobile) */}
       {/* ---------------------------------------------------- */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-[#E5E0D8] flex flex-col justify-between transition-transform duration-200 ease-in-out
+        fixed inset-y-0 left-0 z-40 w-72 flex flex-col justify-between transition-transform duration-200 ease-in-out border-r
         ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${dashboardTheme === 'dark' ? 'bg-[#1A1613] border-[#2A2420]' : 'bg-white border-[#E5E0D8]'}
       `}>
         <div className="flex flex-col h-full overflow-y-auto">
           
-          {/* Header Sidebar */}
-          <div className="p-5 border-b border-[#E5E0D8] flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setAppViewMode('PUBLIC_LANDING')}
-              className="text-left group"
-            >
-              <div className="text-base font-heading font-black text-[#14110F] tracking-tight group-hover:text-[#FF6A2B] transition">
+          {/* Header Sidebar avec Thème et CTA Aller au site */}
+          <div className={`p-4 border-b flex items-center justify-between ${
+            dashboardTheme === 'dark' ? 'border-[#2A2420]' : 'border-[#E5E0D8]'
+          }`}>
+            <div>
+              <div className="text-base font-heading font-black tracking-tight text-[#FF6A2B]">
                 VUKA Pay
               </div>
-              <div className="text-[10px] text-[#7A7068] font-mono flex items-center gap-1">
-                <span>← Retour catalogue</span>
+              <div className={`text-[10px] font-mono ${dashboardTheme === 'dark' ? 'text-[#A69C94]' : 'text-[#7A7068]'}`}>
+                Fintech Événementielle
               </div>
-            </button>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileSidebarOpen(false)}
-              className="lg:hidden w-8 h-8 rounded-full bg-[#FAF8F5] text-[#14110F] flex items-center justify-center"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`p-2 rounded-full border transition ${
+                  dashboardTheme === 'dark' ? 'bg-[#251F1B] border-[#38302A] text-[#FFC21A]' : 'bg-[#FAF8F5] border-[#E5E0D8] text-[#14110F]'
+                }`}
+                title={dashboardTheme === 'dark' ? 'Activer mode clair' : 'Activer mode sombre'}
+              >
+                {dashboardTheme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAppViewMode('PUBLIC_LANDING')}
+                className="h-8 px-3 rounded-full bg-[#FF6A2B] hover:bg-[#e0561d] text-[#14110F] text-xs font-heading font-bold uppercase tracking-wider flex items-center gap-1 transition active:scale-95 shadow-xs"
+              >
+                <span>Aller au site</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                className="lg:hidden w-8 h-8 rounded-full bg-[#FAF8F5] text-[#14110F] flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* User Snapshot Card */}
@@ -1049,29 +1265,29 @@ export const ClientDashboard: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Simulateur Rapide de Scan (pour tests et démo instantanés) */}
+                  {/* Saisie Manuelle du Code QR si la caméra est absente ou désactivée */}
                   <div className="pt-4 border-t border-[#E5E0D8] space-y-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block">
-                      Ou simuler un scan de produit marchand :
+                      Ou saisir le code QR du stand manuellement :
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {menuItems.slice(0, 4).map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => handleSimulateScan(item.standId, item)}
-                          className="p-3 rounded-xl bg-[#FAF8F5] hover:bg-[#F3ECE2] border border-[#E5E0D8] text-left transition flex items-center justify-between"
-                        >
-                          <div className="min-w-0 pr-2">
-                            <div className="text-xs font-heading font-bold text-[#14110F] truncate">{item.name}</div>
-                            <div className="text-[10px] text-[#7A7068]">Chez Ntemba</div>
-                          </div>
-                          <span className="text-xs font-mono font-bold text-[#FF6A2B] shrink-0">
-                            {formatUSD(item.priceUSD)}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+                    <form onSubmit={handleManualQrSubmit} className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Ex : VUKA:PAY:STAND=stand-1&PROD=prod-101&PRICE=5 ou nom de l'article"
+                        value={manualQrInput}
+                        onChange={(e) => setManualQrInput(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#E5E0D8] text-xs font-mono text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 rounded-xl bg-[#14110F] hover:bg-[#2A2420] text-white text-xs font-heading font-bold transition active:scale-95"
+                      >
+                        Valider
+                      </button>
+                    </form>
+                    {manualQrError && (
+                      <p className="text-[10px] text-red-600 font-medium">{manualQrError}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -1123,7 +1339,7 @@ export const ClientDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Formulaire de Recharge M-Pesa */}
+                {/* Formulaire de Recharge Biphasé : Mobile Money ou Carte Visa */}
                 <div className="p-6 sm:p-8 rounded-[28px] bg-white border border-[#E5E0D8] shadow-xs space-y-6">
                   <div>
                     <h3 className="text-lg font-heading font-black text-[#14110F]">
@@ -1141,6 +1357,36 @@ export const ClientDashboard: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Choix du moyen : Mobile Money ou Visa */}
+                  <div className="grid grid-cols-2 p-1 bg-[#FAF8F5] border border-[#E5E0D8] rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => setTopUpMethod('MOBILE_MONEY')}
+                      className={`py-2.5 rounded-xl text-xs font-heading font-bold transition flex items-center justify-center gap-1.5 ${
+                        topUpMethod === 'MOBILE_MONEY'
+                          ? 'bg-[#14110F] text-white shadow-xs'
+                          : 'text-[#7A7068] hover:text-[#14110F]'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5 text-[#FF6A2B]" />
+                      <span>Mobile Money</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTopUpMethod('CARD')}
+                      className={`py-2.5 rounded-xl text-xs font-heading font-bold transition flex items-center justify-center gap-1.5 ${
+                        topUpMethod === 'CARD'
+                          ? 'bg-[#14110F] text-white shadow-xs'
+                          : 'text-[#7A7068] hover:text-[#14110F]'
+                      }`}
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-[#FF6A2B]" />
+                      <span>Carte Visa / Mastercard</span>
+                    </button>
+                  </div>
+
+                  {/* Grille des Montants prédéfinis */}
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5">
                     {[5, 10, 20, 50, 100].map((amt) => (
                       <button
@@ -1172,14 +1418,132 @@ export const ClientDashboard: React.FC = () => {
                     />
                   </div>
 
+                  {/* Détails Mobile Money */}
+                  {topUpMethod === 'MOBILE_MONEY' && (
+                    <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] space-y-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block">
+                        Opérateur Mobile Money (RDC)
+                      </span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'MPESA', label: 'Vodacom M-Pesa' },
+                          { id: 'ORANGE', label: 'Orange Money' },
+                          { id: 'AIRTEL', label: 'Airtel Money' }
+                        ].map((op) => (
+                          <button
+                            key={op.id}
+                            type="button"
+                            onClick={() => setTopUpOperator(op.id as any)}
+                            className={`py-2 px-1 text-center rounded-xl text-xs font-bold transition border ${
+                              topUpOperator === op.id
+                                ? 'bg-[#14110F] text-white border-[#14110F]'
+                                : 'bg-white text-[#14110F] border-[#E5E0D8] hover:bg-[#F3ECE2]'
+                            }`}
+                          >
+                            {op.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-1">
+                          Numéro de facturation Mobile Money
+                        </label>
+                        <input
+                          type="tel"
+                          value={topUpPhone}
+                          onChange={(e) => setTopUpPhone(e.target.value)}
+                          placeholder="+243 81 234 56 78"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-[#E5E0D8] text-xs font-mono font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Détails Carte Bancaire */}
+                  {topUpMethod === 'CARD' && (
+                    <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] space-y-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block">
+                        Coordonnées Bancaires
+                      </span>
+
+                      {topUpCardError && (
+                        <div className="p-2 rounded-xl bg-red-50 text-red-700 text-xs font-bold">
+                          {topUpCardError}
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-[#7A7068] block mb-1">Nom sur la Carte</label>
+                        <input
+                          type="text"
+                          value={topUpCardHolder}
+                          onChange={(e) => setTopUpCardHolder(e.target.value)}
+                          placeholder="Ex : Christian Mwamba"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-[#E5E0D8] text-xs font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold uppercase text-[#7A7068] block mb-1">Numéro de Carte (16 chiffres)</label>
+                        <input
+                          type="text"
+                          maxLength={19}
+                          value={topUpCardNumber}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+                            setTopUpCardNumber(val);
+                          }}
+                          placeholder="4000 1234 5678 9010"
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-[#E5E0D8] text-xs font-mono font-bold text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-[#7A7068] block mb-1">Expiration (MM/AA)</label>
+                          <input
+                            type="text"
+                            maxLength={5}
+                            value={topUpCardExpiry}
+                            onChange={(e) => {
+                              let val = e.target.value.replace(/\D/g, '');
+                              if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2, 4);
+                              setTopUpCardExpiry(val);
+                            }}
+                            placeholder="12/28"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-[#E5E0D8] text-xs font-mono font-bold text-center text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-[#7A7068] block mb-1">CVV (3 chiffres)</label>
+                          <input
+                            type="password"
+                            maxLength={4}
+                            value={topUpCardCvv}
+                            onChange={(e) => setTopUpCardCvv(e.target.value.replace(/\D/g, ''))}
+                            placeholder="123"
+                            className="w-full px-3 py-2 rounded-xl bg-white border border-[#E5E0D8] text-xs font-mono font-bold text-center text-[#14110F] focus:outline-none focus:border-[#FF6A2B]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="button"
-                    onClick={() => handleTopUp(customTopUpAmt ? parseFloat(customTopUpAmt) : selectedTopUpAmt)}
+                    onClick={handleTopUpSubmit}
                     disabled={isTopUpLoading}
                     className="w-full py-3.5 px-6 rounded-full bg-[#FF6A2B] hover:bg-[#e0561d] text-[#14110F] font-heading font-black text-xs uppercase tracking-wider shadow-xs transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    <Smartphone className="w-4 h-4 text-[#14110F]" />
-                    <span>Recharger {formatUSD(customTopUpAmt ? parseFloat(customTopUpAmt) || 0 : selectedTopUpAmt)} par M-Pesa</span>
+                    {topUpMethod === 'CARD' ? (
+                      <CreditCard className="w-4 h-4 text-[#14110F]" />
+                    ) : (
+                      <Smartphone className="w-4 h-4 text-[#14110F]" />
+                    )}
+                    <span>
+                      {isTopUpLoading ? 'Paiement en cours...' : `Recharger ${formatUSD(customTopUpAmt ? parseFloat(customTopUpAmt) || 0 : selectedTopUpAmt)} via ${topUpMethod === 'CARD' ? 'Carte Visa/Mastercard' : (topUpOperator === 'MPESA' ? 'Vodacom M-Pesa' : topUpOperator === 'ORANGE' ? 'Orange Money' : 'Airtel Money')}`}
+                    </span>
                   </button>
                 </div>
 

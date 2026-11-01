@@ -40,6 +40,8 @@ export interface UserAccount {
   email: string;
   phone: string;
   avatarUrl?: string;
+  coverUrl?: string; // Photo de couverture pour profil ou organisation
+  organizationName?: string;
   walletId: string;
   createdAt: string;
   isVerified: boolean;
@@ -85,7 +87,7 @@ export interface MenuItem {
   standId: string;
   name: string;
   description: string;
-  category: 'FOOD' | 'DRINK' | 'DESSERT' | 'SNACK';
+  category: string; // Prend en compte les catégories standards et personnalisées
   priceUSD: number;
   currentStock: number;
   initialStock: number;
@@ -93,14 +95,14 @@ export interface MenuItem {
   isAvailable: boolean;
 }
 
-// Stand Exposant (23 stands au CFW6)
+// Stand Exposant
 export interface Stand {
   id: string;
-  number: number; // 1 à 23
+  number: number;
   name: string;
   category: string; // Ex: "Grillades & Braisés", "Cocktails & Bières Locales", "Pâtisserie & Glaces", etc.
   ownerName: string;
-  ownerPhoneMpesa: string; // Numéro M-Pesa pour payout B2C
+  ownerPhoneMpesa: string; // Numéro Mobile Money pour payout
   locationZone: string;   // Ex: "Zone A - Village Gastronomique", "Zone B - Bar Principal"
   totalSalesUSD: number;
   transactionsCount: number;
@@ -109,6 +111,10 @@ export interface Stand {
   eventId?: string;
   eventName?: string;
   commissionPercent?: number; // Pourcentage de commission prélevé (ex: 10%)
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  ownerUserId?: string;
+  isActive?: boolean;
+  createdAt?: string;
 }
 
 // Demande de réassort de stock (soumise à validation stricte de l'administrateur)
@@ -247,4 +253,6 @@ export interface VukaPublishedEvent {
   tiers?: EventTierDef[];
   paymentLink?: string;
   commissionRatePercent?: number;
+  ownerUserId?: string;
+  isActive?: boolean;
 }

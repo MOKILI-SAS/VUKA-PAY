@@ -21,6 +21,7 @@ export const AuthModal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+243 ');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loginIdentifier, setLoginIdentifier] = useState(isOrganizerAuthMode ? 'organisateur@vuka.cd' : '');
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +33,8 @@ export const AuthModal: React.FC = () => {
     setIsAuthModalOpen(false);
     setIsOrganizerAuthMode(false);
     setError(null);
+    setPassword('');
+    setConfirmPassword('');
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -47,6 +50,18 @@ export const AuthModal: React.FC = () => {
     }
     if (!phone.trim() || phone.trim() === '+243') {
       setError('Veuillez renseigner votre numéro de téléphone.');
+      return;
+    }
+    if (!password) {
+      setError('Veuillez définir un mot de passe.');
+      return;
+    }
+    if (password.length < 4) {
+      setError('Le mot de passe doit comporter au moins 4 caractères ou chiffres.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas. Veuillez confirmer votre mot de passe à l’identique.');
       return;
     }
 
@@ -221,9 +236,27 @@ export const AuthModal: React.FC = () => {
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7068]" />
                 <input
                   type="password"
+                  required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] focus:border-[#FF6A2B] focus:bg-white text-xs font-medium text-[#14110F] outline-none transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#14110F] uppercase tracking-wider mb-1.5">
+                Confirmer le mot de passe
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7068]" />
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] focus:border-[#FF6A2B] focus:bg-white text-xs font-medium text-[#14110F] outline-none transition"
                 />
               </div>

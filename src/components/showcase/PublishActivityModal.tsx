@@ -18,7 +18,8 @@ import {
   Utensils, 
   Award,
   Radio,
-  MoreHorizontal
+  MoreHorizontal,
+  Upload
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatCDF } from '../../utils/formatters';
@@ -471,34 +472,49 @@ export const PublishActivityModal: React.FC = () => {
                 />
               </div>
 
-              {/* Image d'illustration */}
+              {/* Image de l'événement depuis le gestionnaire de fichiers */}
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-wider text-[#7A7068] block mb-1.5">
-                  Image de couverture (choisir parmi les suggestions)
+                  Affiche ou Image de l'événement *
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {activeConfig.defaultImages.concat([
-                    'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=400&q=80',
-                    'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80'
-                  ]).slice(0, 4).map((imgUrl, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => { setSelectedImage(imgUrl); setCustomImage(''); }}
-                      className={`relative h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                        selectedImage === imgUrl && !customImage
-                          ? 'border-[#FF6A2B] ring-2 ring-[#FF6A2B]/20 scale-102'
-                          : 'border-transparent opacity-75 hover:opacity-100'
-                      }`}
+                <div className="p-3 rounded-2xl bg-[#FBF6EE] border border-[#D9D0C6] flex flex-col sm:flex-row items-center gap-3">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#FAF8F5] border border-[#D9D0C6] flex items-center justify-center shrink-0">
+                    {customImage ? (
+                      <img src={customImage} alt="Affiche" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-[#7A7068]" />
+                    )}
+                  </div>
+                  <div className="space-y-1 text-center sm:text-left flex-1">
+                    <input
+                      type="file"
+                      id="event-image-upload"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const res = reader.result as string;
+                            setCustomImage(res);
+                            setSelectedImage(res);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="event-image-upload"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#14110F] text-white hover:bg-[#2A2420] text-xs font-heading font-bold cursor-pointer transition active:scale-95"
                     >
-                      <img src={imgUrl} alt="Illustration" className="w-full h-full object-cover" />
-                      {selectedImage === imgUrl && !customImage && (
-                        <div className="absolute top-1 right-1 w-4 h-4 bg-[#FF6A2B] text-[#14110F] rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                      <Upload className="w-3.5 h-3.5 text-[#FF6A2B]" />
+                      <span>{customImage ? 'Changer l\'image' : 'Choisir mon image...'}</span>
+                    </label>
+                    <p className="text-[10px] text-[#7A7068]">
+                      Importez votre affiche personnalisée depuis votre appareil (JPG, PNG, WEBP).
+                    </p>
+                  </div>
                 </div>
               </div>
 
