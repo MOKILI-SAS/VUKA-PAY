@@ -122,8 +122,8 @@ const MainContent: React.FC = () => {
         />
       )}
 
-      {/* Persistent Footer avec mentions légales obligatoires et attribution "Propulsé par MOKILI" */}
-      <Footer />
+      {/* Persistent Footer avec mentions légales obligatoires et attribution "Propulsé par MOKILI" (Masqué sur le Dashboard) */}
+      {appViewMode !== 'CLIENT_PORTAL' && <Footer />}
     </div>
   );
 };

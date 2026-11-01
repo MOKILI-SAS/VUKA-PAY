@@ -103,50 +103,57 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
   return (
     <div id="recherche-evenements" className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-2 space-y-3">
       
-      {/* 1. BARRE DE RECHERCHE SIMPLE & ÉPURÉE (Style Eventbrite) AVEC BOUTON PUBLIER */}
-      <div className="bg-white rounded-full border border-[#D9D0C6] hover:border-[#14110F]/40 shadow-xs hover:shadow-sm transition-all p-1.5 sm:p-2">
-        <form
-          onSubmit={handleSearchSubmit}
-          className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1"
-        >
-          <Search className="w-4 h-4 text-[#7A7068] shrink-0" />
-          
-          <input
-            id="search-input"
-            type="text"
-            value={query}
-            onChange={handleInputChange}
-            placeholder="Rechercher des événements, concerts, festivals, artistes ou villes..."
-            className="w-full bg-white text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none min-w-0"
-          />
+      {/* 1. BARRE DE RECHERCHE SIMPLE & ÉPURÉE AVEC BOUTON PUBLIER (100% RESPONSIVE MOBILE FIRST) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        
+        {/* Champ de recherche */}
+        <div className="flex-1 bg-white rounded-full border border-[#D9D0C6] hover:border-[#14110F]/40 shadow-xs hover:shadow-sm transition-all p-1 sm:p-1.5 min-w-0">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center gap-2 px-3 sm:px-4 py-1"
+          >
+            <Search className="w-4 h-4 text-[#7A7068] shrink-0" />
+            
+            <input
+              id="search-input"
+              type="text"
+              value={query}
+              onChange={handleInputChange}
+              placeholder="Rechercher événements, concerts, festivals, artistes ou villes..."
+              className="w-full bg-transparent text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none min-w-0"
+            />
 
-          {query && (
+            {query && (
+              <button
+                type="button"
+                onClick={() => { setQuery(''); if (onSearchChange) onSearchChange(''); }}
+                className="text-[#7A7068] hover:text-[#14110F] text-xs px-1.5 font-medium shrink-0"
+              >
+                Effacer
+              </button>
+            )}
+
             <button
-              type="button"
-              onClick={() => { setQuery(''); if (onSearchChange) onSearchChange(''); }}
-              className="text-[#7A7068] hover:text-[#14110F] text-xs px-2 font-medium shrink-0"
+              type="submit"
+              className="h-8 sm:h-9 px-3 sm:px-5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider transition active:scale-95 shrink-0 flex items-center justify-center gap-1.5"
             >
-              Effacer
+              <Search className="w-3.5 h-3.5 sm:hidden" />
+              <span className="hidden sm:inline">Rechercher</span>
             </button>
-          )}
+          </form>
+        </div>
 
-          <button
-            type="submit"
-            className="h-9 px-4 sm:px-5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider transition active:scale-95 shrink-0"
-          >
-            Rechercher
-          </button>
+        {/* Bouton Publier (adapté mobile et grand écran) */}
+        <button
+          type="button"
+          onClick={() => openPublishModal()}
+          className="h-10 sm:h-12 px-4 sm:px-5 rounded-full bg-[#FF6A2B] hover:bg-[#E85B1F] text-[#14110F] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shrink-0 shadow-xs"
+          title="Publier un événement ou une activité"
+        >
+          <PlusCircle className="w-4 h-4 text-[#14110F]" />
+          <span>Publier</span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => openPublishModal()}
-            className="h-9 px-3.5 sm:px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E85B1F] text-[#14110F] font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shrink-0 shadow-xs"
-            title="Publier un événement ou une activité"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>Publier</span>
-          </button>
-        </form>
       </div>
 
       {/* 2. LIGNE UNIFIÉE : FILTRES DE CATÉGORIES + SÉLECTEUR DE VILLE + VÉRIFIER TICKET */}

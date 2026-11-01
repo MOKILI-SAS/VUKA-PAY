@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { formatUSD, formatCDF } from '../utils/formatters';
 import { 
   UserRole, 
   TicketDefinition, 
@@ -68,6 +69,40 @@ interface AppContextType {
       priceUSD?: number;
     }
   ) => Promise<PurchasedTicket>;
+  buyTickets: (
+    ticketDefId: string, 
+    quantity: number,
+    buyerName: string, 
+    buyerPhone: string, 
+    buyerEmail: string,
+    paymentMethod: 'MPESA' | 'WALLET',
+    eventInfo?: {
+      eventId?: string;
+      eventTitle?: string;
+      tierName?: string;
+      priceUSD?: number;
+    }
+  ) => Promise<PurchasedTicket[]>;
+  linkRFIDToTicket: (ticketId: string, rfidTagId: string) => void;
+  updateUserProfile: (data: Partial<UserAccount>) => void;
+  payWithWalletForProduct: (
+    standId: string, 
+    productId: string, 
+    productName: string, 
+    priceUSD: number
+  ) => Promise<{ success: boolean; transaction?: CashlessTransaction; error?: string }>;
+  myMerchantStandId: string;
+  setMyMerchantStandId: (id: string) => void;
+  isMerchantActive: boolean;
+  setIsMerchantActive: (active: boolean) => void;
+  merchantLinkedEventId: string;
+  setMerchantLinkedEventId: (eventId: string) => void;
+  addMerchantProduct: (item: Omit<MenuItem, 'id'>) => MenuItem;
+  updateMerchantProduct: (productId: string, data: Partial<MenuItem>) => void;
+  deleteMerchantProduct: (productId: string) => void;
+  updateStandCommissionRate: (standId: string, commissionPercent: number) => void;
+  addStandToOrganizerEvent: (eventId: string, stand: { name: string; ownerPhone: string; commissionPercent: number; category?: string }) => void;
+  removeStandFromOrganizerEvent: (eventId: string, standId: string) => void;
   publishedEvents: VukaPublishedEvent[];
   addOrganizerEvent: (newEvent: Omit<VukaPublishedEvent, 'id' | 'ticketsSold' | 'revenueUSD' | 'scannedEntries'>) => void;
   
@@ -617,6 +652,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : MOCK_MENU_ITEMS;
   });
 
+  // Espace Marchand & Standier
+  const [myMerchantStandId, setMyMerchantStandId] = useState<string>(() => {
+    return localStorage.getItem('vuka_my_merchant_stand_id') || 'stand-1';
+  });
+  const [isMerchantActive, setIsMerchantActive] = useState<boolean>(() => {
+    const saved = localStorage.getItem('vuka_merchant_active');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [merchantLinkedEventId, setMerchantLinkedEventId] = useState<string>(() => {
+    return localStorage.getItem('vuka_merchant_linked_event_id') || 'cfw-6';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('vuka_my_merchant_stand_id', myMerchantStandId);
+  }, [myMerchantStandId]);
+
+  useEffect(() => {
+    localStorage.setItem('vuka_merchant_active', JSON.stringify(isMerchantActive));
+  }, [isMerchantActive]);
+
+  useEffect(() => {
+    localStorage.setItem('vuka_merchant_linked_event_id', merchantLinkedEventId);
+  }, [merchantLinkedEventId]);
+
   // Demandes de réassort
   const [stockRequests, setStockRequests] = useState<StockRequest[]>(() => {
     const saved = localStorage.getItem('vuka_stock_requests');
@@ -673,7 +732,149 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('vuka_transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  // Achat de billet en ligne (Module VUKA Ticket - Universel multi-événements)
+  // Achat de billets en ligne avec Quantité & choix du paiement (Module VUKA Ticket Universel)
+  const buyTickets = async (
+    ticketDefId: string, 
+    quantity: number,
+    buyerName: string, 
+    buyerPhone: string, 
+    buyerEmail: string,
+    paymentMethod: 'MPESA' | 'WALLET' = 'MPESA',
+    eventInfo?: {
+      eventId?: string;
+      eventTitle?: string;
+      tierName?: string;
+      priceUSD?: number;
+    }
+  ): Promise<PurchasedTicket[]> => {
+    const qty = Math.max(1, Math.floor(quantity));
+    const ticketDef = tickets.find(t => t.id === ticketDefId);
+    if (!ticketDef && !eventInfo) throw new Error("Billet introuvable");
+
+    const effectivePrice = eventInfo?.priceUSD ?? ticketDef?.priceUSD ?? 10;
+    const totalPrice = effectivePrice * qty;
+
+    // Si paiement par portefeuille Cashless, vérifier et débiter le solde
+    if (paymentMethod === 'WALLET') {
+      if (wallet.balanceUSD < totalPrice) {
+        throw new Error(`Solde insuffisant dans votre portefeuille (${formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille ou choisir M-Pesa.`);
+      }
+      const newBalance = Math.round((wallet.balanceUSD - totalPrice) * 100) / 100;
+      setWallet(prev => {
+        const updated = { ...prev, balanceUSD: newBalance };
+        localStorage.setItem('vuka_festivalier_wallet', JSON.stringify(updated));
+        return updated;
+      });
+    } else {
+      // Simulation latence réseau M-Pesa C2B
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    const prefix = eventInfo?.eventId 
+      ? eventInfo.eventId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase()
+      : (ticketDefId.startsWith('pass-') ? 'CFW6' : 'VUKA');
+
+    const effectiveName = eventInfo?.tierName 
+      ? (eventInfo.eventTitle ? `${eventInfo.eventTitle} — ${eventInfo.tierName}` : eventInfo.tierName)
+      : (ticketDef?.name || 'Billet Officiel VUKA');
+
+    const generatedTickets: PurchasedTicket[] = [];
+    const nowIso = new Date().toISOString();
+
+    for (let i = 0; i < qty; i++) {
+      const ticketId = `TCK-${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const passName = qty > 1 ? `${effectiveName} (Place ${i + 1}/${qty})` : effectiveName;
+      const tck: PurchasedTicket = {
+        ticketId,
+        ticketDefId,
+        ticketName: passName,
+        buyerName,
+        buyerPhone,
+        buyerEmail,
+        pricePaidUSD: effectivePrice,
+        purchaseDate: nowIso,
+        qrCodeToken: `VUKA-${ticketId}-${Date.now()}-${i}`,
+        status: 'VALID'
+      };
+      generatedTickets.push(tck);
+    }
+
+    setPurchasedTickets(prev => {
+      const updated = [...generatedTickets, ...prev];
+      localStorage.setItem('vuka_purchased_tickets', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Mettre à jour la quantité restante si le ticket de base existe
+    if (ticketDef) {
+      setTickets(prev => prev.map(t => {
+        if (t.id === ticketDefId) {
+          return { ...t, remainingQuantity: Math.max(0, t.remainingQuantity - qty) };
+        }
+        return t;
+      }));
+    }
+
+    // Mettre à jour les statistiques de l'événement correspondant
+    const targetEventId = eventInfo?.eventId || (ticketDefId.startsWith('pass-') ? 'cfw-6' : undefined);
+    if (targetEventId) {
+      setPublishedEvents(prev => {
+        const updated = prev.map(evt => {
+          if (evt.id === targetEventId) {
+            return {
+              ...evt,
+              ticketsSold: evt.ticketsSold + qty,
+              revenueUSD: evt.revenueUSD + totalPrice
+            };
+          }
+          return evt;
+        });
+        localStorage.setItem('vuka_published_events', JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    // Si payé avec le portefeuille, enregistrer la transaction correspondante
+    if (paymentMethod === 'WALLET') {
+      const tx: CashlessTransaction = {
+        id: `TX-TCK-${Date.now().toString().slice(-6)}`,
+        timestamp: nowIso,
+        type: 'PAYMENT',
+        amountUSD: totalPrice,
+        festivalierId: currentUser?.id || wallet.id,
+        festivalierPhone: buyerPhone,
+        paymentMethod: 'WALLET_QR_DYNAMIC',
+        commissionAmountUSD: 0,
+        merchantNetUSD: totalPrice,
+        isSynced: true,
+        notes: `Achat ${qty} billet(s) — ${effectiveName}`
+      };
+      setTransactions(prev => {
+        const updated = [tx, ...prev];
+        localStorage.setItem('vuka_transactions', JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    // Si le festivalier n'était pas connecté, créer sa session automatiquement pour qu'il voie ses billets
+    if (!currentUser) {
+      const createdUser: UserAccount = {
+        id: `usr-${Date.now().toString().slice(-6)}`,
+        name: buyerName,
+        email: buyerEmail,
+        phone: buyerPhone,
+        walletId: `wal-${Date.now().toString().slice(-4)}`,
+        createdAt: nowIso,
+        isVerified: true
+      };
+      setCurrentUser(createdUser);
+      localStorage.setItem('vuka_current_user', JSON.stringify(createdUser));
+    }
+
+    return generatedTickets;
+  };
+
+  // Wrapper rétrocompatible pour les appels unitaires existants
   const buyTicket = async (
     ticketDefId: string, 
     buyerName: string, 
@@ -686,78 +887,179 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       priceUSD?: number;
     }
   ): Promise<PurchasedTicket> => {
-    const ticketDef = tickets.find(t => t.id === ticketDefId);
-    if (!ticketDef && !eventInfo) throw new Error("Billet introuvable");
+    const list = await buyTickets(ticketDefId, 1, buyerName, buyerPhone, buyerEmail, 'MPESA', eventInfo);
+    return list[0];
+  };
 
-    // Simuler latence réseau M-Pesa C2B
-    await new Promise(r => setTimeout(r, 600));
+  // Lier un bracelet RFID à un billet spécifique
+  const linkRFIDToTicket = (ticketId: string, rfidTagId: string) => {
+    setPurchasedTickets(prev => {
+      const updated = prev.map(t => t.ticketId === ticketId ? { ...t, rfidTagId } : t);
+      localStorage.setItem('vuka_purchased_tickets', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
-    const prefix = eventInfo?.eventId 
-      ? eventInfo.eventId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase()
-      : (ticketDefId.startsWith('pass-') ? 'CFW6' : 'VUKA');
-    const ticketId = `TCK-${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+  // Mise à jour du profil utilisateur (Nom, téléphone, email, photo)
+  const updateUserProfile = (data: Partial<UserAccount>) => {
+    if (!currentUser) return;
+    const updated: UserAccount = { ...currentUser, ...data };
+    setCurrentUser(updated);
+    localStorage.setItem('vuka_current_user', JSON.stringify(updated));
+    if (data.name) {
+      setWallet(w => {
+        const upd = { ...w, festivalierName: data.name! };
+        localStorage.setItem('vuka_festivalier_wallet', JSON.stringify(upd));
+        return upd;
+      });
+    }
+    if (data.phone) {
+      setWallet(w => {
+        const upd = { ...w, phone: data.phone! };
+        localStorage.setItem('vuka_festivalier_wallet', JSON.stringify(upd));
+        return upd;
+      });
+    }
+  };
 
-    const effectivePrice = eventInfo?.priceUSD ?? ticketDef?.priceUSD ?? 10;
-    const effectiveName = eventInfo?.tierName 
-      ? (eventInfo.eventTitle ? `${eventInfo.eventTitle} — ${eventInfo.tierName}` : eventInfo.tierName)
-      : (ticketDef?.name || 'Billet Officiel VUKA');
+  // Paiement Cashless direct pour un produit/stand via scan QR code
+  const payWithWalletForProduct = async (
+    standId: string, 
+    productId: string, 
+    productName: string, 
+    priceUSD: number
+  ): Promise<{ success: boolean; transaction?: CashlessTransaction; error?: string }> => {
+    if (wallet.balanceUSD < priceUSD) {
+      return { 
+        success: false, 
+        error: `Solde insuffisant (${formatUSD(wallet.balanceUSD)}). Veuillez recharger votre portefeuille Cashless pour effectuer cet achat.` 
+      };
+    }
 
-    const newPurchasedTicket: PurchasedTicket = {
-      ticketId,
-      ticketDefId,
-      ticketName: effectiveName,
-      buyerName,
-      buyerPhone,
-      buyerEmail,
-      pricePaidUSD: effectivePrice,
-      purchaseDate: new Date().toISOString(),
-      qrCodeToken: `VUKA-${ticketId}-${Date.now()}`,
-      status: 'VALID'
+    const newBal = Math.round((wallet.balanceUSD - priceUSD) * 100) / 100;
+    setWallet(prev => {
+      const updated = { ...prev, balanceUSD: newBal };
+      localStorage.setItem('vuka_festivalier_wallet', JSON.stringify(updated));
+      return updated;
+    });
+
+    const stand = stands.find(s => s.id === standId) || stands[0];
+    const commRate = stand?.commissionPercent || 10;
+    const commAmount = Math.round((priceUSD * (commRate / 100)) * 100) / 100;
+    const netMerchant = Math.round((priceUSD - commAmount) * 100) / 100;
+
+    const tx: CashlessTransaction = {
+      id: `TX-SCAN-${Date.now().toString().slice(-6)}`,
+      timestamp: new Date().toISOString(),
+      type: 'PAYMENT',
+      amountUSD: priceUSD,
+      festivalierId: currentUser?.id || wallet.id,
+      festivalierPhone: currentUser?.phone || wallet.phone,
+      standId: stand?.id || standId,
+      standName: stand?.name || 'Stand Partenaire',
+      items: [{
+        productId,
+        productName,
+        quantity: 1,
+        priceUSD
+      }],
+      paymentMethod: 'WALLET_QR_DYNAMIC',
+      commissionAmountUSD: commAmount,
+      merchantNetUSD: netMerchant,
+      isSynced: true,
+      notes: `Achat QR Code Stand — ${productName}`
     };
 
-    setPurchasedTickets(prev => [newPurchasedTicket, ...prev]);
+    setTransactions(prev => {
+      const updated = [tx, ...prev];
+      localStorage.setItem('vuka_transactions', JSON.stringify(updated));
+      return updated;
+    });
 
-    // Mettre à jour la quantité restante si le ticket de base existe
-    if (ticketDef) {
-      setTickets(prev => prev.map(t => {
-        if (t.id === ticketDefId) {
-          return { ...t, remainingQuantity: Math.max(0, t.remainingQuantity - 1) };
-        }
-        return t;
-      }));
-    }
-
-    // Mettre à jour les statistiques de l'événement correspondant
-    const targetEventId = eventInfo?.eventId || (ticketDefId.startsWith('pass-') ? 'cfw-6' : undefined);
-    if (targetEventId) {
-      setPublishedEvents(prev => prev.map(evt => {
-        if (evt.id === targetEventId) {
+    setStands(prev => {
+      const updated = prev.map(s => {
+        if (s.id === standId || s.id === stand?.id) {
           return {
-            ...evt,
-            ticketsSold: evt.ticketsSold + 1,
-            revenueUSD: evt.revenueUSD + effectivePrice
+            ...s,
+            totalSalesUSD: Math.round((s.totalSalesUSD + priceUSD) * 100) / 100,
+            transactionsCount: s.transactionsCount + 1
           };
         }
-        return evt;
-      }));
-    }
+        return s;
+      });
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
 
-    // Si le festivalier n'était pas connecté, créer sa session automatiquement pour qu'il voie son billet
-    if (!currentUser) {
-      const createdUser: UserAccount = {
-        id: `usr-${Date.now().toString().slice(-6)}`,
-        name: buyerName,
-        email: buyerEmail,
-        phone: buyerPhone,
-        walletId: `wal-${Date.now().toString().slice(-4)}`,
-        createdAt: new Date().toISOString(),
-        isVerified: true
-      };
-      setCurrentUser(createdUser);
-      localStorage.setItem('vuka_current_user', JSON.stringify(createdUser));
-    }
+    return { success: true, transaction: tx };
+  };
 
-    return newPurchasedTicket;
+  // Fonctions Marchand / Standier
+  const addMerchantProduct = (item: Omit<MenuItem, 'id'>): MenuItem => {
+    const newId = `prod-${Date.now().toString().slice(-6)}`;
+    const newItem: MenuItem = { ...item, id: newId };
+    setMenuItems(prev => {
+      const updated = [newItem, ...prev];
+      localStorage.setItem('vuka_menu_items', JSON.stringify(updated));
+      return updated;
+    });
+    return newItem;
+  };
+
+  const updateMerchantProduct = (productId: string, data: Partial<MenuItem>) => {
+    setMenuItems(prev => {
+      const updated = prev.map(p => p.id === productId ? { ...p, ...data } : p);
+      localStorage.setItem('vuka_menu_items', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteMerchantProduct = (productId: string) => {
+    setMenuItems(prev => {
+      const updated = prev.filter(p => p.id !== productId);
+      localStorage.setItem('vuka_menu_items', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Fonctions Organisateur
+  const updateStandCommissionRate = (standId: string, commissionPercent: number) => {
+    setStands(prev => {
+      const updated = prev.map(s => s.id === standId ? { ...s, commissionPercent } : s);
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const addStandToOrganizerEvent = (eventId: string, standData: { name: string; ownerPhone: string; commissionPercent: number; category?: string }) => {
+    const newStandNumber = stands.length + 1;
+    const newStand: Stand = {
+      id: `stand-${Date.now().toString().slice(-4)}`,
+      number: newStandNumber,
+      name: standData.name,
+      category: standData.category || 'Stand Partenaire',
+      ownerName: standData.name,
+      ownerPhoneMpesa: standData.ownerPhone,
+      locationZone: 'Zone Partenaires',
+      totalSalesUSD: 0,
+      transactionsCount: 0,
+      isOnline: true,
+      eventId,
+      commissionPercent: standData.commissionPercent
+    };
+    setStands(prev => {
+      const updated = [...prev, newStand];
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeStandFromOrganizerEvent = (_eventId: string, standId: string) => {
+    setStands(prev => {
+      const updated = prev.filter(s => s.id !== standId);
+      localStorage.setItem('vuka_stands', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   // Recharge du portefeuille numérique (Module VUKA Pay)
@@ -1195,6 +1497,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tickets,
       purchasedTickets,
       buyTicket,
+      buyTickets,
+      linkRFIDToTicket,
+      updateUserProfile,
+      payWithWalletForProduct,
+      myMerchantStandId,
+      setMyMerchantStandId,
+      isMerchantActive,
+      setIsMerchantActive,
+      merchantLinkedEventId,
+      setMerchantLinkedEventId,
+      addMerchantProduct,
+      updateMerchantProduct,
+      deleteMerchantProduct,
+      updateStandCommissionRate,
+      addStandToOrganizerEvent,
+      removeStandFromOrganizerEvent,
       publishedEvents,
       addOrganizerEvent,
       isPublishModalOpen,

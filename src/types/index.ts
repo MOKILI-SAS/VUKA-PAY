@@ -21,13 +21,17 @@ export type BackofficeModule =
 
 // Onglets du Dashboard Utilisateur
 export type ClientPortalTab = 
-  | 'OVERVIEW'   // Dashboard (Vue d'ensemble, mes publications & stands)
-  | 'DASHBOARD'  // Alias Dashboard
-  | 'WALLET'     // Portefeuille Cashless & Recharges M-Pesa
-  | 'TICKETS'    // Mes Billets & Pass
-  | 'PROFILE'    // Mon Profil & Sécurité
-  | 'VERIFY'     // Vérifier un Billet (Anti-Fraude)
-  | 'HISTORY';   // Mes Commandes & Reçus
+  | 'OVERVIEW'        // Dashboard (Vue d'ensemble, mes chiffres)
+  | 'DASHBOARD'       // Alias Dashboard
+  | 'WALLET'          // Portefeuille Cashless & Recharges M-Pesa
+  | 'SCAN_PAY'        // Scanner Caméra QR pour Payer un stand/produit
+  | 'TICKETS'         // Mes Billets & Pass (avec quantité, partage WhatsApp unitaire, RFID)
+  | 'STAND_MERCHANT'  // Espace Marchand / Standier (Catalogue, QR produits, compta, CSV)
+  | 'ORGANIZER'       // Espace Organisateur (Créer événement, tarifs, marchands, compta, CSV)
+  | 'HISTORY'         // Historique & Reçus fiscaux
+  | 'VERIFY'          // Vérifier un Billet (Anti-Fraude)
+  | 'SETTINGS'        // Paramètres du Profil (Nom, téléphone, email, photo)
+  | 'PROFILE';        // Alias Profil
 
 // Compte utilisateur client festivalier
 export interface UserAccount {
@@ -102,6 +106,9 @@ export interface Stand {
   transactionsCount: number;
   isOnline: boolean;
   avatarUrl?: string;
+  eventId?: string;
+  eventName?: string;
+  commissionPercent?: number; // Pourcentage de commission prélevé (ex: 10%)
 }
 
 // Demande de réassort de stock (soumise à validation stricte de l'administrateur)
@@ -198,6 +205,16 @@ export interface StandApplication {
 // Types d'activités publiables sur VUKA Pay
 export type ActivityType = 'Événement' | 'Donation' | 'Concert' | 'Festival' | 'Conférence' | 'É-vote' | 'Autre';
 
+// Palier ou catégorie tarifaire d'un événement
+export interface EventTierDef {
+  id: string;
+  name: string;
+  priceUSD: number;
+  description?: string;
+  dayLabel?: string;
+  badge?: string;
+}
+
 // Événement ou activité publiée sur la plateforme VUKA Pay
 export interface VukaPublishedEvent {
   id: string;
@@ -223,4 +240,11 @@ export interface VukaPublishedEvent {
   ctaText?: string;
   likesCount?: number;
   organizerFollowers?: number;
+  // Multi-jours & Grille tarifaire
+  isMultiDay?: boolean;
+  daysCount?: number;
+  datesList?: string[];
+  tiers?: EventTierDef[];
+  paymentLink?: string;
+  commissionRatePercent?: number;
 }
