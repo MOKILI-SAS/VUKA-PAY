@@ -88,18 +88,18 @@ export const TicketmasterHeroBento: React.FC<TicketmasterHeroBentoProps> = ({
         onMouseLeave={() => setIsPaused(false)}
         className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] bg-[#14110F] text-[#FBF6EE] shadow-level2 group min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] flex flex-col justify-between"
       >
-        {/* Photo de fond immersive avec éclairage scénique / festival */}
+        {/* Photo de fond immersive avec éclairage scénique / festival (opacité équilibrée) */}
         {currentEvent?.imageUrl && (
           <div 
             key={currentEvent.id}
-            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out scale-100 group-hover:scale-105 opacity-45 pointer-events-none"
+            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out scale-100 group-hover:scale-105 opacity-75 sm:opacity-80 pointer-events-none"
             style={{ backgroundImage: `url(${currentEvent.imageUrl})` }}
           />
         )}
 
-        {/* Dégradés d'ombrage pour lisibilité optimale du texte et du CTA */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent pointer-events-none" />
+        {/* Dégradés d'ombrage dosés pour révéler l'image tout en assurant une lisibilité maximale */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/15 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none" />
 
         {/* Top Header : Tag de catégorie discret et flèches de navigation discrètes */}
         <div className="relative z-10 p-6 sm:p-8 flex items-center justify-between">

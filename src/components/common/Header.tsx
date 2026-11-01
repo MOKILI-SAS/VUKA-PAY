@@ -35,17 +35,17 @@ export const Header: React.FC = () => {
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [solutionsDropdownOpen, setSolutionsDropdownOpen] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  const solutionsRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Fermeture au clic extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (solutionsRef.current && !solutionsRef.current.contains(event.target as Node)) {
-        setSolutionsDropdownOpen(false);
+      if (aboutRef.current && !aboutRef.current.contains(event.target as Node)) {
+        setAboutDropdownOpen(false);
       }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserDropdownOpen(false);
@@ -106,88 +106,75 @@ export const Header: React.FC = () => {
               Événements
             </button>
 
-            <button 
-              type="button"
-              onClick={() => scrollToSection('cashless-section')}
-              className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
-            >
-              Comment ça marche
-            </button>
-
-            <button 
-              type="button"
-              onClick={() => scrollToSection('tarifs')}
-              className="px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04] transition-colors"
-            >
-              Tarifs
-            </button>
-
-            {/* Dropdown Solutions */}
-            <div className="relative" ref={solutionsRef}>
+            {/* Dropdown À Propos regroupant : Comment ça marche, Tarifs et Solutions */}
+            <div className="relative" ref={aboutRef}>
               <button 
                 type="button"
-                onClick={() => setSolutionsDropdownOpen(!solutionsDropdownOpen)}
+                onClick={() => setAboutDropdownOpen(!aboutDropdownOpen)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-colors ${
-                  solutionsDropdownOpen 
+                  aboutDropdownOpen 
                     ? 'text-[#14110F] bg-black/[0.06]' 
                     : 'text-[#4A433D] hover:text-[#14110F] hover:bg-black/[0.04]'
                 }`}
-                aria-expanded={solutionsDropdownOpen}
+                aria-expanded={aboutDropdownOpen}
               >
-                <span>Solutions</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-[#7A7068] transition-transform duration-200 ${solutionsDropdownOpen ? 'rotate-180' : ''}`} />
+                <span>À Propos</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-[#7A7068] transition-transform duration-200 ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {solutionsDropdownOpen && (
+              {aboutDropdownOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-2xl bg-white border border-[#E5E0D8] shadow-xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {/* Section 1 : Comment ça marche */}
                   <button 
                     type="button"
                     onClick={() => { 
-                      scrollToSection('evenements'); 
-                      setSolutionsDropdownOpen(false); 
+                      scrollToSection('cashless-section'); 
+                      setAboutDropdownOpen(false); 
                     }}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left"
+                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#FFE3D3] text-[#FF6A2B] flex items-center justify-center shrink-0">
-                      <Ticket className="w-4 h-4" />
+                      <Wallet className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#14110F] text-xs">VUKA Billetterie</div>
-                      <div className="text-[11px] text-[#7A7068]">Vente en ligne & Mobile Money</div>
+                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Comment ça marche</div>
+                      <div className="text-[11px] text-[#7A7068]">Pass numérique & cashless sans contact</div>
                     </div>
                   </button>
 
+                  {/* Section 2 : Tarifs */}
                   <button 
                     type="button"
                     onClick={() => {
-                      scrollToSection('cashless-section');
-                      setSolutionsDropdownOpen(false);
+                      scrollToSection('tarifs');
+                      setAboutDropdownOpen(false);
                     }}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left"
+                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#FFF3CC] text-[#14110F] flex items-center justify-center shrink-0">
-                      <Wallet className="w-4 h-4 text-[#14110F]" />
+                      <Receipt className="w-4 h-4 text-[#14110F]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#14110F] text-xs">VUKA Cashless</div>
-                      <div className="text-[11px] text-[#7A7068]">NFC & QR dynamique 30s</div>
+                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Tarifs & Pass</div>
+                      <div className="text-[11px] text-[#7A7068]">Pass festivalier & 10% solidaire</div>
                     </div>
                   </button>
 
+                  {/* Section 3 : Solutions */}
                   <button 
                     type="button"
                     onClick={() => {
-                      setAppViewMode('BACKOFFICE_STAFF');
-                      setSolutionsDropdownOpen(false);
+                      scrollToSection('tarifs');
+                      setAboutDropdownOpen(false);
                     }}
-                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left"
+                    className="w-full p-2.5 rounded-xl hover:bg-[#FBF6EE] flex items-center gap-3 transition text-left group"
                   >
                     <div className="w-8 h-8 rounded-lg bg-[#F3ECE2] text-[#4A433D] flex items-center justify-center shrink-0">
-                      <Store className="w-4 h-4" />
+                      <Layers className="w-4 h-4 text-[#0E5A8A]" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#14110F] text-xs">Caisses POS & Contrôle</div>
-                      <div className="text-[11px] text-[#7A7068]">Terminaux Sunmi & Barrières</div>
+                      <div className="font-semibold text-[#14110F] text-xs group-hover:text-[#FF6A2B] transition-colors">Nos Solutions</div>
+                      <div className="text-[11px] text-[#7A7068]">Billetterie, Cashless & Bornes POS</div>
                     </div>
                   </button>
                 </div>
@@ -404,37 +391,39 @@ export const Header: React.FC = () => {
               onClick={() => scrollToSection('evenements')}
               className="w-full text-left py-2 px-3 rounded-xl text-sm font-semibold text-[#4A433D] hover:bg-white"
             >
-              Événements à l'affiche
+              Événements
             </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('cashless-section')}
-              className="w-full text-left py-2 px-3 rounded-xl text-sm font-semibold text-[#4A433D] hover:bg-white"
-            >
-              Comment fonctionne le Cashless
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection('tarifs')}
-              className="w-full text-left py-2 px-3 rounded-xl text-sm font-semibold text-[#4A433D] hover:bg-white"
-            >
-              Tarifs et Commissions
-            </button>
-          </div>
 
-          {/* Raccourci Backoffice Staff */}
-          <div className="pt-2 border-t border-[#E5E0D8]">
-            <button
-              type="button"
-              onClick={() => {
-                setAppViewMode('BACKOFFICE_STAFF');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-[#7A7068] hover:text-[#14110F] hover:bg-white text-left flex items-center justify-between"
-            >
-              <span>Accès Staff & Caisses</span>
-              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#F3ECE2] text-[#4A433D]">Interne</span>
-            </button>
+            {/* Sections regroupées sous À Propos */}
+            <div className="pt-2 pb-1 space-y-1">
+              <span className="px-3 text-[11px] font-bold text-[#7A7068] uppercase tracking-wider block">
+                À Propos
+              </span>
+              <button
+                type="button"
+                onClick={() => scrollToSection('cashless-section')}
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#FF6A2B]" />
+                Comment ça marche
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection('tarifs')}
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#FFC21A]" />
+                Tarifs & Pass
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection('tarifs')}
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-medium text-[#4A433D] hover:bg-white flex items-center gap-2.5"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#0E5A8A]" />
+                Nos Solutions
+              </button>
+            </div>
           </div>
         </div>
       )}

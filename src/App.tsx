@@ -50,16 +50,18 @@ const MainContent: React.FC = () => {
         {/* VUE 1 : LANDING PAGE GRAND PUBLIC (100% sobre, épurée et sans encombrement) */}
         {appViewMode === 'PUBLIC_LANDING' && (
           <div className="space-y-6">
-            {/* 1. Hero Section mettant en avant les activités populaires (Style Eventbrite) */}
+            {/* 1. Barre de recherche, Filtres (dont É-vote), Régions & Bouton Publier (Au-dessus du Hero) */}
+            <TicketmasterSearchHeader onSearchClick={() => handleOpenPassCheckout()} />
+
+            {/* 2. Hero Section mettant en avant les activités populaires (Style Eventbrite) */}
             <TicketmasterHeroBento 
               onExploreTickets={() => handleOpenPassCheckout()} 
               onExploreStands={handleExploreStands}
               onSelectTicket={(ticket) => setSelectedTicketForCheckout(ticket)}
             />
 
-            {/* 2. Section Événements : Barre de recherche simple, Filtres (dont É-vote), Régions & Grille */}
+            {/* 3. Section Grille des Événements */}
             <div id="evenements" className="space-y-2">
-              <TicketmasterSearchHeader onSearchClick={() => handleOpenPassCheckout()} />
               <UpcomingEventsSection onSelectEventTickets={() => handleOpenPassCheckout()} />
             </div>
 

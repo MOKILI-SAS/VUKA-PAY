@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useApp } from '../../context/AppContext';
-import { ShieldCheck, Heart, ExternalLink, Lock } from 'lucide-react';
+import { ShieldCheck, Heart, ExternalLink } from 'lucide-react';
 import { VukaLogo } from './VukaLogo';
 import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 export const Footer: React.FC = () => {
-  const { setAppViewMode, setActiveBackofficeModule } = useApp();
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalTab, setLegalTab] = useState<LegalTab>('PRIVACY');
 
@@ -59,19 +57,6 @@ export const Footer: React.FC = () => {
                   <span className="w-2 h-2 rounded-full bg-[#14110F]"></span>
                   VUKA POS — Terminaux Caisse Sunmi
                 </span>
-              </li>
-              <li className="pt-2 border-t border-[#F3ECE2]">
-                <button
-                  onClick={() => {
-                    setAppViewMode('BACKOFFICE_STAFF');
-                    setActiveBackofficeModule('POS_TERMINAL');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="text-xs font-bold text-[#14110F] hover:text-[#FF6A2B] transition flex items-center gap-1.5 py-1 px-2.5 rounded-[8px] bg-[#F3ECE2] hover:bg-[#FFE3D3]"
-                >
-                  <Lock className="w-3.5 h-3.5 text-[#FF6A2B]" />
-                  <span>Espace Staff & Backoffice Pro</span>
-                </button>
               </li>
             </ul>
           </div>

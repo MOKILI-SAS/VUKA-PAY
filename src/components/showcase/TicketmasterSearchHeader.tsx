@@ -3,7 +3,8 @@ import {
   Search, 
   MapPin, 
   ShieldCheck,
-  Check
+  Check,
+  PlusCircle
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ActivityType } from '../../types';
@@ -46,7 +47,8 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
     selectedRegionFilter,
     setSelectedRegionFilter,
     publishedEvents,
-    setIsTicketVerificationOpen
+    setIsTicketVerificationOpen,
+    openPublishModal
   } = useApp();
 
   const [query, setQuery] = useState('');
@@ -101,11 +103,11 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
   return (
     <div id="recherche-evenements" className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-2 space-y-3">
       
-      {/* 1. BARRE DE RECHERCHE SIMPLE & ÉPURÉE (Style Eventbrite) */}
+      {/* 1. BARRE DE RECHERCHE SIMPLE & ÉPURÉE (Style Eventbrite) AVEC BOUTON PUBLIER */}
       <div className="bg-white rounded-full border border-[#D9D0C6] hover:border-[#14110F]/40 shadow-xs hover:shadow-sm transition-all p-1.5 sm:p-2">
         <form
           onSubmit={handleSearchSubmit}
-          className="flex items-center gap-3 px-4 py-1.5"
+          className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1"
         >
           <Search className="w-4 h-4 text-[#7A7068] shrink-0" />
           
@@ -115,7 +117,7 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
             value={query}
             onChange={handleInputChange}
             placeholder="Rechercher des événements, concerts, festivals, artistes ou villes..."
-            className="w-full bg-white text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none"
+            className="w-full bg-white text-xs sm:text-sm font-medium text-[#14110F] placeholder:text-[#7A7068] focus:outline-none min-w-0"
           />
 
           {query && (
@@ -130,9 +132,19 @@ export const TicketmasterSearchHeader: React.FC<TicketmasterSearchHeaderProps> =
 
           <button
             type="submit"
-            className="h-9 px-5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider transition active:scale-95 shrink-0"
+            className="h-9 px-4 sm:px-5 rounded-full bg-[#14110F] hover:bg-[#2A2420] text-[#FBF6EE] font-bold text-xs uppercase tracking-wider transition active:scale-95 shrink-0"
           >
             Rechercher
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openPublishModal()}
+            className="h-9 px-3.5 sm:px-4 rounded-full bg-[#FF6A2B] hover:bg-[#E85B1F] text-[#14110F] font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shrink-0 shadow-xs"
+            title="Publier un événement ou une activité"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>Publier</span>
           </button>
         </form>
       </div>

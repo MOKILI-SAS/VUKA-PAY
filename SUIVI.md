@@ -263,6 +263,26 @@
    - Build de production Vite optimisé (`npm run build`).
    - Serveur de prévisualisation actif (HTTP 200 sur `http://localhost:5173/`).
 
+### Session 11 — 01 novembre 2026
+
+#### Actions Réalisées :
+1. **Repositionnement Stratégique de la Barre de Recherche & Bouton Publier :**
+   - Montée du bloc de recherche et de filtres au-dessus du Hero (immédiatement sous le Header) pour un accès instantané dès l'arrivée.
+   - Intégration du bouton d'action « Publier » (avec icône `PlusCircle`) directement à côté du bouton « Rechercher », ouvrant le modal de publication d'activités.
+2. **Harmonisation de la Navigation — Menu « À Propos » :**
+   - Regroupement des trois boutons séparés (« Comment ça marche », « Tarifs », « Solutions ») en un unique menu déroulant sobre « À Propos » (sur desktop et tiroir mobile).
+   - Navigation fluide vers les ancres respectives : *Comment ça marche*, *Tarifs & Pass*, et *Nos Solutions*.
+3. **Suppression du Bouton Espace Staff & Backoffice Pro :**
+   - Retrait complet du bouton « Espace Staff & Backoffice Pro » du Footer et du tiroir mobile pour une interface 100% axée sur l'expérience grand public.
+4. **Équilibre Visuel & Opacité du Hero Banner :**
+   - Ajustement de l'opacité de l'image de fond (`opacity-75 sm:opacity-80`) et adoucissement des dégradés d'ombrage (`from-black/85 via-black/35 to-black/15`).
+   - Révélation claire des photographies immersives des événements tout en préservant un contraste parfait pour les textes et le CTA pilule blanc.
+5. **Validation Technique & Déploiement :**
+   - Tests unitaires MOKILI validés (`npm test` : 4/4 PASS).
+   - Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+   - Build de production Vite optimisé (`npm run build`).
+   - Serveur de prévisualisation actif (HTTP 200 sur `http://127.0.0.1:5173/`).
+
 ---
 
 ## 2. REGISTRE DES DÉCISIONS STRUCTURANTES
@@ -284,6 +304,7 @@
 | **DEC-013** | 31/10/2026 | Mini-Hero rotatif en boucle, Filtres normalisés & Publication | Slider en boucle des activités phares, filtres Événement/Donation/Concert/Festival/Conférence et workflow de publication multi-formats. | VALIDÉE |
 | **DEC-014** | 31/10/2026 | Mini-Hero Pleine Largeur, Vérification Billet, Espace Standier & Villes RDC | Suppression du bloc de 4 cartes, intégration du vérificateur de ticket HMAC, dashboard standier, sélecteur multi-régions et apaisement colorimétrique Tickera/Weezevent. | VALIDÉE |
 | **DEC-015** | 31/10/2026 | Hero Eventbrite, É-vote, Likes/Follows & Apaisement Cartes | Hero bannière épurée 1 CTA, atténuation du mur de boutons orange vers boutons sobres, likes/abonnements discrets, filtres unifiés avec É-vote et villes RDC, header ultra-sobre. | VALIDÉE |
+| **DEC-016** | 01/11/2026 | Recherche & Publier au-dessus du Hero, Menu À Propos, Retrait Staff & Équilibre Hero | Barre de recherche au-dessus du hero avec bouton Publier, regroupement en menu À Propos, suppression staff footer, opacité photo hero rehaussée. | VALIDÉE |
 
 ---
 
@@ -305,3 +326,4 @@
 | **PURGE & RESPONSIVE** | Épuration vitrine, 0 organisateur & mobile | [PASS] Terminé | Retrait organisateurs, programmation, zones, pass switcher modal, preview 200 OK |
 | **MINI-HERO & PUBLISH** | Mini-hero rotatif, filtres 5 types & bouton publier | [PASS] Terminé | Mini-hero 5.5s, filtres 5 types, PublishActivityModal, test & preview 200 OK |
 | **EVENTBRITE & É-VOTE** | Hero Eventbrite, É-vote, Likes/Follow & Grille apaisée | [PASS] Terminé | Hero 1 CTA, cartes sobres sans fatigue visuelle, é-vote, build 0 erreur, preview 200 OK |
+| **TOP-SEARCH & ABOUT** | Recherche au-dessus Hero, Menu À Propos, 0 Staff & Hero Équilibré | [PASS] Terminé | Barre & Publier top, À Propos dropdown, 0 staff, photos hero visibles, preview 200 OK |
